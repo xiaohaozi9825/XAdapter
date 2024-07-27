@@ -1,20 +1,18 @@
 plugins {
-    id 'com.android.application'
+    id 'com.android.library'
     id 'org.jetbrains.kotlin.android'
 }
 
 android {
-    namespace 'pw.xiaohaozi.xadapter'
-    compileSdk 33
+    namespace 'pw.xiaohaozi.xadapter.smart'
+    compileSdk 32
 
     defaultConfig {
-        applicationId "pw.xiaohaozi.xadapter"
         minSdk 21
-        targetSdk 33
-        versionCode 1
-        versionName "1.0"
+        targetSdk 32
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        consumerProguardFiles "consumer-rules.pro"
     }
 
     buildTypes {
@@ -30,6 +28,7 @@ android {
     kotlinOptions {
         jvmTarget = '1.8'
     }
+
     buildFeatures {
 //        dataBinding = true
         viewBinding = true
@@ -37,10 +36,6 @@ android {
 }
 
 dependencies {
-    implementation project(path: ':smart')
-    implementation 'androidx.core:core-ktx:1.9.0'
-    implementation 'androidx.appcompat:appcompat:1.5.1'
+    implementation 'androidx.core:core-ktx:1.7.0'
     implementation 'com.google.android.material:material:1.7.0'
-    implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
-
 }
