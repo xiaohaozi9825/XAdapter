@@ -1,15 +1,13 @@
 package pw.xiaohaozi.xadapter.smart.impl
 
 import android.view.View
-import android.widget.CheckBox
 import android.widget.CompoundButton
-import android.widget.RadioGroup.OnCheckedChangeListener
 import android.widget.TextView
 import androidx.core.widget.addTextChangedListener
 import androidx.viewbinding.ViewBinding
+import pw.xiaohaozi.xadapter.smart.XAdapterException
 import pw.xiaohaozi.xadapter.smart.adapter.SmartAdapter
 import pw.xiaohaozi.xadapter.smart.holder.SmartHolder
-import pw.xiaohaozi.xadapter.smart.provider.SmartProvider
 import pw.xiaohaozi.xadapter.smart.provider.TypeProvider
 import pw.xiaohaozi.xadapter.smart.proxy.ListenerProxy
 import pw.xiaohaozi.xadapter.smart.proxy.XEmployer
@@ -29,7 +27,7 @@ class ListenerImpl<Employer : XProxy<Employer>, VB : ViewBinding, D> : ListenerP
     private val adapter: SmartAdapter<*, *> by lazy {
         when (val e = employer) {
             is XEmployer -> e.getEmployerAdapter()
-            else -> throw NullPointerException("找不到对应的Adapter对象")
+            else -> throw XAdapterException("找不到对应的Adapter对象")
         }
     }
 

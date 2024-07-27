@@ -18,11 +18,11 @@ class MainActivity : AppCompatActivity() {
 
     private val adapter = XAdapter<ItemMainBinding, String>().setOnClickListener { holder, data, position, view ->
         launch(Default) {
-//            Toast.makeText(this@MainActivity, data, Toast.LENGTH_SHORT).show()
             Log.i("SmartProvider", "当前线程: ${Thread.currentThread().name}")
         }
+        Toast.makeText(this@MainActivity, "adapter:$data", Toast.LENGTH_SHORT).show()
 
-        }
+    }
     private val provider = object : XProvider<ItemMainBinding, String>(adapter) {
         override fun onCreated(holder: SmartHolder<ItemMainBinding>) {
             super.onCreated(holder)
@@ -40,6 +40,8 @@ class MainActivity : AppCompatActivity() {
             holder.binding.tvTitle.text = data
         }
 
+    }.setOnClickListener { holder, data, position, view ->
+        Toast.makeText(this@MainActivity, "provider:$data", Toast.LENGTH_SHORT).show()
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
