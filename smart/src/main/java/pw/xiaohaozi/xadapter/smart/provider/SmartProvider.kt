@@ -21,6 +21,10 @@ import java.lang.reflect.ParameterizedType
  */
 abstract class SmartProvider<VB : ViewBinding, D>(override val adapter: SmartAdapter<*, *>) : TypeProvider<VB, D> {
     val TAG = "SmartProvider"
+    abstract fun onCreated(holder: SmartHolder<VB>)
+    abstract fun onBind(holder: SmartHolder<VB>, data: D, position: Int)
+    open fun onBind(holder: SmartHolder<VB>, data: D, position: Int, payloads: List<Any?>) {}
+
     override fun getEmployerAdapter(): SmartAdapter<*, *> {
         return adapter
     }
@@ -30,9 +34,16 @@ abstract class SmartProvider<VB : ViewBinding, D>(override val adapter: SmartAda
         return SmartHolder(smartCreateViewBinding(parent))
     }
 
+    override fun onCreatedViewHolder(holder: SmartHolder<*>) {
+        onCreated(holder as SmartHolder<VB>)
+    }
 
-    override fun onBind(holder: SmartHolder<VB>, data: D, position: Int, payloads: List<Any?>) {
+    override fun onBindViewHolder(holder: SmartHolder<*>, data: Any?, position: Int) {
+        onBind(holder as SmartHolder<VB>, data as D, position)
+    }
 
+    override fun onBindViewHolder(holder: SmartHolder<*>, data: Any?, position: Int, payloads: List<Any?>) {
+        onBind(holder as SmartHolder<VB>, data as D, position, payloads)
     }
 
     override fun onViewRecycled(holder: SmartHolder<VB>) {

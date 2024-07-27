@@ -14,16 +14,16 @@ import pw.xiaohaozi.xadapter.smart.proxy.ListenerProxy
  * github：https://github.com/xiaohaozi9825
  * 创建时间：2024/6/9 22:08
  */
-abstract class XProvider<VB : ViewBinding, D>(override val adapter: SmartAdapter<*, *>, val listener: ListenerImpl<XProvider<VB, D>, VB, D> = ListenerImpl()) : SmartProvider<VB, D>(
-    adapter
-), ListenerProxy<XProvider<VB, D>, VB, D> by listener {
+abstract class XProvider<VB : ViewBinding, D>(
+    override val adapter: SmartAdapter<*, *>, private val listener: ListenerImpl<XProvider<VB, D>, VB, D> = ListenerImpl()
+) : SmartProvider<VB, D>(adapter), ListenerProxy<XProvider<VB, D>, VB, D> by listener {
     init {
+        init()
+    }
+
+    private fun init() {
         listener.init(this)
     }
-
-    override fun onCreated(holder: SmartHolder<VB>) {
-    }
-
 
     override fun isFixedViewType() = false
 

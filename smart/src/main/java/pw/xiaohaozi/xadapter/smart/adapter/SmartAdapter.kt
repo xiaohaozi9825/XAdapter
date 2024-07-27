@@ -25,18 +25,18 @@ open class SmartAdapter<VB : ViewBinding, D> : Adapter<SmartHolder<VB>>() {
     }
 
     var datas: MutableList<D> = mutableListOf()
-    val providers: SparseArray<TypeProvider<VB, D>> by lazy { SparseArray() }
+    val providers: SparseArray<TypeProvider<*, *>> by lazy { SparseArray() }
     private val onViewHolderChanges: ArrayList<OnViewHolderChanges> = arrayListOf()
     private val onRecyclerViewChanges: ArrayList<OnRecyclerViewChanges> = arrayListOf()
     private val onViewChanges: ArrayList<OnViewChanges<VB>> = arrayListOf()
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): SmartHolder<VB> {
         val provide = providers[viewType]
-        val holder: SmartHolder<VB> = provide.onCreateViewHolder(parent, viewType)
+        val holder: SmartHolder<*> = provide.onCreateViewHolder(parent, viewType)
         onViewHolderChanges.tryNotify { onCreated(provide, holder) }
-        provide.onCreated(holder)
+        provide.onCreatedViewHolder(holder)
         Log.i("SmartProvider", "onCreateViewHolder: holder = $holder")
-        return holder
+        return holder as SmartHolder<VB>
     }
 
     override fun onBindViewHolder(holder: SmartHolder<VB>, position: Int) {
@@ -44,7 +44,7 @@ open class SmartAdapter<VB : ViewBinding, D> : Adapter<SmartHolder<VB>>() {
         val provide = providers[viewType]
         Log.i("SmartProvider", "onBindViewHolder: viewType = $viewType -- provide = $provide")
         onViewHolderChanges.tryNotify { onBinding(holder, position) }
-        provide.onBind(holder, datas[position], position)
+        provide.onBindViewHolder(holder, datas[position], position)
     }
 
 
@@ -54,27 +54,27 @@ open class SmartAdapter<VB : ViewBinding, D> : Adapter<SmartHolder<VB>>() {
         val viewType = getItemViewType(position)
         val provide = providers[viewType]
         Log.i("SmartProvider", "onBindViewHolder: viewType = $viewType -- provide = $provide")
-        provide.onBind(holder, datas[position], position, payloads)
+        provide.onBindViewHolder(holder, datas[position], position, payloads)
     }
 
     override fun getItemViewType(position: Int): Int {
-        val data = datas[position]?: return 0
+        val data = datas[position] ?: return 0
 //        if (t is MultiItemEntity) return t.getItemViewType().absoluteValue
         val clazz = data::class.java
         providers.forEach { key, value ->
-            val genericSuperclass = value.javaClass.genericSuperclass as? ParameterizedType
-                ?: throw RuntimeException("必须明确指定 D 泛型类型")
+            val genericSuperclass = value.javaClass.genericSuperclass as? ParameterizedType ?: throw RuntimeException("必须明确指定 D 泛型类型")
             if (genericSuperclass.actualTypeArguments.any { it == clazz }) {
                 return key
             }
         }
         return 0
     }
+
     override fun getItemCount(): Int {
         return datas.size
     }
 
-    fun addProvider(viewType: Int, provide: TypeProvider<VB, D>): SmartAdapter<VB, D> {
+    fun addProvider(viewType: Int, provide: TypeProvider<*, *>): SmartAdapter<VB, D> {
         providers.put(viewType, provide)
         return this
     }
@@ -113,7 +113,7 @@ open class SmartAdapter<VB : ViewBinding, D> : Adapter<SmartHolder<VB>>() {
     private fun tryNotifyProvider(action: TypeProvider<VB, D>.() -> Unit) {
         providers.forEach { key, provider ->
             try {
-                action.invoke(provider)
+                action.invoke(provider as TypeProvider<VB, D>)
             } catch (e: Exception) {
                 Log.e(TAG, "tryNotifyProvider: ", e)
             }

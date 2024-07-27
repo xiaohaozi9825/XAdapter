@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.util.Log
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.viewbinding.ViewBinding
 import kotlinx.coroutines.Dispatchers.Default
 import kotlinx.coroutines.launch
 import pw.xiaohaozi.xadapter.databinding.ActivityMainBinding
@@ -16,7 +17,7 @@ import pw.xiaohaozi.xadapter.smart.provider.XProvider
 class MainActivity : AppCompatActivity() {
     private val binding by lazy { ActivityMainBinding.inflate(layoutInflater) }
 
-    private val adapter = XAdapter<ItemMainBinding, String>().setOnClickListener { holder, data, position, view ->
+    private val adapter = XAdapter<ViewBinding, Any>().setOnClickListener { holder, data, position, view ->
         launch(Default) {
             Log.i("SmartProvider", "当前线程: ${Thread.currentThread().name}")
         }
@@ -25,7 +26,6 @@ class MainActivity : AppCompatActivity() {
     }
     private val provider = object : XProvider<ItemMainBinding, String>(adapter) {
         override fun onCreated(holder: SmartHolder<ItemMainBinding>) {
-            super.onCreated(holder)
             Log.i("SmartProvider", "onCreated: ")
 
         }

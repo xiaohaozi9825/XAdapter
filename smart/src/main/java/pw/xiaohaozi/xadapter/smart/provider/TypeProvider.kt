@@ -15,17 +15,17 @@ import pw.xiaohaozi.xadapter.smart.proxy.XEmployer
  * github：https://github.com/xiaohaozi9825
  * 创建时间：2024/6/8 14:30
  */
-interface TypeProvider<VB : ViewBinding, D> : XEmployer {
+interface TypeProvider<VB : ViewBinding, D > : XEmployer {
     val adapter: SmartAdapter<*, *>
 
     /**
      * ViewHolder创建成功
      * 这里可以做一些初始化操作
      */
-    fun onCreateViewHolder(parent: ViewGroup, viewType: Int): SmartHolder<VB>
-    fun onCreated(holder: SmartHolder<VB>)
-    fun onBind(holder: SmartHolder<VB>, data: D, position: Int)
-    fun onBind(holder: SmartHolder<VB>, data: D, position: Int, payloads: List<Any?>)
+    fun onCreateViewHolder(parent: ViewGroup, viewType: Int): SmartHolder<*>
+    fun onCreatedViewHolder(holder: SmartHolder<*>)
+    fun onBindViewHolder(holder: SmartHolder<*>, data: Any?, position: Int)
+    fun onBindViewHolder(holder: SmartHolder<*>, data: Any?, position: Int, payloads: List<Any?>)
     fun isFixedViewType(): Boolean
     fun getItemViewType(): Int?
 
