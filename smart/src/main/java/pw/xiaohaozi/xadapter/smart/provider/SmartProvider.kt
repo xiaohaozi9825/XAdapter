@@ -23,7 +23,9 @@ abstract class SmartProvider<VB : ViewBinding, D>(override val adapter: SmartAda
     val TAG = "SmartProvider"
     abstract fun onCreated(holder: SmartHolder<VB>)
     abstract fun onBind(holder: SmartHolder<VB>, data: D, position: Int)
-    open fun onBind(holder: SmartHolder<VB>, data: D, position: Int, payloads: List<Any?>) {}
+    open fun onBind(holder: SmartHolder<VB>, data: D, position: Int, payloads: List<Any?>) {
+        onBind(holder, data, position)
+    }
 
     override fun getEmployerAdapter(): SmartAdapter<*, *> {
         return adapter

@@ -4,9 +4,11 @@ import androidx.viewbinding.ViewBinding
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
-import pw.xiaohaozi.xadapter.smart.impl.ListenerImpl
+import pw.xiaohaozi.xadapter.smart.impl.AdapterSelectedImpl
+import pw.xiaohaozi.xadapter.smart.impl.EventImpl
 import pw.xiaohaozi.xadapter.smart.impl.SmartDataImpl
-import pw.xiaohaozi.xadapter.smart.proxy.ListenerProxy
+import pw.xiaohaozi.xadapter.smart.proxy.EventProxy
+import pw.xiaohaozi.xadapter.smart.proxy.SelectedProxy
 import pw.xiaohaozi.xadapter.smart.proxy.SmartDataProxy
 import pw.xiaohaozi.xadapter.smart.proxy.XEmployer
 import kotlin.coroutines.CoroutineContext
@@ -20,23 +22,32 @@ import kotlin.coroutines.CoroutineContext
  * 创建时间：2024/6/9 9:10
  */
 open class XAdapter<VB : ViewBinding, D>(
-    private val dataImpl: SmartDataImpl<XAdapter<VB, D>, VB, D> = SmartDataImpl(), private val listenerImpl: ListenerImpl<XAdapter<VB, D>, VB, D> = ListenerImpl()
-) : SmartAdapter<VB, D>(), CoroutineScope, XEmployer, SmartDataProxy<XAdapter<VB, D>, VB, D> by dataImpl, ListenerProxy<XAdapter<VB, D>, VB, D> by listenerImpl {
+    private val dataImpl: SmartDataImpl<XAdapter<VB, D>, VB, D> = SmartDataImpl(), //
+    private val eventImpl: EventImpl<XAdapter<VB, D>, VB, D> = EventImpl(),//
+    private val selectedImpl: AdapterSelectedImpl<XAdapter<VB, D>, VB, D> = AdapterSelectedImpl()//
+) : SmartAdapter<VB, D>(),//继承Adapter
+    CoroutineScope, //协成
+    XEmployer, //宿主
+    SmartDataProxy<XAdapter<VB, D>, VB, D> by dataImpl,//数据
+    EventProxy<XAdapter<VB, D>, VB, D> by eventImpl,//
+    SelectedProxy<XAdapter<VB, D>, VB, D> by selectedImpl //
+{
     init {
-        init()
+        initProxy()
     }
 
-    private fun init() {
-        init(this)
+    private fun initProxy() {
+        initProxy(this)
     }
 
     override var employer: XAdapter<VB, D>
         get() = this
         set(value) {}
 
-    override fun init(employer: XAdapter<VB, D>) {
-        dataImpl.init(employer)
-        listenerImpl.init(employer)
+    final override fun initProxy(employer: XAdapter<VB, D>) {
+        dataImpl.initProxy(employer)
+        eventImpl.initProxy(employer)
+        selectedImpl.initProxy(employer)
     }
 
     override fun getEmployerAdapter(): SmartAdapter<VB, D> {

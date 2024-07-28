@@ -15,7 +15,7 @@ import pw.xiaohaozi.xadapter.smart.holder.SmartHolder
  * github：https://github.com/xiaohaozi9825
  * 创建时间：2022/9/28 23:19
  */
-interface ListenerProxy<Employer : XProxy<Employer>,  VB : ViewBinding, D> :
+interface EventProxy<Employer : XProxy<Employer>,  VB : ViewBinding, D> :
     XProxy<Employer> {
     val clickListenerMap:
             HashMap<Int?, Employer.(holder: SmartHolder<VB>, data: D, position: Int, view: View) -> Unit>

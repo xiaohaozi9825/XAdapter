@@ -38,8 +38,8 @@ open class SmartProviderSelectedImpl<Employer : XProxy<Employer>, VB : ViewBindi
         }
     }
     private val datas: MutableList<D> by lazy { adapter.datas as MutableList<D> }
-    override fun init(employer: Employer) {
-        super.init(employer)
+    override fun initProxy(employer: Employer) {
+        super.initProxy(employer)
         adapter.addOnViewHolderChanges(object : SmartAdapter.OnViewHolderChanges {
             override fun onCreated(provide: TypeProvider<*, *>, holder: SmartHolder<*>) {
                 initListener(provide, holder)
@@ -107,7 +107,7 @@ open class SmartProviderSelectedImpl<Employer : XProxy<Employer>, VB : ViewBindi
         }
 
 
-    override val selectedCache: SelectedList<D> by lazy { selectedCache }
+    override val selectedCache: SelectedList<D> by lazy { SelectedList() }
     override var selectedAllChanges: (Employer.(isSelectAll: Boolean) -> Unit)? = null
     override var selectedIndexChange: (Employer.(data: D, position: Int, index: Int) -> Unit)? =
         null

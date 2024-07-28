@@ -14,7 +14,7 @@ interface XProxy<Employer : XProxy<Employer>> {
      * 该对象需要在雇主类中赋值，否则会报属性为初始化异常
      */
     var employer: Employer
-    fun init(employer: Employer) {
+    fun initProxy(employer: Employer) {
         this.employer = employer
     }
 }

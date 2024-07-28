@@ -17,11 +17,11 @@ import pw.xiaohaozi.xadapter.smart.provider.XProvider
 class MainActivity : AppCompatActivity() {
     private val binding by lazy { ActivityMainBinding.inflate(layoutInflater) }
 
-    private val adapter = XAdapter<ViewBinding, Any>().setOnClickListener { holder, data, position, view ->
+    private val adapter = XAdapter<ViewBinding, Any>().setOnSelectedIndexChange { data, position, index ->
         launch(Default) {
             Log.i("SmartProvider", "当前线程: ${Thread.currentThread().name}")
         }
-        Toast.makeText(this@MainActivity, "adapter:$data", Toast.LENGTH_SHORT).show()
+        Toast.makeText(this@MainActivity, "adapter:${isSelected(data)}", Toast.LENGTH_SHORT).show()
 
     }
     private val provider = object : XProvider<ItemMainBinding, String>(adapter) {
@@ -30,19 +30,16 @@ class MainActivity : AppCompatActivity() {
 
         }
 
-        override fun onBind(holder: SmartHolder<ItemMainBinding>, data: String, position: Int, payloads: List<Any?>) {
-            Log.i("SmartProvider", "onBind: ")
-            holder.binding.tvTitle.text = data
-        }
-
         override fun onBind(holder: SmartHolder<ItemMainBinding>, data: String, position: Int) {
             Log.i("SmartProvider", "onBind: ")
             holder.binding.tvTitle.text = data
         }
 
-    }.setOnClickListener { holder, data, position, view ->
+    }/*.setOnClickListener { holder, data, position, view ->
         Toast.makeText(this@MainActivity, "provider:$data", Toast.LENGTH_SHORT).show()
-    }
+    }*/.setOnSelectedIndexChange { data, position, index ->
+            Toast.makeText(this@MainActivity, "provider:${isSelected(data)}", Toast.LENGTH_SHORT).show()
+        }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

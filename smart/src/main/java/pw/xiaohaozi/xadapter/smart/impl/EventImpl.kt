@@ -9,7 +9,7 @@ import pw.xiaohaozi.xadapter.smart.XAdapterException
 import pw.xiaohaozi.xadapter.smart.adapter.SmartAdapter
 import pw.xiaohaozi.xadapter.smart.holder.SmartHolder
 import pw.xiaohaozi.xadapter.smart.provider.TypeProvider
-import pw.xiaohaozi.xadapter.smart.proxy.ListenerProxy
+import pw.xiaohaozi.xadapter.smart.proxy.EventProxy
 import pw.xiaohaozi.xadapter.smart.proxy.XEmployer
 import pw.xiaohaozi.xadapter.smart.proxy.XProxy
 
@@ -22,7 +22,7 @@ import pw.xiaohaozi.xadapter.smart.proxy.XProxy
  * github：https://github.com/xiaohaozi9825
  * 创建时间：2022/10/5 22:47
  */
-class ListenerImpl<Employer : XProxy<Employer>, VB : ViewBinding, D> : ListenerProxy<Employer, VB, D> {
+class EventImpl<Employer : XProxy<Employer>, VB : ViewBinding, D> : EventProxy<Employer, VB, D> {
     override lateinit var employer: Employer
     private val adapter: SmartAdapter<*, *> by lazy {
         when (val e = employer) {
@@ -43,8 +43,8 @@ class ListenerImpl<Employer : XProxy<Employer>, VB : ViewBinding, D> : ListenerP
     override val textChangeMap: HashMap<Int?, Employer.(holder: SmartHolder<VB>, data: D, position: Int, view: TextView, text: CharSequence?) -> Unit> =
         hashMapOf()
 
-    override fun init(employer: Employer) {
-        super.init(employer)
+    override fun initProxy(employer: Employer) {
+        super.initProxy(employer)
         adapter.addOnViewHolderChanges(object : SmartAdapter.OnViewHolderChanges {
             override fun onCreated(provide: TypeProvider<*, *>, holder: SmartHolder<*>) {
                 initListener(provide, holder)

@@ -96,8 +96,8 @@ open class AdapterSelectedImpl<Employer : XProxy<Employer>, VB : ViewBinding, D>
         }
     }
 
-    override fun init(employer: Employer) {
-        super.init(employer)
+    override fun initProxy(employer: Employer) {
+        super.initProxy(employer)
         adapter.addOnViewHolderChanges(object : SmartAdapter.OnViewHolderChanges {
             override fun onCreated(provide: TypeProvider<*, *>, holder: SmartHolder<*>) {
                 initListener(provide, holder)
