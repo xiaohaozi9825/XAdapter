@@ -56,22 +56,29 @@ abstract class SmartProvider<VB : ViewBinding, D>(override val adapter: SmartAda
 
     }
 
-    override fun onViewAttachedToWindow(holder: SmartHolder<VB>) {
+    override fun onHolderAttachedToWindow(holder: SmartHolder<VB>) {
 
     }
 
-    override fun onViewDetachedFromWindow(holder: SmartHolder<VB>) {
+    override fun onHolderDetachedFromWindow(holder: SmartHolder<VB>) {
 
     }
 
-    override fun onAttachedToRecyclerView(recyclerView: RecyclerView) {
+    override fun onAdapterAttachedToRecyclerView(recyclerView: RecyclerView) {
 
     }
 
-    override fun onDetachedFromRecyclerView(recyclerView: RecyclerView) {
+    override fun onAdapterDetachedFromRecyclerView(recyclerView: RecyclerView) {
 
     }
 
+    override fun onRecyclerViewAttachedToWindow(recyclerView: RecyclerView) {
+
+    }
+
+    override fun onViewRecyclerDetachedFromWindow(recyclerView: RecyclerView) {
+
+    }
     //反射创建ViewBinding实例
     //A : Adapter<*>, VH : Holder<VB>, VB : ViewBinding, D
     @Suppress("UNCHECKED_CAST")

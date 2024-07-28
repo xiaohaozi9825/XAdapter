@@ -2,6 +2,7 @@ package pw.xiaohaozi.xadapter.smart.adapter
 
 import android.util.Log
 import android.util.SparseArray
+import android.view.View
 import android.view.ViewGroup
 import androidx.core.util.forEach
 import androidx.recyclerview.widget.RecyclerView
@@ -24,11 +25,14 @@ open class SmartAdapter<VB : ViewBinding, D> : Adapter<SmartHolder<VB>>() {
         const val TAG = "SmartAdapter"
     }
 
+
     var datas: MutableList<D> = mutableListOf()
     val providers: SparseArray<TypeProvider<*, *>> by lazy { SparseArray() }
     private val onViewHolderChanges: ArrayList<OnViewHolderChanges> = arrayListOf()
     private val onRecyclerViewChanges: ArrayList<OnRecyclerViewChanges> = arrayListOf()
     private val onViewChanges: ArrayList<OnViewChanges<VB>> = arrayListOf()
+    private val onRecyclerViewAttachStateChanges: ArrayList<OnRecyclerViewAttachStateChanges> = arrayListOf()
+    private val rvOnAttachStateChangeListener = RVOnAttachStateChangeListener()
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): SmartHolder<VB> {
         val provide = providers[viewType]
@@ -90,23 +94,27 @@ open class SmartAdapter<VB : ViewBinding, D> : Adapter<SmartHolder<VB>>() {
     }
 
     override fun onAttachedToRecyclerView(recyclerView: RecyclerView) {
+        recyclerView.addOnAttachStateChangeListener(rvOnAttachStateChangeListener)
         onRecyclerViewChanges.tryNotify { onAttachedToRecyclerView(recyclerView) }
-        tryNotifyProvider { onAttachedToRecyclerView(recyclerView) }
+        tryNotifyProvider { onAdapterAttachedToRecyclerView(recyclerView) }
     }
 
     override fun onDetachedFromRecyclerView(recyclerView: RecyclerView) {
+        recyclerView.removeOnAttachStateChangeListener(rvOnAttachStateChangeListener)
         onRecyclerViewChanges.tryNotify { onDetachedFromRecyclerView(recyclerView) }
-        tryNotifyProvider { onDetachedFromRecyclerView(recyclerView) }
+        tryNotifyProvider { onAdapterDetachedFromRecyclerView(recyclerView) }
     }
 
     override fun onViewAttachedToWindow(holder: SmartHolder<VB>) {
+        Log.i(TAG, "onViewAttachedToWindow: ")
         onViewChanges.tryNotify { onViewAttachedToWindow(holder) }
-        tryNotifyProvider { onViewAttachedToWindow(holder) }
+        tryNotifyProvider { onHolderAttachedToWindow(holder) }
     }
 
     override fun onViewDetachedFromWindow(holder: SmartHolder<VB>) {
+        Log.i(TAG, "onViewDetachedFromWindow: ")
         onViewChanges.tryNotify { onViewDetachedFromWindow(holder) }
-        tryNotifyProvider { onViewDetachedFromWindow(holder) }
+        tryNotifyProvider { onHolderDetachedFromWindow(holder) }
     }
 
 
@@ -142,6 +150,21 @@ open class SmartAdapter<VB : ViewBinding, D> : Adapter<SmartHolder<VB>>() {
         onViewChanges.add(change)
     }
 
+    inner class RVOnAttachStateChangeListener : View.OnAttachStateChangeListener {
+        override fun onViewAttachedToWindow(v: View) {
+            Log.i(TAG, "onViewAttachedToWindow: ")
+            onRecyclerViewAttachStateChanges.tryNotify { onViewAttachedToWindow(v as RecyclerView) }
+            tryNotifyProvider { onRecyclerViewAttachedToWindow(v as RecyclerView) }
+        }
+
+        //这里可以用来监听activity销毁
+        override fun onViewDetachedFromWindow(v: View) {
+            Log.i(TAG, "onViewDetachedFromWindow: ")
+            onRecyclerViewAttachStateChanges.tryNotify { onViewDetachedFromWindow(v as RecyclerView) }
+            tryNotifyProvider { onViewRecyclerDetachedFromWindow(v as RecyclerView) }
+        }
+    }
+
     interface OnViewHolderChanges {
         fun onCreated(provide: TypeProvider<*, *>, holder: SmartHolder<*>)
         fun onBinding(holder: SmartHolder<*>, position: Int)
@@ -156,5 +179,11 @@ open class SmartAdapter<VB : ViewBinding, D> : Adapter<SmartHolder<VB>>() {
         fun onViewAttachedToWindow(holder: SmartHolder<VB>)
         fun onViewDetachedFromWindow(holder: SmartHolder<VB>)
     }
+
+    interface OnRecyclerViewAttachStateChanges {
+        fun onViewAttachedToWindow(recyclerView: RecyclerView)
+        fun onViewDetachedFromWindow(recyclerView: RecyclerView)
+    }
+
 }
 

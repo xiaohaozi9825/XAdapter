@@ -2,6 +2,8 @@ package pw.xiaohaozi.xadapter
 
 import android.os.Bundle
 import android.util.Log
+import android.view.View
+import android.view.View.OnAttachStateChangeListener
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.viewbinding.ViewBinding
@@ -48,6 +50,7 @@ class MainActivity : AppCompatActivity() {
         binding.rvList.adapter = adapter
 
         adapter.reset(list)
+
     }
 
     private val list = arrayListOf(
