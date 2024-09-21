@@ -13,6 +13,7 @@ import pw.xiaohaozi.xadapter.smart.entity.MultiItemEntity
 import pw.xiaohaozi.xadapter.smart.holder.SmartHolder
 import pw.xiaohaozi.xadapter.smart.provider.TypeProvider
 import java.lang.reflect.ParameterizedType
+import java.util.LinkedList
 import kotlin.math.absoluteValue
 
 /**
@@ -31,10 +32,12 @@ open class SmartAdapter<VB : ViewBinding, D> : Adapter<SmartHolder<VB>>() {
 
     var datas: MutableList<D> = mutableListOf()
     val providers: SparseArray<TypeProvider<*, *>> by lazy { SparseArray() }
+    private val visibleHolders = LinkedList<SmartHolder<VB>>()
     private val onViewHolderChanges: ArrayList<OnViewHolderChanges> = arrayListOf()
     private val onRecyclerViewChanges: ArrayList<OnRecyclerViewChanges> = arrayListOf()
     private val onViewChanges: ArrayList<OnViewChanges<VB>> = arrayListOf()
-    private val onRecyclerViewAttachStateChanges: ArrayList<OnRecyclerViewAttachStateChanges> = arrayListOf()
+    private val onRecyclerViewAttachStateChanges: ArrayList<OnRecyclerViewAttachStateChanges> =
+        arrayListOf()
     private val rvOnAttachStateChangeListener = RVOnAttachStateChangeListener()
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): SmartHolder<VB> {
@@ -73,7 +76,8 @@ open class SmartAdapter<VB : ViewBinding, D> : Adapter<SmartHolder<VB>>() {
         }
         val clazz = data::class.java
         providers.forEach { key, value ->
-            val genericSuperclass = value.javaClass.genericSuperclass as? ParameterizedType ?: throw RuntimeException("必须明确指定 D 泛型类型")
+            val genericSuperclass = value.javaClass.genericSuperclass as? ParameterizedType
+                ?: throw RuntimeException("必须明确指定 D 泛型类型")
             if (genericSuperclass.actualTypeArguments.any { it == clazz }) {
                 return key
             }
@@ -85,12 +89,38 @@ open class SmartAdapter<VB : ViewBinding, D> : Adapter<SmartHolder<VB>>() {
         return datas.size
     }
 
+
+    /**************************************************************************/
+    /**************************  对外扩展方法    ********************************/
+    /**************************************************************************/
+
+    /**
+     * 向当前adapter增加一个Holder提供者
+     * @param viewType Holder对于itemType，≤0的数值被框架占用，使用者必须使用>0的整数
+     * @param provide 对应的Holder提供者
+     */
     fun addProvider(viewType: Int, provide: TypeProvider<*, *>): SmartAdapter<VB, D> {
         providers.put(viewType, provide)
         return this
     }
 
+    /**
+     * 刷新列表所有item
+     * 处于效率考虑，该方法只刷新可见的item
+     */
+    fun notifyAllItemChange(payload: Any? = null) {
+        val start = visibleHolders.minOf { it.adapterPosition }
+        notifyItemRangeChanged(start, visibleHolders.size, payload)
+    }
 
+    /**
+     * 获取可见的所有Holder
+     */
+    fun getVisibleHolderList() = visibleHolders
+
+    /**************************************************************************/
+    /**************************   生命周期同步   ********************************/
+    /**************************************************************************/
     override fun onViewRecycled(holder: SmartHolder<VB>) {
         tryNotifyProvider { onViewRecycled(holder) }
     }
@@ -114,12 +144,14 @@ open class SmartAdapter<VB : ViewBinding, D> : Adapter<SmartHolder<VB>>() {
 
     override fun onViewAttachedToWindow(holder: SmartHolder<VB>) {
         Log.i(TAG, "onViewAttachedToWindow: ")
+        visibleHolders.add(holder)
         onViewChanges.tryNotify { onViewAttachedToWindow(holder) }
         tryNotifyProvider { onHolderAttachedToWindow(holder) }
     }
 
     override fun onViewDetachedFromWindow(holder: SmartHolder<VB>) {
         Log.i(TAG, "onViewDetachedFromWindow: ")
+        visibleHolders.remove(holder)
         onViewChanges.tryNotify { onViewDetachedFromWindow(holder) }
         tryNotifyProvider { onHolderDetachedFromWindow(holder) }
     }
