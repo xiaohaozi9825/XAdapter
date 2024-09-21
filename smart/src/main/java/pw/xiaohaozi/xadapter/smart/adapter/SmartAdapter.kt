@@ -8,9 +8,12 @@ import androidx.core.util.forEach
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.RecyclerView.Adapter
 import androidx.viewbinding.ViewBinding
+import pw.xiaohaozi.xadapter.smart.XAdapterException
+import pw.xiaohaozi.xadapter.smart.entity.MultiItemEntity
 import pw.xiaohaozi.xadapter.smart.holder.SmartHolder
 import pw.xiaohaozi.xadapter.smart.provider.TypeProvider
 import java.lang.reflect.ParameterizedType
+import kotlin.math.absoluteValue
 
 /**
  * Adapter基类，提供Adapter基础功能
@@ -63,7 +66,11 @@ open class SmartAdapter<VB : ViewBinding, D> : Adapter<SmartHolder<VB>>() {
 
     override fun getItemViewType(position: Int): Int {
         val data = datas[position] ?: return 0
-//        if (t is MultiItemEntity) return t.getItemViewType().absoluteValue
+        if (data is MultiItemEntity) {
+            val itemViewType = data.getItemViewType()
+            if (itemViewType <= 0) throw XAdapterException("data.getItemViewType() 必须为正整数。而当前值为：“$itemViewType”")
+            return itemViewType
+        }
         val clazz = data::class.java
         providers.forEach { key, value ->
             val genericSuperclass = value.javaClass.genericSuperclass as? ParameterizedType ?: throw RuntimeException("必须明确指定 D 泛型类型")
