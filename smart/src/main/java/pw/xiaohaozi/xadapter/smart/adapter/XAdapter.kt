@@ -1,9 +1,11 @@
 package pw.xiaohaozi.xadapter.smart.adapter
 
 import androidx.viewbinding.ViewBinding
+import kotlinx.coroutines.CoroutineName
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.launch
 import pw.xiaohaozi.xadapter.smart.impl.AdapterSelectedImpl
 import pw.xiaohaozi.xadapter.smart.impl.EventImpl
 import pw.xiaohaozi.xadapter.smart.impl.SmartDataImpl
@@ -55,6 +57,6 @@ open class XAdapter<VB : ViewBinding, D>(
     }
 
     override val coroutineContext: CoroutineContext
-        get() = SupervisorJob() + Dispatchers.Main
+        get() = SupervisorJob() + Dispatchers.Main + CoroutineName("XAdapterCoroutine")
 
 }
