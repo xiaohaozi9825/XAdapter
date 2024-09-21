@@ -5,6 +5,7 @@ import android.util.SparseArray
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.util.forEach
+import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.RecyclerView.Adapter
 import androidx.viewbinding.ViewBinding
@@ -14,7 +15,6 @@ import pw.xiaohaozi.xadapter.smart.holder.SmartHolder
 import pw.xiaohaozi.xadapter.smart.provider.TypeProvider
 import java.lang.reflect.ParameterizedType
 import java.util.LinkedList
-import kotlin.math.absoluteValue
 
 /**
  * Adapter基类，提供Adapter基础功能
@@ -97,12 +97,14 @@ open class SmartAdapter<VB : ViewBinding, D> : Adapter<SmartHolder<VB>>() {
     /**
      * 向当前adapter增加一个Holder提供者
      * @param viewType Holder对于itemType，≤0的数值被框架占用，使用者必须使用>0的整数
-     * @param provide 对应的Holder提供者
+     * @param provider 对应的Holder提供者
      */
-    fun addProvider(viewType: Int, provide: TypeProvider<*, *>): SmartAdapter<VB, D> {
-        providers.put(viewType, provide)
+    fun addProvider(provider: TypeProvider<*, *>, viewType: Int? = null): SmartAdapter<VB, D> {
+        val itemType = viewType ?: automaticallyItemType(provider)
+        providers[itemType] = provider
         return this
     }
+
 
     /**
      * 刷新列表所有item
@@ -118,6 +120,19 @@ open class SmartAdapter<VB : ViewBinding, D> : Adapter<SmartHolder<VB>>() {
      */
     fun getVisibleHolderList() = visibleHolders
 
+    //自动生成itemType
+    private fun automaticallyItemType(provider: TypeProvider<*, *>): Int {
+        val genericSuperclass = provider.javaClass.genericSuperclass as? ParameterizedType
+            ?: throw XAdapterException("必须明确指定VB泛型类型")
+        val find = genericSuperclass.actualTypeArguments.find {
+            (it as? Class<*>)
+                ?.run { MultiItemEntity::class.java.isAssignableFrom(this) }
+                ?: false
+        }
+        if (find != null) throw XAdapterException("provider中数据类继承自MultiItemEntity，addProvider()方法中形参itemType不能为空")
+        //保证自动生产的itemType为负数
+        return -providers.size() - 1
+    }
     /**************************************************************************/
     /**************************   生命周期同步   ********************************/
     /**************************************************************************/
@@ -131,6 +146,17 @@ open class SmartAdapter<VB : ViewBinding, D> : Adapter<SmartHolder<VB>>() {
     }
 
     override fun onAttachedToRecyclerView(recyclerView: RecyclerView) {
+        val manager = recyclerView.layoutManager
+        if (manager is GridLayoutManager) {
+            val defSpanSizeLookup = manager.spanSizeLookup
+            manager.spanSizeLookup = object : GridLayoutManager.SpanSizeLookup() {
+                override fun getSpanSize(position: Int): Int {
+                    val isFixed = providers[getItemViewType(position)]?.isFixedViewType() ?: false
+                    return if (isFixed) manager.spanCount
+                    else defSpanSizeLookup.getSpanSize(position)
+                }
+            }
+        }
         recyclerView.addOnAttachStateChangeListener(rvOnAttachStateChangeListener)
         onRecyclerViewChanges.tryNotify { onAttachedToRecyclerView(recyclerView) }
         tryNotifyProvider { onAdapterAttachedToRecyclerView(recyclerView) }

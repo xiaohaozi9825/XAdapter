@@ -4,7 +4,9 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.core.util.forEach
+import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import androidx.viewbinding.ViewBinding
 import pw.xiaohaozi.xadapter.smart.adapter.SmartAdapter
 import pw.xiaohaozi.xadapter.smart.holder.SmartHolder
@@ -57,7 +59,7 @@ abstract class SmartProvider<VB : ViewBinding, D>(override val adapter: SmartAda
     }
 
     override fun onHolderAttachedToWindow(holder: SmartHolder<VB>) {
-
+        if (isFixedViewType()) setFullSpan(holder)
     }
 
     override fun onHolderDetachedFromWindow(holder: SmartHolder<VB>) {
@@ -106,6 +108,13 @@ abstract class SmartProvider<VB : ViewBinding, D>(override val adapter: SmartAda
             if (value == this) return key
         }
         return null
+    }
+
+    protected open fun setFullSpan(holder: RecyclerView.ViewHolder) {
+        val layoutParams = holder.itemView.layoutParams
+        if (layoutParams is StaggeredGridLayoutManager.LayoutParams) {
+            layoutParams.isFullSpan = true
+        }
     }
 }
 
