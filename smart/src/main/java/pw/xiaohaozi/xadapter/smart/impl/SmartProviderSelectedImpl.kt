@@ -55,8 +55,9 @@ open class SmartProviderSelectedImpl<Employer : XProxy<Employer>, VB : ViewBindi
     private fun initListener(
         provide: TypeProvider<*, *>, holder: SmartHolder<*>
     ) {
-        val id = selectedListener?.first
-        val tagger: View = id?.let { holder.itemView.findViewById(it) } ?: holder.itemView
+        val selectedListener = this.selectedListener ?: return
+        val viewId = selectedListener.first
+        val tagger: View = viewId?.let { holder.itemView.findViewById(it) } ?: holder.itemView
         tagger.setOnClickListener {
             val position = holder.adapterPosition
             val data = datas[position]

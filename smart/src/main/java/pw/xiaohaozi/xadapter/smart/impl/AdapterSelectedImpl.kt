@@ -132,8 +132,9 @@ open class AdapterSelectedImpl<Employer : XProxy<Employer>, VB : ViewBinding, D>
         provide: TypeProvider<*, *>,
         holder: SmartHolder<*>
     ) {
-        val id = selectedListener?.first
-        val tagger: View = id?.let { holder.itemView.findViewById(it) } ?: holder.itemView
+        val selectedListener = this.selectedListener ?: return
+        val viewId = selectedListener.first
+        val tagger: View = viewId?.let { holder.itemView.findViewById(it) } ?: holder.itemView
         tagger.setOnClickListener {
             val position = holder.adapterPosition
             val data = datas[position]
