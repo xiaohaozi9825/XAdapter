@@ -18,11 +18,11 @@ import pw.xiaohaozi.xadapter.smart.provider.XProvider
 class SingleFragment : Fragment() {
     private lateinit var binding: FragmentRecyclerBinding
 
-    //①创建Adapter并绑定数据
     private val adapter = function2()
 
     override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
+        inflater: LayoutInflater,
+        container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
         binding = FragmentRecyclerBinding.inflate(inflater)
