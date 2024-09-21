@@ -100,7 +100,8 @@ open class AdapterSelectedImpl<Employer : XProxy<Employer>, VB : ViewBinding, D>
         super.initProxy(employer)
         adapter.addOnViewHolderChanges(object : SmartAdapter.OnViewHolderChanges {
             override fun onCreated(provide: TypeProvider<*, *>, holder: SmartHolder<*>) {
-                initListener(provide, holder)
+//                if (provide != employer) return
+                initListener(holder)
             }
 
             override fun onBinding(holder: SmartHolder<*>, position: Int) {
@@ -128,10 +129,7 @@ open class AdapterSelectedImpl<Employer : XProxy<Employer>, VB : ViewBinding, D>
         return employer
     }
 
-    private fun initListener(
-        provide: TypeProvider<*, *>,
-        holder: SmartHolder<*>
-    ) {
+    private fun initListener(holder: SmartHolder<*>) {
         val selectedListener = this.selectedListener ?: return
         val viewId = selectedListener.first
         val tagger: View = viewId?.let { holder.itemView.findViewById(it) } ?: holder.itemView

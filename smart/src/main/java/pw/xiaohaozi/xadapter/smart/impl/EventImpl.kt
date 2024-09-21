@@ -47,7 +47,8 @@ class EventImpl<Employer : XProxy<Employer>, VB : ViewBinding, D> : EventProxy<E
         super.initProxy(employer)
         adapter.addOnViewHolderChanges(object : SmartAdapter.OnViewHolderChanges {
             override fun onCreated(provide: TypeProvider<*, *>, holder: SmartHolder<*>) {
-                initListener(provide, holder)
+                if (employer != adapter && provide != employer) return
+                initListener(holder)
             }
 
             override fun onBinding(holder: SmartHolder<*>, position: Int) {
@@ -57,7 +58,7 @@ class EventImpl<Employer : XProxy<Employer>, VB : ViewBinding, D> : EventProxy<E
         })
     }
 
-    private fun initListener(provide: TypeProvider<*, *>, holder: SmartHolder<*>) {
+    private fun initListener(holder: SmartHolder<*>) {
         clickListenerMap.forEach {
             val id = it.key
             val value = it.value
@@ -81,17 +82,26 @@ class EventImpl<Employer : XProxy<Employer>, VB : ViewBinding, D> : EventProxy<E
         checkedChangeListener.forEach {
             val id = it.key
             val value = it.value
-            val tagger: CompoundButton? = (id?.let { holder.itemView.findViewById(it) } ?: holder.itemView) as? CompoundButton
+            val tagger: CompoundButton? =
+                (id?.let { holder.itemView.findViewById(it) } ?: holder.itemView) as? CompoundButton
             tagger?.setOnCheckedChangeListener { buttonView, isChecked ->
                 val position = holder.adapterPosition
                 val data = getDatas()[position]
-                value.invoke(employer, holder as SmartHolder<VB>, data, position, buttonView, isChecked)
+                value.invoke(
+                    employer,
+                    holder as SmartHolder<VB>,
+                    data,
+                    position,
+                    buttonView,
+                    isChecked
+                )
             }
         }
         textChangeMap.forEach {
             val id = it.key
             val value = it.value
-            val tagger: TextView? = (id?.let { holder.itemView.findViewById(it) } ?: holder.itemView) as? TextView
+            val tagger: TextView? =
+                (id?.let { holder.itemView.findViewById(it) } ?: holder.itemView) as? TextView
             tagger?.addTextChangedListener {
                 val position = holder.adapterPosition
                 val data = getDatas()[position]
@@ -102,28 +112,32 @@ class EventImpl<Employer : XProxy<Employer>, VB : ViewBinding, D> : EventProxy<E
     }
 
     override fun setOnClickListener(
-        id: Int?, listener: Employer.(holder: SmartHolder<VB>, data: D, position: Int, view: View) -> Unit
+        id: Int?,
+        listener: Employer.(holder: SmartHolder<VB>, data: D, position: Int, view: View) -> Unit
     ): Employer {
         clickListenerMap[id] = listener
         return employer
     }
 
     override fun setOnLongClickListener(
-        id: Int?, listener: Employer.(holder: SmartHolder<VB>, data: D, position: Int, view: View) -> Boolean
+        id: Int?,
+        listener: Employer.(holder: SmartHolder<VB>, data: D, position: Int, view: View) -> Boolean
     ): Employer {
         longClickListenerMap[id] = listener
         return employer
     }
 
     override fun setOnCheckedChangeListener(
-        id: Int?, listener: Employer.(holder: SmartHolder<VB>, data: D, position: Int, view: CompoundButton, isCheck: Boolean) -> Unit
+        id: Int?,
+        listener: Employer.(holder: SmartHolder<VB>, data: D, position: Int, view: CompoundButton, isCheck: Boolean) -> Unit
     ): Employer {
         checkedChangeListener[id] = listener
         return employer
     }
 
     override fun setOnTextChange(
-        id: Int?, listener: Employer.(holder: SmartHolder<VB>, data: D, position: Int, view: TextView, text: CharSequence?) -> Unit
+        id: Int?,
+        listener: Employer.(holder: SmartHolder<VB>, data: D, position: Int, view: TextView, text: CharSequence?) -> Unit
     ): Employer {
         textChangeMap[id] = listener
         return employer
