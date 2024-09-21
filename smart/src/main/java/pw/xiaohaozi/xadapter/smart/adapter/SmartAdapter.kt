@@ -45,14 +45,14 @@ open class SmartAdapter<VB : ViewBinding, D> : Adapter<SmartHolder<VB>>() {
         val holder: SmartHolder<*> = provide.onCreateViewHolder(parent, viewType)
         onViewHolderChanges.tryNotify { onCreated(provide, holder) }
         provide.onCreatedViewHolder(holder)
-        Log.i("SmartProvider", "onCreateViewHolder: holder = $holder")
+        Log.i(TAG, "onCreateViewHolder: holder = $holder")
         return holder as SmartHolder<VB>
     }
 
     override fun onBindViewHolder(holder: SmartHolder<VB>, position: Int) {
         val viewType = getItemViewType(position)
         val provide = providers[viewType]
-        Log.i("SmartProvider", "onBindViewHolder: viewType = $viewType -- provide = $provide")
+        Log.i(TAG, "onBindViewHolder: viewType = $viewType -- provide = $provide")
         onViewHolderChanges.tryNotify { onBinding(holder, position) }
         provide.onBindViewHolder(holder, datas[position], position)
     }
@@ -63,7 +63,7 @@ open class SmartAdapter<VB : ViewBinding, D> : Adapter<SmartHolder<VB>>() {
     ) {
         val viewType = getItemViewType(position)
         val provide = providers[viewType]
-        Log.i("SmartProvider", "onBindViewHolder: viewType = $viewType -- provide = $provide")
+        Log.i(TAG, "onBindViewHolder: viewType = $viewType -- provide = $provide")
         provide.onBindViewHolder(holder, datas[position], position, payloads)
     }
 
@@ -105,6 +105,10 @@ open class SmartAdapter<VB : ViewBinding, D> : Adapter<SmartHolder<VB>>() {
         return this
     }
 
+    open operator fun plus(provider: TypeProvider<*, *>): SmartAdapter<VB, D> {
+        addProvider(provider)
+        return this
+    }
 
     /**
      * 刷新列表所有item
@@ -133,6 +137,8 @@ open class SmartAdapter<VB : ViewBinding, D> : Adapter<SmartHolder<VB>>() {
         //保证自动生产的itemType为负数
         return -providers.size() - 1
     }
+
+
     /**************************************************************************/
     /**************************   生命周期同步   ********************************/
     /**************************************************************************/

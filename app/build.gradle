@@ -1,6 +1,8 @@
 plugins {
     id 'com.android.application'
     id 'org.jetbrains.kotlin.android'
+    id 'kotlin-kapt'
+
 }
 
 android {
@@ -31,7 +33,7 @@ android {
         jvmTarget = '1.8'
     }
     buildFeatures {
-//        dataBinding = true
+        dataBinding = true
         viewBinding = true
     }
 }
@@ -42,5 +44,33 @@ dependencies {
     implementation 'androidx.appcompat:appcompat:1.5.1'
     implementation 'com.google.android.material:material:1.7.0'
     implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
+
+    //下面这两个至少有一个才能使用 by viewModels（）方法
+    implementation 'androidx.navigation:navigation-fragment-ktx:2.5.2'
+    implementation 'androidx.navigation:navigation-ui-ktx:2.5.2'
+
+    //https://github.com/scwang90/SmartRefreshLayout
+    //需要在gradle.properties 中添加 android.enableJetifier=true
+    implementation 'io.github.scwang90:refresh-layout-kernel:2.0.5'
+//    implementation  'com.scwang.smart:refresh-layout-kernel:2.0.0-alpha-1'      //核心必须依赖
+    implementation 'io.github.scwang90:refresh-header-classics:2.0.5'    //经典刷新头
+    implementation 'io.github.scwang90:refresh-header-radar:2.0.5'       //雷达刷新头
+    implementation 'io.github.scwang90:refresh-header-falsify:2.0.5'     //虚拟刷新头
+    implementation 'io.github.scwang90:refresh-header-material:2.0.5'    //谷歌刷新头
+    implementation 'io.github.scwang90:refresh-header-two-level:2.0.5'   //二级刷新头
+    implementation 'io.github.scwang90:refresh-footer-ball:2.0.5'        //球脉冲加载
+    implementation 'io.github.scwang90:refresh-footer-classics:2.0.5'    //经典加载
+
+//    https://github.com/wasabeef/recyclerview-animators
+    implementation 'jp.wasabeef:recyclerview-animators:4.0.2'
+    //https://github.com/google/flexbox-layout
+    implementation 'com.google.android.flexbox:flexbox:3.0.0'
+
+
+    implementation 'com.github.bumptech.glide:glide:4.12.0'
+//    implementation 'com.squareup.picasso:picasso:2.5.2'
+//    implementation 'com.nostra13.universalimageloader:universal-image-loader:1.9.5'
+    implementation("io.coil-kt:coil:1.4.0")
+    implementation 'com.google.code.gson:gson:2.8.9'
 
 }

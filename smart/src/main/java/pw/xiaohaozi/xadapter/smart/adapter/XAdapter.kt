@@ -9,6 +9,7 @@ import kotlinx.coroutines.launch
 import pw.xiaohaozi.xadapter.smart.impl.AdapterSelectedImpl
 import pw.xiaohaozi.xadapter.smart.impl.EventImpl
 import pw.xiaohaozi.xadapter.smart.impl.SmartDataImpl
+import pw.xiaohaozi.xadapter.smart.provider.TypeProvider
 import pw.xiaohaozi.xadapter.smart.proxy.EventProxy
 import pw.xiaohaozi.xadapter.smart.proxy.SelectedProxy
 import pw.xiaohaozi.xadapter.smart.proxy.SmartDataProxy
@@ -59,4 +60,8 @@ open class XAdapter<VB : ViewBinding, D>(
     override val coroutineContext: CoroutineContext
         get() = SupervisorJob() + Dispatchers.Main + CoroutineName("XAdapterCoroutine")
 
+    override operator fun plus(provider: TypeProvider<*, *>): XAdapter<VB, D> {
+        addProvider(provider)
+        return this
+    }
 }
