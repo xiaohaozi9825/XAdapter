@@ -11,7 +11,7 @@ import pw.xiaohaozi.xadapter.smart.provider.XProvider
  *****************************************************/
 
 /**
- * 创建单类型Adapter
+ * 创建单布局Adapter
  */
 inline fun <VB : ViewBinding, D> createAdapter(
     crossinline init: (XAdapter<VB, D>.(holder: SmartHolder<VB>) -> Unit) = {},
@@ -33,14 +33,25 @@ inline fun <VB : ViewBinding, D> createAdapter(
 }
 
 /**
- * 创建通用Adapter，后续需要使用.withType()方法实现数据绑定；
- * 最后调用toAdapter()方法还原回Adapter。
+ * 创建通用Adapter，单布局和多布局都可以使用，建议创建多布局时使用。
+ * 后续需要使用.withType()方法实现数据绑定； 最后调用toAdapter()方法还原回Adapter。
+ *
+ * @param custom 动态生成 itemType
  */
-fun createAdapter(): XAdapter<ViewBinding, Any?> {
-    return XAdapter()
+fun createAdapter(custom: (XAdapter<ViewBinding, Any?>.(data: Any?, position: Int) -> Int?)? = null): XAdapter<ViewBinding, Any?> {
+    val xAdapter = XAdapter<ViewBinding, Any?>()
+    if (custom != null) {
+        xAdapter.customItemType { data, position ->
+            return@customItemType custom.invoke(xAdapter, data, position)
+        }
+    }
+    return xAdapter
 }
 
-
+/**
+ * 多布局切换
+ * 返回Provider
+ */
 inline fun <VB : ViewBinding, D : Any?> XAdapter<ViewBinding, Any?>.withType(
     isFixed: Boolean? = null,
     itemType: Int? = null,
@@ -65,7 +76,10 @@ inline fun <VB : ViewBinding, D : Any?> XAdapter<ViewBinding, Any?>.withType(
     this.addProvider(provider, itemType)
     return provider
 }
-
+/**
+ * 多布局切换
+ * 返回Provider
+ */
 inline fun <reified VB : ViewBinding, D : Any?> XProvider<out ViewBinding, out Any?>.withType(
     isFixed: Boolean? = null,
     itemType: Int? = null,
@@ -90,17 +104,14 @@ inline fun <reified VB : ViewBinding, D : Any?> XProvider<out ViewBinding, out A
     return provider
 }
 
-
+/**
+ * Provider切换为Adapter
+ */
 fun <VB : ViewBinding, D> XProvider<VB, D>.toAdapter(): XAdapter<ViewBinding, Any?> {
     return this.adapter as XAdapter<ViewBinding, Any?>
 }
 
-fun XAdapter<ViewBinding, Any?>.custom(call: XAdapter<ViewBinding, Any?>.(data: Any?, position: Int) -> Int?): XAdapter<ViewBinding, Any?> {
-    customItemType { data, position ->
-        return@customItemType call.invoke(this@custom, data, position)
-    }
-    return this
-}
+
 /*****************************************************
  * 其他操作
  *****************************************************/

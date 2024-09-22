@@ -125,22 +125,18 @@ createAdapter()
 
 ##### 方案 3、动态关联 itemType
 
-使用回调方法SmartAdapter中customItemType()方法或扩展函数中custom()方法。
+使用回调方法SmartAdapter中customItemType()方法或扩展函数中createAdapter(custom)方法。
 
 ```kotlin
- createAdapter()
-    .custom { data, position ->
-        if (data is Int) return@custom 9
+ createAdapter{ data, position ->
+        if (data is Int) return 9
         else null
-    }
-    .withType<ItemVerseBinding, VerseInfo> { holder, data, position ->
+    }.withType<ItemVerseBinding, VerseInfo> { holder, data, position ->
         holder.binding.tvContent.text = data.content
         holder.binding.tvAuthor.text = data.author
-    }
-    .withType<ItemImageCardBinding, Int>(itemType = 9) { holder, data, position ->
+    }.withType<ItemImageCardBinding, Int>(itemType = 9) { holder, data, position ->
         holder.binding.image.setImageResource(data)
-    }
-    .toAdapter()
+    }.toAdapter()
 ```
 
 ##### 对比

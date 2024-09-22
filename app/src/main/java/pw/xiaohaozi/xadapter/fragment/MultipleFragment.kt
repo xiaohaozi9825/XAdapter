@@ -15,7 +15,6 @@ import pw.xiaohaozi.xadapter.info.VerseInfo
 import pw.xiaohaozi.xadapter.smart.adapter.XAdapter
 import pw.xiaohaozi.xadapter.smart.entity.MultiItemEntity
 import pw.xiaohaozi.xadapter.smart.ext.createAdapter
-import pw.xiaohaozi.xadapter.smart.ext.custom
 import pw.xiaohaozi.xadapter.smart.ext.toAdapter
 import pw.xiaohaozi.xadapter.smart.ext.withType
 import pw.xiaohaozi.xadapter.smart.holder.SmartHolder
@@ -130,26 +129,22 @@ class MultipleFragment : Fragment() {
     //如果使用了kotlin-reflect库，会查找data为空，且itemType最小的province
 
     private fun function3(): XAdapter<ViewBinding, Any?> {
-        //泛型VB 确定布局文件，泛型D确定数据类型，回调函数中绑定数据
-        return createAdapter()
-            .custom { data, position ->
-                if (data is Int) return@custom 9
-                else null
-            }
-            .withType<ItemVerseBinding, VerseInfo> { holder, data, position ->
-                holder.binding.tvContent.text = data.content
-                holder.binding.tvAuthor.text = data.author
-            }
-            .withType<ItemImageCardBinding, Int>(itemType = 9) { holder, data, position ->
-                holder.binding.image.setImageResource(data)
-            }
-            .toAdapter()
+        return createAdapter { data, position ->
+            if (data is Int) return@createAdapter 9
+            else null
+        }.withType<ItemVerseBinding, VerseInfo> { holder, data, position ->
+            holder.binding.tvContent.text = data.content
+            holder.binding.tvAuthor.text = data.author
+        }.withType<ItemImageCardBinding, Int>(itemType = 9) { holder, data, position ->
+            holder.binding.image.setImageResource(data)
+        }.toAdapter()
 
     }
+
     private fun function4(): XAdapter<ViewBinding, Any?> {
         //泛型VB 确定布局文件，泛型D确定数据类型，回调函数中绑定数据
         return createAdapter()
-            .withType<ItemVerseBinding, MultipleVerseInfo> (itemType = 5){ holder, data, position ->
+            .withType<ItemVerseBinding, MultipleVerseInfo>(itemType = 5) { holder, data, position ->
                 holder.binding.tvContent.text = data.verseInfo.content
                 holder.binding.tvAuthor.text = data.verseInfo.author
             }
@@ -279,12 +274,22 @@ class MultipleFragment : Fragment() {
     }
 
     private val list2 = arrayListOf(
-        MultipleInt( R.mipmap.snow1),
-        MultipleVerseInfo(VerseInfo("1、何时杖尔看南雪，我与梅花两白头。", "——查辛香《清稗类钞·咏罗浮藤杖所作》")),
+        MultipleInt(R.mipmap.snow1),
+        MultipleVerseInfo(
+            VerseInfo(
+                "1、何时杖尔看南雪，我与梅花两白头。",
+                "——查辛香《清稗类钞·咏罗浮藤杖所作》"
+            )
+        ),
         MultipleVerseInfo(VerseInfo("2、晚来天欲雪，能饮一杯无？", "——白居易《问刘十九》")),
         MultipleVerseInfo(VerseInfo("3、昔去雪如花，今来花似雪。", "——范云《别诗》")),
         MultipleVerseInfo(VerseInfo("4、柴门闻犬吠，风雪夜归人。", "——刘长卿《逢雪宿芙蓉山主人》")),
-        MultipleVerseInfo(VerseInfo("5、忽如一夜春风来，千树万树梨花开。", "——岑参《白雪歌送武判官归京》")),
+        MultipleVerseInfo(
+            VerseInfo(
+                "5、忽如一夜春风来，千树万树梨花开。",
+                "——岑参《白雪歌送武判官归京》"
+            )
+        ),
     )
 }
 
