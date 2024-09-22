@@ -1,21 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.appcompat.widget.LinearLayoutCompat
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.appcompat.widget.LinearLayoutCompat xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:orientation="vertical"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
     <FrameLayout
+        android:id="@+id/fl_bar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@drawable/shape_toolbar_bg"
-        android:paddingTop="24dp">
+        android:background="@drawable/shape_toolbar_bg">
 
         <LinearLayout
-            android:id="@+id/ll_bar"
+            android:id="@+id/ll_tools_bar"
             android:layout_width="match_parent"
-            android:layout_height="?actionBarSize"
+            android:layout_height="48dp"
             android:gravity="center"
             android:orientation="horizontal"
             android:paddingHorizontal="8dp">
@@ -30,8 +30,8 @@
                 <ImageView
                     android:id="@+id/iv_go_back"
                     android:layout_width="32dp"
-                    android:padding="4dp"
                     android:layout_height="32dp"
+                    android:padding="4dp"
                     android:src="@drawable/ic_back" />
 
                 <TextView
@@ -57,10 +57,10 @@
 
             <ImageView
                 android:id="@+id/btn_image"
-                android:src="@drawable/ic_source_code"
                 android:layout_width="48dp"
                 android:layout_height="48dp"
-                android:paddingVertical="12dp" />
+                android:paddingVertical="12dp"
+                android:src="@drawable/ic_source_code" />
 
             <TextView
                 android:id="@+id/btn_text"
@@ -83,9 +83,9 @@
                 android:visibility="gone" />
         </LinearLayout>
     </FrameLayout>
+
     <FrameLayout
         android:id="@+id/fl_fragment"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
-    </FrameLayout>
+        android:layout_height="match_parent"></FrameLayout>
 </androidx.appcompat.widget.LinearLayoutCompat>

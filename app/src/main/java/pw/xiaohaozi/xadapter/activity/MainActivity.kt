@@ -3,10 +3,13 @@ package pw.xiaohaozi.xadapter.activity
 import android.os.Bundle
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 import pw.xiaohaozi.xadapter.R
 import pw.xiaohaozi.xadapter.databinding.ActivityMainBinding
 import pw.xiaohaozi.xadapter.databinding.ItemHomeBinding
 import pw.xiaohaozi.xadapter.databinding.ItemHomeTitleBinding
+import pw.xiaohaozi.xadapter.enableEdgeToEdge
 import pw.xiaohaozi.xadapter.fragment.MultipleFragment
 import pw.xiaohaozi.xadapter.fragment.SingleFragment
 import pw.xiaohaozi.xadapter.smart.ext.createAdapter
@@ -37,7 +40,14 @@ class MainActivity : AppCompatActivity() {
     var data: VerseInfo? = null
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        enableEdgeToEdge()
         setContentView(binding.root)
+        ViewCompat.setOnApplyWindowInsetsListener(binding.root) { v, insets ->
+            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
+            insets
+        }
+
         binding.rvList.adapter = adapter
         adapter.reset(list)
     }

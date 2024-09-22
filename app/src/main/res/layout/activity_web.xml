@@ -7,15 +7,15 @@
     android:orientation="vertical">
 
     <FrameLayout
+        android:id="@+id/fl_bar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@drawable/shape_toolbar_bg"
-        android:paddingTop="24dp">
+        android:background="@drawable/shape_toolbar_bg">
 
         <LinearLayout
-            android:id="@+id/ll_bar"
+            android:id="@+id/ll_tools_bar"
             android:layout_width="match_parent"
-            android:layout_height="?actionBarSize"
+            android:layout_height="48dp"
             android:gravity="center"
             android:orientation="horizontal"
             android:paddingHorizontal="8dp">
