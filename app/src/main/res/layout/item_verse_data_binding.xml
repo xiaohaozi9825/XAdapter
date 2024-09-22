@@ -7,7 +7,7 @@
 
         <variable
             name="data"
-            type="pw.xiaohaozi.xadapter.fragment.SingleFragment.Verse" />
+            type="pw.xiaohaozi.xadapter.info.VerseInfo" />
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout

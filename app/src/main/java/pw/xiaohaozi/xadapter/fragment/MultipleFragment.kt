@@ -6,72 +6,87 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.viewbinding.ViewBinding
+import pw.xiaohaozi.xadapter.R
 import pw.xiaohaozi.xadapter.databinding.FragmentRecyclerBinding
+import pw.xiaohaozi.xadapter.databinding.ItemImageCardBinding
 import pw.xiaohaozi.xadapter.databinding.ItemVerseBinding
-
-import pw.xiaohaozi.xadapter.databinding.ItemVerseDataBindingBinding
 import pw.xiaohaozi.xadapter.info.VerseInfo
 import pw.xiaohaozi.xadapter.smart.adapter.XAdapter
+import pw.xiaohaozi.xadapter.smart.entity.MultiItemEntity
 import pw.xiaohaozi.xadapter.smart.ext.createAdapter
+import pw.xiaohaozi.xadapter.smart.ext.custom
+import pw.xiaohaozi.xadapter.smart.ext.toAdapter
+import pw.xiaohaozi.xadapter.smart.ext.withType
 import pw.xiaohaozi.xadapter.smart.holder.SmartHolder
 import pw.xiaohaozi.xadapter.smart.provider.XProvider
 
 /**
- * 单布局
+ * 多布局
  */
-class SingleFragment : Fragment() {
+class MultipleFragment : Fragment() {
     private lateinit var binding: FragmentRecyclerBinding
-
-    private val adapter = function2()
-
+    private val adapter = function1()
     override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
+        inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
         binding = FragmentRecyclerBinding.inflate(inflater)
         binding.recycleView.layoutManager = LinearLayoutManager(requireContext())
         binding.recycleView.adapter = adapter
-        adapter.reset(list)
+
         return binding.root
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        adapter.reset(list)
     }
 
     /**
      * 方法1
      * 使用XAdapter拓展方法创建
      */
-    private fun function1(): XAdapter<ItemVerseBinding, VerseInfo> {
+    private fun function1(): XAdapter<ViewBinding, Any?> {
         //泛型VB 确定布局文件，泛型D确定数据类型，回调函数中绑定数据
-        return createAdapter<ItemVerseBinding, VerseInfo> { holder, data, position ->
-            holder.binding.tvContent.text = data.content
-            holder.binding.tvAuthor.text = data.author
-        }
+        return createAdapter()
+            .withType<ItemVerseBinding, VerseInfo> { holder, data, position ->
+                holder.binding.tvContent.text = data.content
+                holder.binding.tvAuthor.text = data.author
+            }
+            .withType<ItemImageCardBinding, Int> { holder, data, position ->
+                holder.binding.image.setImageResource(data)
+            }
+            .toAdapter()
     }
 
-    /**
-     * 方法2
-     * 使用Adapter+Provider的方式创建
-     *
-     * 比较：
-     * 方法1实际上是对方法2的封装，使用更方便；
-     * 方法2步骤繁琐，但是暴露的方法较多，而且可以添加多个Provider，灵活度更高
-     *
-     * 推荐：
-     * 如果逻辑较为简单，推荐使用方法1；
-     * 如果逻辑复杂，推荐使用方法2.
-     */
-    private fun function2(): XAdapter<ItemVerseBinding, VerseInfo> {
+    private fun function2(): XAdapter<ViewBinding, Any?> {
         //①创建Adapter
-        val xAdapter = XAdapter<ItemVerseBinding, VerseInfo>()
+        val xAdapter = XAdapter<ViewBinding, Any?>()
         //②创建Provider
-        val provider = object : XProvider<ItemVerseBinding, VerseInfo>(xAdapter) {
+        val provider1 = object : XProvider<ItemImageCardBinding, Int>(xAdapter) {
+            override fun onCreated(holder: SmartHolder<ItemImageCardBinding>) {
+
+            }
+
+            override fun onBind(
+                holder: SmartHolder<ItemImageCardBinding>,
+                data: Int,
+                position: Int
+            ) {
+                holder.binding.image.setImageResource(data)
+            }
+
+
+        }
+        val provider2 = object : XProvider<ItemVerseBinding, VerseInfo?>(xAdapter) {
             override fun onCreated(holder: SmartHolder<ItemVerseBinding>) {
 
             }
 
             override fun onBind(
                 holder: SmartHolder<ItemVerseBinding>,
-                data: VerseInfo,
+                data: VerseInfo?,
                 position: Int
             ) {
                 holder.binding.tvContent.text = data?.content
@@ -81,35 +96,72 @@ class SingleFragment : Fragment() {
         }
         //③将Provider 添加到 Adapter中
         //方式一：使用方法添加，viewType可不填
-        xAdapter.addProvider(provider, 0)
+
+        xAdapter.addProvider(provider2)
+        xAdapter.addProvider(provider1)
+//
         return xAdapter
         //方式一二：使用➕链接，viewType为空
-//        return xAdapter + provider
+//        return xAdapter + provider2 + provider1
 
     }
 
-    /**
-     * 结合 dataBinding 绑定数据，可以一行代码实现Adapter的创建和数据绑定
-     *
-     * 注意和function1() 中的布局文件不是同一个，
-     * function3()的 ItemSingleTypeDataBindingBinding 是使用了dataBinding 的，
-     * 而function1()的 ItemSingleTypeViewBindingBinding 没有使用dataBinding的。
-     *
-     * 此处代码简化前如下,如果单独写，需要注意指定泛型：
-     * ```
-     * return createAdapter<ItemSingleTypeDataBindingBinding, Verse> { holder, data, position ->
-     *     holder.binding.data = data
-     * }
-     * ```
-     */
-    private fun function3(): XAdapter<ItemVerseDataBindingBinding, VerseInfo> {
-        //一行代码实现Adapter的创建和数据绑定
-        return createAdapter { holder, data, _ -> holder.binding.data = data }
+    //多布局itemViewType与province对应的方式：
+    //1、根据数据类型自动查找对应的province。
+    // 优点：使用简单，数据类不需要实现任何接口，甚至可以是基本数据类型；
+    // 缺点：每个province泛型中的数据类型不能相同，否则无法正确匹配。
+
+    //2、数据类实现MultiItemEntity接口。
+    // 优点：匹配度高；
+    // 缺点：使用繁琐。数据类必须实现MultiItemEntity接口，且getItemViewType()方法返回值必须为正整数，同时在addProvince方法中形参itemType不能为空。
+
+    //3、使用adapter.customItemType（）方法动态确定itemViewType。
+    // 优点：可以允许province泛型中的数据类型相同，数据类无需实现MultiItemEntity接口；
+    // 缺点：使用繁琐。customItemType回调返回值必须为正整数，同时在addProvince方法中形参itemType不能为空。
+
+    //建议：
+    //如果多个布局的数据类型不一样，建议使用方法1；
+    //如果数据类型有相同的，但是数据类可以实现MultiItemEntity接口，建议使用方法2
+    //以上条件都不满足，那就使用方法3
+    //优先级：动态指定>MultiItemEntity>自动生成
+
+    //数据可空：
+    //最多只能存在一个province数据类型为可空类型，优先使用itemType==0 的province，如果没有，则找itemType最小的province
+    //如果使用了kotlin-reflect库，会查找data为空，且itemType最小的province
+
+    private fun function3(): XAdapter<ViewBinding, Any?> {
+        //泛型VB 确定布局文件，泛型D确定数据类型，回调函数中绑定数据
+        return createAdapter()
+            .custom { data, position ->
+                if (data is Int) return@custom 9
+                else null
+            }
+            .withType<ItemVerseBinding, VerseInfo> { holder, data, position ->
+                holder.binding.tvContent.text = data.content
+                holder.binding.tvAuthor.text = data.author
+            }
+            .withType<ItemImageCardBinding, Int>(itemType = 9) { holder, data, position ->
+                holder.binding.image.setImageResource(data)
+            }
+            .toAdapter()
+
     }
+    private fun function4(): XAdapter<ViewBinding, Any?> {
+        //泛型VB 确定布局文件，泛型D确定数据类型，回调函数中绑定数据
+        return createAdapter()
+            .withType<ItemVerseBinding, MultipleVerseInfo> (itemType = 5){ holder, data, position ->
+                holder.binding.tvContent.text = data.verseInfo.content
+                holder.binding.tvAuthor.text = data.verseInfo.author
+            }
+            .withType<ItemImageCardBinding, MultipleInt>(itemType = 8) { holder, data, position ->
+                holder.binding.image.setImageResource(data.res)
+            }
+            .toAdapter()
 
-
+    }
 
     private val list = arrayListOf(
+        R.mipmap.snow1,
         VerseInfo("1、何时杖尔看南雪，我与梅花两白头。", "——查辛香《清稗类钞·咏罗浮藤杖所作》"),
         VerseInfo("2、晚来天欲雪，能饮一杯无？", "——白居易《问刘十九》"),
         VerseInfo("3、昔去雪如花，今来花似雪。", "——范云《别诗》"),
@@ -120,6 +172,7 @@ class SingleFragment : Fragment() {
         VerseInfo("8、乱山残雪夜，孤烛异乡人。", "——崔涂《除夜 / 巴山道中除夜书怀 / 除夜有怀》"),
         VerseInfo("9、渺万里层云，千山暮雪，只影向谁去？", "——元好问《摸鱼儿·雁丘词 /迈陂塘》"),
         VerseInfo("10、有梅无雪不精神，有雪无诗俗了人。", "——卢梅坡《雪梅·其二》"),
+        R.mipmap.snow2,
         VerseInfo("11、欲将轻骑逐，大雪满弓刀。", "——卢纶《和张仆射塞下曲·其三》"),
         VerseInfo("12、千里黄云白日曛，北风吹雁雪纷纷。", "——高适《别董大二首》"),
         VerseInfo("13、白雪却嫌春色晚，故穿庭树作飞花。", "——韩愈《春雪》"),
@@ -129,6 +182,7 @@ class SingleFragment : Fragment() {
         VerseInfo("17、五月天山雪，无花只有寒。", "——李白《塞下曲六首·其一》"),
         VerseInfo("18、惨惨柴门风雪夜，此时有子不如无。", "——黄景仁《别老母》"),
         VerseInfo("19、北风卷地白草折，胡天八月即飞雪。", "——岑参《白雪歌送武判官归京》"),
+        R.mipmap.snow3,
         VerseInfo("20、欲渡黄河冰塞川，将登太行雪满山。", "——李白《行路难·其一》"),
         VerseInfo("21、今我来思，雨雪霏霏。", "——佚名《采薇》"),
         VerseInfo("22、雪消门外千山绿，花发江边二月晴。", "——欧阳修《春日西湖寄谢法曹歌》"),
@@ -210,6 +264,27 @@ class SingleFragment : Fragment() {
         VerseInfo("98、凄凄岁暮风，翳翳经日雪。", "——陶渊明《癸卯岁十二月中作与从弟敬远》"),
         VerseInfo("99、侵陵雪色还萱草，漏泄春光有柳条。", "——杜甫《腊日》"),
         VerseInfo("100、将军玉帐貂鼠衣，手持酒杯看雪飞。", "——刘基《北风行》"),
+    )
+
+    data class MultipleVerseInfo(val verseInfo: VerseInfo) : MultiItemEntity {
+        override fun getItemViewType(): Int {
+            return 5
+        }
+    }
+
+    data class MultipleInt(val res: Int) : MultiItemEntity {
+        override fun getItemViewType(): Int {
+            return 8
+        }
+    }
+
+    private val list2 = arrayListOf(
+        MultipleInt( R.mipmap.snow1),
+        MultipleVerseInfo(VerseInfo("1、何时杖尔看南雪，我与梅花两白头。", "——查辛香《清稗类钞·咏罗浮藤杖所作》")),
+        MultipleVerseInfo(VerseInfo("2、晚来天欲雪，能饮一杯无？", "——白居易《问刘十九》")),
+        MultipleVerseInfo(VerseInfo("3、昔去雪如花，今来花似雪。", "——范云《别诗》")),
+        MultipleVerseInfo(VerseInfo("4、柴门闻犬吠，风雪夜归人。", "——刘长卿《逢雪宿芙蓉山主人》")),
+        MultipleVerseInfo(VerseInfo("5、忽如一夜春风来，千树万树梨花开。", "——岑参《白雪歌送武判官归京》")),
     )
 }
 

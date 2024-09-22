@@ -68,9 +68,8 @@ private fun function2(): XAdapter<ItemSingleTypeViewBindingBinding, Verse> {
 }
 ```
 
-#####  
-
-结合 dataBinding 绑定数据
+##### 结合 dataBinding 绑定数据
+一行代码实现Adapter的创建和数据绑定
 
 ```kotlin
   /**
@@ -109,3 +108,6 @@ binding.recycleView.adapter = adapter
 ```kotlin
 adapter.reset(list)
 ```
+
+
+

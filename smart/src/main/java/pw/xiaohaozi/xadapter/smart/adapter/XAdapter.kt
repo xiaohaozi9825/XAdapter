@@ -64,4 +64,5 @@ open class XAdapter<VB : ViewBinding, D>(
         addProvider(provider)
         return this
     }
+
 }

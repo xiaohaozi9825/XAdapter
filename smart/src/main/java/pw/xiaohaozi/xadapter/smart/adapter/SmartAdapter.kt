@@ -32,6 +32,8 @@ open class SmartAdapter<VB : ViewBinding, D> : Adapter<SmartHolder<VB>>() {
 
     var datas: MutableList<D> = mutableListOf()
     val providers: SparseArray<TypeProvider<*, *>> by lazy { SparseArray() }
+    private var itemTypeCallback: (SmartAdapter<VB, D>.(data: D, position: Int) -> Int?)? = null
+
     private val visibleHolders = LinkedList<SmartHolder<VB>>()
     private val onViewHolderChanges: ArrayList<OnViewHolderChanges> = arrayListOf()
     private val onRecyclerViewChanges: ArrayList<OnRecyclerViewChanges> = arrayListOf()
@@ -68,20 +70,60 @@ open class SmartAdapter<VB : ViewBinding, D> : Adapter<SmartHolder<VB>>() {
     }
 
     override fun getItemViewType(position: Int): Int {
-        val data = datas[position] ?: return 0
+        val data = datas[position]
+        if (itemTypeCallback != null) {
+            val type = itemTypeCallback?.invoke(this, data, position)
+            if (type != null) return type
+        }
         if (data is MultiItemEntity) {
             val itemViewType = data.getItemViewType()
             if (itemViewType <= 0) throw XAdapterException("data.getItemViewType() 必须为正整数。而当前值为：“$itemViewType”")
             return itemViewType
         }
-        val clazz = data::class.java
-        providers.forEach { key, value ->
-            val genericSuperclass = value.javaClass.genericSuperclass as? ParameterizedType
-                ?: throw RuntimeException("必须明确指定 D 泛型类型")
-            if (genericSuperclass.actualTypeArguments.any { it == clazz }) {
-                return key
+        //当有数据为空时
+        if (data == null) {
+            //如果有 itemType ==0的情况，则返回0
+            //否则返回itemType 满足条件的最小值
+            if (providers.get(0) != null) return 0
+            for (index in 0 until providers.size()) {
+                val key = providers.keyAt(index)
+            }
+
+            providers.forEach { key, value ->
+                Log.i(TAG, "getItemViewType: key = $key")
+//                val kClass = value::class
+//                kClass.supertypes.forEach {
+//                    Log.i(TAG, "getItemViewType: supertype = ${it}")
+//                    it.arguments.forEach {
+//                        Log.i(TAG, "getItemViewType: arguments = ${it}")
+//                        Log.i(TAG, "getItemViewType: arguments = ${it.type?.isMarkedNullable}")//泛型是否可空
+//                    }
+//                }
+                try {
+                    //使用kotlin 反射获取第一个泛型类型为可空类型的provider 对应的key
+                    //需要用到implementation "org.jetbrains.kotlin:kotlin-reflect:1.7.10"库
+                    //如果没有添加该库，则会走进入异常捕获，返回第一个 provider的key
+                    val isMarkedNullable = value::class.supertypes.any {
+                        it.arguments.any { it.type?.isMarkedNullable == true }
+                    }
+                    if (isMarkedNullable) return key
+                } catch (e: KotlinReflectionNotSupportedError) {
+                    Log.i(TAG, "getItemViewType: KotlinReflectionNotSupportedError key = $key")
+                    return key
+                }
+            }
+
+        } else {
+            val clazz = data!!::class.java
+            providers.forEach { key, value ->
+                val genericSuperclass = value.javaClass.genericSuperclass as? ParameterizedType
+                    ?: throw RuntimeException("必须明确指定 D 泛型类型")
+                if (genericSuperclass.actualTypeArguments.any { it == clazz }) {
+                    return key
+                }
             }
         }
+
         return 0
     }
 
@@ -96,12 +138,18 @@ open class SmartAdapter<VB : ViewBinding, D> : Adapter<SmartHolder<VB>>() {
 
     /**
      * 向当前adapter增加一个Holder提供者
-     * @param viewType Holder对于itemType，≤0的数值被框架占用，使用者必须使用>0的整数
+     * @param itemType Holder对于itemType，≤0的数值被框架占用，使用者必须使用>0的整数
      * @param provider 对应的Holder提供者
      */
-    fun addProvider(provider: TypeProvider<*, *>, viewType: Int? = null): SmartAdapter<VB, D> {
-        val itemType = viewType ?: automaticallyItemType(provider)
-        providers[itemType] = provider
+    fun addProvider(provider: TypeProvider<*, *>, itemType: Int? = null): SmartAdapter<VB, D> {
+        if (itemType != null && itemType < 0) throw XAdapterException("itemType 必须为非负整数，不能为: $itemType")
+        val type = itemType ?: automaticallyItemType(provider)
+        providers[type] = provider
+        return this
+    }
+
+    fun customItemType(call: SmartAdapter<VB, D>.(data: D, position: Int) -> Int?): SmartAdapter<VB, D> {
+        itemTypeCallback = call
         return this
     }
 
@@ -134,8 +182,8 @@ open class SmartAdapter<VB : ViewBinding, D> : Adapter<SmartHolder<VB>>() {
                 ?: false
         }
         if (find != null) throw XAdapterException("provider中数据类继承自MultiItemEntity，addProvider()方法中形参itemType不能为空")
-        //保证自动生产的itemType为负数
-        return -providers.size() - 1
+
+        return Int.MIN_VALUE - providers.size()
     }
 
 

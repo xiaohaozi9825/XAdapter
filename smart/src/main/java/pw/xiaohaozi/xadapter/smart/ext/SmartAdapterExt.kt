@@ -1,11 +1,8 @@
 package pw.xiaohaozi.xadapter.smart.ext
 
 import androidx.viewbinding.ViewBinding
-import pw.xiaohaozi.xadapter.smart.adapter.SmartAdapter
 import pw.xiaohaozi.xadapter.smart.adapter.XAdapter
 import pw.xiaohaozi.xadapter.smart.holder.SmartHolder
-import pw.xiaohaozi.xadapter.smart.provider.SmartProvider
-import pw.xiaohaozi.xadapter.smart.provider.TypeProvider
 import pw.xiaohaozi.xadapter.smart.provider.XProvider
 
 
@@ -47,8 +44,8 @@ fun createAdapter(): XAdapter<ViewBinding, Any?> {
 inline fun <VB : ViewBinding, D : Any?> XAdapter<ViewBinding, Any?>.withType(
     isFixed: Boolean? = null,
     itemType: Int? = null,
-    crossinline init: (SmartProvider<VB, D>.(holder: SmartHolder<VB>) -> Unit) = {},
-    crossinline bind: SmartProvider<VB, D>.(holder: SmartHolder<VB>, data: D, position: Int) -> Unit,
+    crossinline init: (XProvider<VB, D>.(holder: SmartHolder<VB>) -> Unit) = {},
+    crossinline bind: XProvider<VB, D>.(holder: SmartHolder<VB>, data: D, position: Int) -> Unit,
 ): XProvider<VB, D> {
     val provider = object : XProvider<VB, D>(this) {
 
@@ -72,7 +69,7 @@ inline fun <VB : ViewBinding, D : Any?> XAdapter<ViewBinding, Any?>.withType(
 inline fun <reified VB : ViewBinding, D : Any?> XProvider<out ViewBinding, out Any?>.withType(
     isFixed: Boolean? = null,
     itemType: Int? = null,
-    crossinline init: (XProvider<VB, D>.(holder: SmartHolder<VB>) -> Unit) = {},
+    crossinline init: XProvider<VB, D>.(holder: SmartHolder<VB>) -> Unit = {},
     crossinline bind: XProvider<VB, D>.(holder: SmartHolder<VB>, data: D, position: Int) -> Unit,
 ): XProvider<VB, D> {
     val provider = object : XProvider<VB, D>(adapter) {
@@ -98,7 +95,12 @@ fun <VB : ViewBinding, D> XProvider<VB, D>.toAdapter(): XAdapter<ViewBinding, An
     return this.adapter as XAdapter<ViewBinding, Any?>
 }
 
-
+fun XAdapter<ViewBinding, Any?>.custom(call: XAdapter<ViewBinding, Any?>.(data: Any?, position: Int) -> Int?): XAdapter<ViewBinding, Any?> {
+    customItemType { data, position ->
+        return@customItemType call.invoke(this@custom, data, position)
+    }
+    return this
+}
 /*****************************************************
  * 其他操作
  *****************************************************/

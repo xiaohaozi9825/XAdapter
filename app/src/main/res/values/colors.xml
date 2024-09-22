@@ -9,6 +9,8 @@
     <color name="white">#FFFFFFFF</color>
     <color name="gray_dedede">#FFdedede</color>
 
+    <color name="off_white">#F8F6E7</color>//米白色
+
     <color name="theme">#FF3794FC</color>
     <color name="theme2">#FF68B1FE</color>
 </resources>
