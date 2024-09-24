@@ -3,12 +3,11 @@ package pw.xiaohaozi.xadapter.smart.proxy
 import android.view.View
 import androidx.annotation.IdRes
 import androidx.annotation.IntRange
-import androidx.recyclerview.widget.RecyclerView.ViewHolder
 import androidx.viewbinding.ViewBinding
-import pw.xiaohaozi.xadapter.smart.holder.SmartHolder
+import pw.xiaohaozi.xadapter.smart.holder.XHolder
 
 /**
- * item选中事件
+ * item选择事件
  * 描述：
  * 作者：小耗子
  * 简书地址：https://www.jianshu.com/u/2a2ea7b43087
@@ -26,7 +25,7 @@ interface SelectedProxy<Employer : XProxy<Employer>,  VB : ViewBinding, D> :
     var selectedIndexChange: (Employer.(data: D, position: Int, index: Int) -> Unit)?
 
     //选中事件，一个item只能一个view响应选中事件
-    var selectedListener: Pair<Int?, (Employer.(holder: SmartHolder<VB>?, data: D, position: Int, index: Int, view: View?) -> Unit)>?
+    var selectedListener: Pair<Int?, (Employer.(holder: XHolder<VB>?, data: D, position: Int, index: Int, view: View?) -> Unit)>?
     var borderCall: (Employer.(count: Int) -> Unit)?
     var MAX_CHECK_COUNT: Int?
     var isAllowCancel: Boolean
@@ -40,7 +39,7 @@ interface SelectedProxy<Employer : XProxy<Employer>,  VB : ViewBinding, D> :
      */
     fun setOnSelectedListener(
         @IdRes id: Int? = null,
-        listener: Employer.(holder: SmartHolder<VB>?, data: D, position: Int, index: Int, trigger: View?) -> Unit
+        listener: Employer.(holder: XHolder<VB>?, data: D, position: Int, index: Int, trigger: View?) -> Unit
     ): Employer
 
     /**

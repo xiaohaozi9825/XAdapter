@@ -12,13 +12,13 @@ import pw.xiaohaozi.xadapter.databinding.FragmentRecyclerBinding
 import pw.xiaohaozi.xadapter.databinding.ItemImageCardBinding
 import pw.xiaohaozi.xadapter.databinding.ItemVerseBinding
 import pw.xiaohaozi.xadapter.info.VerseInfo
-import pw.xiaohaozi.xadapter.smart.adapter.XAdapter
-import pw.xiaohaozi.xadapter.smart.entity.MultiItemEntity
+import pw.xiaohaozi.xadapter.smart.adapter.SmartAdapter
+import pw.xiaohaozi.xadapter.smart.entity.XMultiItemEntity
 import pw.xiaohaozi.xadapter.smart.ext.createAdapter
 import pw.xiaohaozi.xadapter.smart.ext.toAdapter
 import pw.xiaohaozi.xadapter.smart.ext.withType
-import pw.xiaohaozi.xadapter.smart.holder.SmartHolder
-import pw.xiaohaozi.xadapter.smart.provider.XProvider
+import pw.xiaohaozi.xadapter.smart.holder.XHolder
+import pw.xiaohaozi.xadapter.smart.provider.SmartProvider
 
 /**
  * 多布局
@@ -46,7 +46,7 @@ class MultipleFragment : Fragment() {
      * 方法1
      * 使用XAdapter拓展方法创建
      */
-    private fun function1(): XAdapter<ViewBinding, Any?> {
+    private fun function1(): SmartAdapter<ViewBinding, Any?> {
         //泛型VB 确定布局文件，泛型D确定数据类型，回调函数中绑定数据
         return createAdapter()
             .withType<ItemVerseBinding, VerseInfo> { holder, data, position ->
@@ -59,17 +59,17 @@ class MultipleFragment : Fragment() {
             .toAdapter()
     }
 
-    private fun function2(): XAdapter<ViewBinding, Any?> {
+    private fun function2(): SmartAdapter<ViewBinding, Any?> {
         //①创建Adapter
-        val xAdapter = XAdapter<ViewBinding, Any?>()
+        val SmartAdapter = SmartAdapter<ViewBinding, Any?>()
         //②创建Provider
-        val provider1 = object : XProvider<ItemImageCardBinding, Int>(xAdapter) {
-            override fun onCreated(holder: SmartHolder<ItemImageCardBinding>) {
+        val provider1 = object : SmartProvider<ItemImageCardBinding, Int>(SmartAdapter) {
+            override fun onCreated(holder: XHolder<ItemImageCardBinding>) {
 
             }
 
             override fun onBind(
-                holder: SmartHolder<ItemImageCardBinding>,
+                holder: XHolder<ItemImageCardBinding>,
                 data: Int,
                 position: Int
             ) {
@@ -78,13 +78,13 @@ class MultipleFragment : Fragment() {
 
 
         }
-        val provider2 = object : XProvider<ItemVerseBinding, VerseInfo?>(xAdapter) {
-            override fun onCreated(holder: SmartHolder<ItemVerseBinding>) {
+        val provider2 = object : SmartProvider<ItemVerseBinding, VerseInfo?>(SmartAdapter) {
+            override fun onCreated(holder: XHolder<ItemVerseBinding>) {
 
             }
 
             override fun onBind(
-                holder: SmartHolder<ItemVerseBinding>,
+                holder: XHolder<ItemVerseBinding>,
                 data: VerseInfo?,
                 position: Int
             ) {
@@ -96,10 +96,10 @@ class MultipleFragment : Fragment() {
         //③将Provider 添加到 Adapter中
         //方式一：使用方法添加，viewType可不填
 
-        xAdapter.addProvider(provider2)
-        xAdapter.addProvider(provider1)
+        SmartAdapter.addProvider(provider2)
+        SmartAdapter.addProvider(provider1)
 //
-        return xAdapter
+        return SmartAdapter
         //方式一二：使用➕链接，viewType为空
 //        return xAdapter + provider2 + provider1
 
@@ -128,7 +128,7 @@ class MultipleFragment : Fragment() {
     //最多只能存在一个province数据类型为可空类型，优先使用itemType==0 的province，如果没有，则找itemType最小的province
     //如果使用了kotlin-reflect库，会查找data为空，且itemType最小的province
 
-    private fun function3(): XAdapter<ViewBinding, Any?> {
+    private fun function3(): SmartAdapter<ViewBinding, Any?> {
         return createAdapter { data, position ->
             if (data is Int) return@createAdapter 9
             else null
@@ -141,7 +141,7 @@ class MultipleFragment : Fragment() {
 
     }
 
-    private fun function4(): XAdapter<ViewBinding, Any?> {
+    private fun function4(): SmartAdapter<ViewBinding, Any?> {
         //泛型VB 确定布局文件，泛型D确定数据类型，回调函数中绑定数据
         return createAdapter()
             .withType<ItemVerseBinding, MultipleVerseInfo>(itemType = 5) { holder, data, position ->
@@ -261,13 +261,13 @@ class MultipleFragment : Fragment() {
         VerseInfo("100、将军玉帐貂鼠衣，手持酒杯看雪飞。", "——刘基《北风行》"),
     )
 
-    data class MultipleVerseInfo(val verseInfo: VerseInfo) : MultiItemEntity {
+    data class MultipleVerseInfo(val verseInfo: VerseInfo) : XMultiItemEntity {
         override fun getItemViewType(): Int {
             return 5
         }
     }
 
-    data class MultipleInt(val res: Int) : MultiItemEntity {
+    data class MultipleInt(val res: Int) : XMultiItemEntity {
         override fun getItemViewType(): Int {
             return 8
         }

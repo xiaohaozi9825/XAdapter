@@ -8,6 +8,6 @@ package pw.xiaohaozi.xadapter.smart.entity
  * github：https://github.com/xiaohaozi9825
  * 创建时间：2022/9/25 1:14
  */
-interface MultiItemEntity {
+interface XMultiItemEntity {
     fun getItemViewType():Int
 }

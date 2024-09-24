@@ -1,7 +1,20 @@
 package pw.xiaohaozi.xadapter.smart.ext
 
 import androidx.annotation.IntRange
-
+/**
+ * 从start开始，移除集合中count个元素
+ */
+fun MutableList<*>.remove(start: Int, count: Int) {
+    var index = 0
+    val itr = this.listIterator(start)
+    while (itr.hasNext()) {
+        itr.next()
+        if (index <= count) {
+            itr.remove()
+            if (++index == count) return
+        }
+    }
+}
 /**
  * 删除制定制定位置的值
  * data class 中的值改变后，LinkedHashSet无法被删除

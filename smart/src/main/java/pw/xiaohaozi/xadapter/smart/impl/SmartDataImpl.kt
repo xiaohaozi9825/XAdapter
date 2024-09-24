@@ -2,12 +2,12 @@ package pw.xiaohaozi.xadapter.smart.impl
 
 import androidx.annotation.IntRange
 import androidx.viewbinding.ViewBinding
-import pw.xiaohaozi.xadapter.smart.adapter.SmartAdapter
+import pw.xiaohaozi.xadapter.smart.adapter.XAdapter
 import pw.xiaohaozi.xadapter.smart.proxy.ObservableList
 import pw.xiaohaozi.xadapter.smart.proxy.SmartDataProxy
 import pw.xiaohaozi.xadapter.smart.proxy.XEmployer
 import pw.xiaohaozi.xadapter.smart.proxy.XProxy
-import pw.xiaohaozi.xadapter.smart.utils.remove
+import pw.xiaohaozi.xadapter.smart.ext.remove
 import java.util.*
 
 /**
@@ -20,7 +20,7 @@ import java.util.*
  */
 class SmartDataImpl<Employer : XProxy<Employer>, VB : ViewBinding, D> : SmartDataProxy<Employer, VB, D> {
     override lateinit var employer: Employer
-    fun getAdapter(): SmartAdapter<*, *> {
+    fun getAdapter(): XAdapter<*, *> {
         return when (val e = employer) {
             is XEmployer -> e.getEmployerAdapter()
             else -> throw NullPointerException("找不到对应的Adapter对象")
@@ -29,17 +29,6 @@ class SmartDataImpl<Employer : XProxy<Employer>, VB : ViewBinding, D> : SmartDat
 
     fun getDatas(): MutableList<D> = getAdapter().datas as MutableList<D>
 
-    /**
-     * 更新所有item
-     * 使用notifyDataSetChanged()方法刷新列表，会将所有数据重新绑定一次，这样会出现闪烁。
-     * 如果不需要重新绑定数据，可以使用该方法，但是可能存在性能问题
-     */
-    fun notifyAllItemChanged() {
-        val size: Int = getDatas().size
-        for (i in 0 until size) {
-            getAdapter().notifyItemChanged(i)
-        }
-    }
 
     /**
      * 追加数据，可用于上拉加载更多

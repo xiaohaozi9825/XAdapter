@@ -3,6 +3,7 @@ package pw.xiaohaozi.xadapter.smart.proxy
 /**
  * 代理类接口
  * 描述：所有的代理类接口都需要继承该接口
+ *
  * 作者：小耗子
  * 简书地址：https://www.jianshu.com/u/2a2ea7b43087
  * github：https://github.com/xiaohaozi9825

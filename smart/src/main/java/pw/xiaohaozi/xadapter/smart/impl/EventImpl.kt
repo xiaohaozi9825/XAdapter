@@ -6,8 +6,8 @@ import android.widget.TextView
 import androidx.core.widget.addTextChangedListener
 import androidx.viewbinding.ViewBinding
 import pw.xiaohaozi.xadapter.smart.XAdapterException
-import pw.xiaohaozi.xadapter.smart.adapter.SmartAdapter
-import pw.xiaohaozi.xadapter.smart.holder.SmartHolder
+import pw.xiaohaozi.xadapter.smart.adapter.XAdapter
+import pw.xiaohaozi.xadapter.smart.holder.XHolder
 import pw.xiaohaozi.xadapter.smart.provider.TypeProvider
 import pw.xiaohaozi.xadapter.smart.proxy.EventProxy
 import pw.xiaohaozi.xadapter.smart.proxy.XEmployer
@@ -24,7 +24,7 @@ import pw.xiaohaozi.xadapter.smart.proxy.XProxy
  */
 class EventImpl<Employer : XProxy<Employer>, VB : ViewBinding, D> : EventProxy<Employer, VB, D> {
     override lateinit var employer: Employer
-    private val adapter: SmartAdapter<*, *> by lazy {
+    private val adapter: XAdapter<*, *> by lazy {
         when (val e = employer) {
             is XEmployer -> e.getEmployerAdapter()
             else -> throw XAdapterException("找不到对应的Adapter对象")
@@ -34,31 +34,31 @@ class EventImpl<Employer : XProxy<Employer>, VB : ViewBinding, D> : EventProxy<E
     //adapter中的datas可以被重新赋值，所以不能用by lazy 的方式获取
     private fun getDatas() = adapter.datas as MutableList<D>
 
-    override val clickListenerMap: HashMap<Int?, Employer.(holder: SmartHolder<VB>, data: D, position: Int, view: View) -> Unit> =
+    override val clickListenerMap: HashMap<Int?, Employer.(holder: XHolder<VB>, data: D, position: Int, view: View) -> Unit> =
         hashMapOf()
-    override val longClickListenerMap: HashMap<Int?, Employer.(holder: SmartHolder<VB>, data: D, position: Int, view: View) -> Boolean> =
+    override val longClickListenerMap: HashMap<Int?, Employer.(holder: XHolder<VB>, data: D, position: Int, view: View) -> Boolean> =
         hashMapOf()
-    override val checkedChangeListener: HashMap<Int?, Employer.(holder: SmartHolder<VB>, data: D, position: Int, view: CompoundButton, isCheck: Boolean) -> Unit> =
+    override val checkedChangeListener: HashMap<Int?, Employer.(holder: XHolder<VB>, data: D, position: Int, view: CompoundButton, isCheck: Boolean) -> Unit> =
         hashMapOf()
-    override val textChangeMap: HashMap<Int?, Employer.(holder: SmartHolder<VB>, data: D, position: Int, view: TextView, text: CharSequence?) -> Unit> =
+    override val textChangeMap: HashMap<Int?, Employer.(holder: XHolder<VB>, data: D, position: Int, view: TextView, text: CharSequence?) -> Unit> =
         hashMapOf()
 
     override fun initProxy(employer: Employer) {
         super.initProxy(employer)
-        adapter.addOnViewHolderChanges(object : SmartAdapter.OnViewHolderChanges {
-            override fun onCreated(provide: TypeProvider<*, *>, holder: SmartHolder<*>) {
+        adapter.addOnViewHolderChanges(object : XAdapter.OnViewHolderChanges {
+            override fun onCreated(provide: TypeProvider<*, *>, holder: XHolder<*>) {
                 if (employer != adapter && provide != employer) return
                 initListener(holder)
             }
 
-            override fun onBinding(holder: SmartHolder<*>, position: Int) {
+            override fun onBinding(holder: XHolder<*>, position: Int) {
 
             }
 
         })
     }
 
-    private fun initListener(holder: SmartHolder<*>) {
+    private fun initListener(holder: XHolder<*>) {
         clickListenerMap.forEach {
             val id = it.key
             val value = it.value
@@ -66,7 +66,7 @@ class EventImpl<Employer : XProxy<Employer>, VB : ViewBinding, D> : EventProxy<E
             tagger.setOnClickListener {
                 val position = holder.adapterPosition
                 val data = getDatas()[position]
-                value.invoke(employer, holder as SmartHolder<VB>, data, position, it)
+                value.invoke(employer, holder as XHolder<VB>, data, position, it)
             }
         }
         longClickListenerMap.forEach {
@@ -76,7 +76,7 @@ class EventImpl<Employer : XProxy<Employer>, VB : ViewBinding, D> : EventProxy<E
             tagger.setOnLongClickListener {
                 val position = holder.adapterPosition
                 val data = getDatas()[position]
-                value.invoke(employer, holder as SmartHolder<VB>, data, position, it)
+                value.invoke(employer, holder as XHolder<VB>, data, position, it)
             }
         }
         checkedChangeListener.forEach {
@@ -89,7 +89,7 @@ class EventImpl<Employer : XProxy<Employer>, VB : ViewBinding, D> : EventProxy<E
                 val data = getDatas()[position]
                 value.invoke(
                     employer,
-                    holder as SmartHolder<VB>,
+                    holder as XHolder<VB>,
                     data,
                     position,
                     buttonView,
@@ -105,7 +105,7 @@ class EventImpl<Employer : XProxy<Employer>, VB : ViewBinding, D> : EventProxy<E
             tagger?.addTextChangedListener {
                 val position = holder.adapterPosition
                 val data = getDatas()[position]
-                value.invoke(employer, holder as SmartHolder<VB>, data, position, tagger, it)
+                value.invoke(employer, holder as XHolder<VB>, data, position, tagger, it)
             }
         }
 
@@ -113,7 +113,7 @@ class EventImpl<Employer : XProxy<Employer>, VB : ViewBinding, D> : EventProxy<E
 
     override fun setOnClickListener(
         id: Int?,
-        listener: Employer.(holder: SmartHolder<VB>, data: D, position: Int, view: View) -> Unit
+        listener: Employer.(holder: XHolder<VB>, data: D, position: Int, view: View) -> Unit
     ): Employer {
         clickListenerMap[id] = listener
         return employer
@@ -121,7 +121,7 @@ class EventImpl<Employer : XProxy<Employer>, VB : ViewBinding, D> : EventProxy<E
 
     override fun setOnLongClickListener(
         id: Int?,
-        listener: Employer.(holder: SmartHolder<VB>, data: D, position: Int, view: View) -> Boolean
+        listener: Employer.(holder: XHolder<VB>, data: D, position: Int, view: View) -> Boolean
     ): Employer {
         longClickListenerMap[id] = listener
         return employer
@@ -129,7 +129,7 @@ class EventImpl<Employer : XProxy<Employer>, VB : ViewBinding, D> : EventProxy<E
 
     override fun setOnCheckedChangeListener(
         id: Int?,
-        listener: Employer.(holder: SmartHolder<VB>, data: D, position: Int, view: CompoundButton, isCheck: Boolean) -> Unit
+        listener: Employer.(holder: XHolder<VB>, data: D, position: Int, view: CompoundButton, isCheck: Boolean) -> Unit
     ): Employer {
         checkedChangeListener[id] = listener
         return employer
@@ -137,7 +137,7 @@ class EventImpl<Employer : XProxy<Employer>, VB : ViewBinding, D> : EventProxy<E
 
     override fun setOnTextChange(
         id: Int?,
-        listener: Employer.(holder: SmartHolder<VB>, data: D, position: Int, view: TextView, text: CharSequence?) -> Unit
+        listener: Employer.(holder: XHolder<VB>, data: D, position: Int, view: TextView, text: CharSequence?) -> Unit
     ): Employer {
         textChangeMap[id] = listener
         return employer

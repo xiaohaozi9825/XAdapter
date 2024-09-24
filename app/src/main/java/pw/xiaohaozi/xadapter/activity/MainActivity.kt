@@ -9,6 +9,7 @@ import pw.xiaohaozi.xadapter.R
 import pw.xiaohaozi.xadapter.databinding.ActivityMainBinding
 import pw.xiaohaozi.xadapter.databinding.ItemHomeBinding
 import pw.xiaohaozi.xadapter.databinding.ItemHomeTitleBinding
+import pw.xiaohaozi.xadapter.databinding.ItemImageCardBinding
 import pw.xiaohaozi.xadapter.enableEdgeToEdge
 import pw.xiaohaozi.xadapter.fragment.MultipleFragment
 import pw.xiaohaozi.xadapter.fragment.SingleFragment
@@ -23,6 +24,9 @@ class MainActivity : AppCompatActivity() {
     private val binding by lazy { ActivityMainBinding.inflate(layoutInflater) }
 
     private val adapter = createAdapter()
+        .withType<ItemImageCardBinding, Int>(isFixed = true) { holder, data, position ->
+            holder.binding.image.setImageResource(data)
+        }
         .withType<ItemHomeTitleBinding, String>(isFixed = true) { holder, data, position ->
             holder.binding.tvTitle.text = data
         }
@@ -53,6 +57,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private val list = arrayListOf(
+        R.mipmap.home_top,
         "单布局",
         HomeInfo(
             "创建Adapter",

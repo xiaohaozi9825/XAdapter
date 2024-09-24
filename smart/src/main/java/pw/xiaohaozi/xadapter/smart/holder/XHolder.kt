@@ -12,5 +12,5 @@ import androidx.viewbinding.ViewBinding
  * github：https://github.com/xiaohaozi9825
  * 创建时间：2022/8/10 20:09
  */
-open class SmartHolder<VB : ViewBinding>(val binding: VB) : RecyclerView.ViewHolder(binding.root)
+open class XHolder<VB : ViewBinding>(val binding: VB) : RecyclerView.ViewHolder(binding.root)
 

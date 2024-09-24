@@ -5,7 +5,7 @@ import android.widget.CompoundButton
 import android.widget.TextView
 import androidx.annotation.IdRes
 import androidx.viewbinding.ViewBinding
-import pw.xiaohaozi.xadapter.smart.holder.SmartHolder
+import pw.xiaohaozi.xadapter.smart.holder.XHolder
 
 /**
  * 事件监听接口
@@ -18,13 +18,13 @@ import pw.xiaohaozi.xadapter.smart.holder.SmartHolder
 interface EventProxy<Employer : XProxy<Employer>,  VB : ViewBinding, D> :
     XProxy<Employer> {
     val clickListenerMap:
-            HashMap<Int?, Employer.(holder: SmartHolder<VB>, data: D, position: Int, view: View) -> Unit>
+            HashMap<Int?, Employer.(holder: XHolder<VB>, data: D, position: Int, view: View) -> Unit>
     val longClickListenerMap:
-            HashMap<Int?, Employer.(holder: SmartHolder<VB>, data: D, position: Int, view: View) -> Boolean>
+            HashMap<Int?, Employer.(holder: XHolder<VB>, data: D, position: Int, view: View) -> Boolean>
     val checkedChangeListener:
-            HashMap<Int?, Employer.(holder: SmartHolder<VB>, data: D, position: Int, view: CompoundButton, isCheck: Boolean) -> Unit>
+            HashMap<Int?, Employer.(holder: XHolder<VB>, data: D, position: Int, view: CompoundButton, isCheck: Boolean) -> Unit>
     val textChangeMap:
-            HashMap<Int?, Employer.(holder: SmartHolder<VB>, data: D, position: Int, view: TextView, text: CharSequence?) -> Unit>
+            HashMap<Int?, Employer.(holder: XHolder<VB>, data: D, position: Int, view: TextView, text: CharSequence?) -> Unit>
 
     /**
      * 设置点击事件
@@ -33,7 +33,7 @@ interface EventProxy<Employer : XProxy<Employer>,  VB : ViewBinding, D> :
      */
     fun setOnClickListener(
         @IdRes id: Int? = null,
-        listener: Employer.(holder: SmartHolder<VB>, data: D, position: Int, view: View) -> Unit
+        listener: Employer.(holder: XHolder<VB>, data: D, position: Int, view: View) -> Unit
     ): Employer
 
     /**
@@ -43,17 +43,17 @@ interface EventProxy<Employer : XProxy<Employer>,  VB : ViewBinding, D> :
      */
     fun setOnLongClickListener(
         @IdRes id: Int? = null,
-        listener: Employer.(holder: SmartHolder<VB>, data: D, position: Int, view: View) -> Boolean
+        listener: Employer.(holder: XHolder<VB>, data: D, position: Int, view: View) -> Boolean
     ): Employer
 
     fun setOnCheckedChangeListener(
         id: Int? = null,
-        listener: Employer.(holder: SmartHolder<VB>, data: D, position: Int, view: CompoundButton, isCheck: Boolean) -> Unit
+        listener: Employer.(holder: XHolder<VB>, data: D, position: Int, view: CompoundButton, isCheck: Boolean) -> Unit
     ): Employer
 
     fun setOnTextChange(
         id: Int? = null,
-        listener: Employer.(holder: SmartHolder<VB>, data: D, position: Int, view: TextView, text: CharSequence?) -> Unit
+        listener: Employer.(holder: XHolder<VB>, data: D, position: Int, view: TextView, text: CharSequence?) -> Unit
     ): Employer
 
 }

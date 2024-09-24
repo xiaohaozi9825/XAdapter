@@ -4,8 +4,8 @@ import android.os.Build
 import android.view.View
 import androidx.viewbinding.ViewBinding
 import pw.xiaohaozi.smartadapter.utils.SelectedList
-import pw.xiaohaozi.xadapter.smart.adapter.SmartAdapter
-import pw.xiaohaozi.xadapter.smart.holder.SmartHolder
+import pw.xiaohaozi.xadapter.smart.adapter.XAdapter
+import pw.xiaohaozi.xadapter.smart.holder.XHolder
 import pw.xiaohaozi.xadapter.smart.provider.TypeProvider
 import pw.xiaohaozi.xadapter.smart.proxy.ObservableList
 import pw.xiaohaozi.xadapter.smart.proxy.SelectedProxy
@@ -25,7 +25,7 @@ open class AdapterSelectedImpl<Employer : XProxy<Employer>, VB : ViewBinding, D>
     override lateinit var employer: Employer
 
 
-    private val adapter: SmartAdapter<*, *> by lazy {
+    private val adapter: XAdapter<*, *> by lazy {
         when (val e = employer) {
             is XEmployer -> e.getEmployerAdapter()
             else -> throw NullPointerException("找不到对应的Adapter对象")
@@ -38,7 +38,7 @@ open class AdapterSelectedImpl<Employer : XProxy<Employer>, VB : ViewBinding, D>
     override var selectedAllChanges: (Employer.(isSelectAll: Boolean) -> Unit)? = null
     override var selectedIndexChange: (Employer.(data: D, position: Int, index: Int) -> Unit)? =
         null
-    override var selectedListener: Pair<Int?, Employer.(holder: SmartHolder<VB>?, data: D, position: Int, index: Int, view: View?) -> Unit>? =
+    override var selectedListener: Pair<Int?, Employer.(holder: XHolder<VB>?, data: D, position: Int, index: Int, view: View?) -> Unit>? =
         null
     override var borderCall: (Employer.(count: Int) -> Unit)? = null
     override var MAX_CHECK_COUNT: Int? = null
@@ -98,13 +98,13 @@ open class AdapterSelectedImpl<Employer : XProxy<Employer>, VB : ViewBinding, D>
 
     override fun initProxy(employer: Employer) {
         super.initProxy(employer)
-        adapter.addOnViewHolderChanges(object : SmartAdapter.OnViewHolderChanges {
-            override fun onCreated(provide: TypeProvider<*, *>, holder: SmartHolder<*>) {
+        adapter.addOnViewHolderChanges(object : XAdapter.OnViewHolderChanges {
+            override fun onCreated(provide: TypeProvider<*, *>, holder: XHolder<*>) {
 //                if (provide != employer) return
                 initListener(holder)
             }
 
-            override fun onBinding(holder: SmartHolder<*>, position: Int) {
+            override fun onBinding(holder: XHolder<*>, position: Int) {
 
             }
 
@@ -123,13 +123,13 @@ open class AdapterSelectedImpl<Employer : XProxy<Employer>, VB : ViewBinding, D>
     /*******************************************  核心方法  ******************************************************/
     override fun setOnSelectedListener(
         id: Int?,
-        listener: Employer.(holder: SmartHolder<VB>?, data: D, position: Int, index: Int, view: View?) -> Unit
+        listener: Employer.(holder: XHolder<VB>?, data: D, position: Int, index: Int, view: View?) -> Unit
     ): Employer {
         selectedListener = Pair(id, listener)
         return employer
     }
 
-    private fun initListener(holder: SmartHolder<*>) {
+    private fun initListener(holder: XHolder<*>) {
         val selectedListener = this.selectedListener ?: return
         val viewId = selectedListener.first
         val tagger: View = viewId?.let { holder.itemView.findViewById(it) } ?: holder.itemView
@@ -139,7 +139,7 @@ open class AdapterSelectedImpl<Employer : XProxy<Employer>, VB : ViewBinding, D>
             val isCheck = isSelected(data)
             //如果不允许点击item取消选中状态,则不执行取消操作
             if (!isAllowCancel && isCheck) return@setOnClickListener
-            clickCheck(holder as? SmartHolder<VB>, !isCheck, position, it)
+            clickCheck(holder as? XHolder<VB>, !isCheck, position, it)
         }
     }
 
@@ -230,7 +230,7 @@ open class AdapterSelectedImpl<Employer : XProxy<Employer>, VB : ViewBinding, D>
     //取消选中
     protected open fun cancelCheck(
         data: D,
-        holder: SmartHolder<VB>?,
+        holder: XHolder<VB>?,
         view: View?
     ) {
         //必须在删除前拿到被删除item索引
@@ -258,7 +258,7 @@ open class AdapterSelectedImpl<Employer : XProxy<Employer>, VB : ViewBinding, D>
     //设置为选中
     protected open fun setCheck(
         data: D,
-        holder: SmartHolder<VB>?,
+        holder: XHolder<VB>?,
         view: View?
     ) {
         //当超出最大可选数时，如果设置了越界监听，则不在执行后续操作，否则删除第一个元素后继续追加
@@ -287,7 +287,7 @@ open class AdapterSelectedImpl<Employer : XProxy<Employer>, VB : ViewBinding, D>
 
     //点击事件触发选中或取消
     protected open fun clickCheck(
-        holder: SmartHolder<VB>?,
+        holder: XHolder<VB>?,
         isCheck: Boolean,
         position: Int,
         view: View?
@@ -302,7 +302,7 @@ open class AdapterSelectedImpl<Employer : XProxy<Employer>, VB : ViewBinding, D>
 
     //通知更新选中状态改变
     protected open fun notifyCheckChanges(
-        holder: SmartHolder<VB>?,
+        holder: XHolder<VB>?,
         data: D,
         position: Int,
         index: Int,

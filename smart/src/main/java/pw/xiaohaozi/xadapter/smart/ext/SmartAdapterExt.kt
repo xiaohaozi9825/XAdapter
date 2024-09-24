@@ -1,9 +1,9 @@
 package pw.xiaohaozi.xadapter.smart.ext
 
 import androidx.viewbinding.ViewBinding
-import pw.xiaohaozi.xadapter.smart.adapter.XAdapter
-import pw.xiaohaozi.xadapter.smart.holder.SmartHolder
-import pw.xiaohaozi.xadapter.smart.provider.XProvider
+import pw.xiaohaozi.xadapter.smart.adapter.SmartAdapter
+import pw.xiaohaozi.xadapter.smart.holder.XHolder
+import pw.xiaohaozi.xadapter.smart.provider.SmartProvider
 
 
 /*****************************************************
@@ -14,22 +14,22 @@ import pw.xiaohaozi.xadapter.smart.provider.XProvider
  * 创建单布局Adapter
  */
 inline fun <VB : ViewBinding, D> createAdapter(
-    crossinline init: (XAdapter<VB, D>.(holder: SmartHolder<VB>) -> Unit) = {},
-    crossinline bind: XAdapter<VB, D>.(holder: SmartHolder<VB>, data: D, position: Int) -> Unit,
-): XAdapter<VB, D> {
-    val xAdapter = XAdapter<VB, D>()
-    val provider = object : XProvider<VB, D>(xAdapter) {
+    crossinline init: (SmartAdapter<VB, D>.(holder: XHolder<VB>) -> Unit) = {},
+    crossinline bind: SmartAdapter<VB, D>.(holder: XHolder<VB>, data: D, position: Int) -> Unit,
+): SmartAdapter<VB, D> {
+    val SmartAdapter = SmartAdapter<VB, D>()
+    val provider = object : SmartProvider<VB, D>(SmartAdapter) {
 
-        override fun onCreated(holder: SmartHolder<VB>) {
-            init.invoke(xAdapter, holder)
+        override fun onCreated(holder: XHolder<VB>) {
+            init.invoke(SmartAdapter, holder)
         }
 
-        override fun onBind(holder: SmartHolder<VB>, data: D, position: Int) {
-            bind.invoke(xAdapter, holder, data, position)
+        override fun onBind(holder: XHolder<VB>, data: D, position: Int) {
+            bind.invoke(SmartAdapter, holder, data, position)
         }
     }
-    xAdapter.addProvider(provider, 0)
-    return xAdapter
+    SmartAdapter.addProvider(provider, 0)
+    return SmartAdapter
 }
 
 /**
@@ -38,33 +38,33 @@ inline fun <VB : ViewBinding, D> createAdapter(
  *
  * @param custom 动态生成 itemType
  */
-fun createAdapter(custom: (XAdapter<ViewBinding, Any?>.(data: Any?, position: Int) -> Int?)? = null): XAdapter<ViewBinding, Any?> {
-    val xAdapter = XAdapter<ViewBinding, Any?>()
+fun createAdapter(custom: (SmartAdapter<ViewBinding, Any?>.(data: Any?, position: Int) -> Int?)? = null): SmartAdapter<ViewBinding, Any?> {
+    val SmartAdapter = SmartAdapter<ViewBinding, Any?>()
     if (custom != null) {
-        xAdapter.customItemType { data, position ->
-            return@customItemType custom.invoke(xAdapter, data, position)
+        SmartAdapter.customItemType { data, position ->
+            return@customItemType custom.invoke(SmartAdapter, data, position)
         }
     }
-    return xAdapter
+    return SmartAdapter
 }
 
 /**
  * 多布局切换
  * 返回Provider
  */
-inline fun <VB : ViewBinding, D : Any?> XAdapter<ViewBinding, Any?>.withType(
+inline fun <VB : ViewBinding, D : Any?> SmartAdapter<ViewBinding, Any?>.withType(
     isFixed: Boolean? = null,
     itemType: Int? = null,
-    crossinline init: (XProvider<VB, D>.(holder: SmartHolder<VB>) -> Unit) = {},
-    crossinline bind: XProvider<VB, D>.(holder: SmartHolder<VB>, data: D, position: Int) -> Unit,
-): XProvider<VB, D> {
-    val provider = object : XProvider<VB, D>(this) {
+    crossinline init: (SmartProvider<VB, D>.(holder: XHolder<VB>) -> Unit) = {},
+    crossinline bind: SmartProvider<VB, D>.(holder: XHolder<VB>, data: D, position: Int) -> Unit,
+): SmartProvider<VB, D> {
+    val provider = object : SmartProvider<VB, D>(this) {
 
-        override fun onCreated(holder: SmartHolder<VB>) {
+        override fun onCreated(holder: XHolder<VB>) {
             init.invoke(this, holder)
         }
 
-        override fun onBind(holder: SmartHolder<VB>, data: D, position: Int) {
+        override fun onBind(holder: XHolder<VB>, data: D, position: Int) {
             bind.invoke(this, holder, data, position)
         }
 
@@ -80,19 +80,19 @@ inline fun <VB : ViewBinding, D : Any?> XAdapter<ViewBinding, Any?>.withType(
  * 多布局切换
  * 返回Provider
  */
-inline fun <reified VB : ViewBinding, D : Any?> XProvider<out ViewBinding, out Any?>.withType(
+inline fun <reified VB : ViewBinding, D : Any?> SmartProvider<out ViewBinding, out Any?>.withType(
     isFixed: Boolean? = null,
     itemType: Int? = null,
-    crossinline init: XProvider<VB, D>.(holder: SmartHolder<VB>) -> Unit = {},
-    crossinline bind: XProvider<VB, D>.(holder: SmartHolder<VB>, data: D, position: Int) -> Unit,
-): XProvider<VB, D> {
-    val provider = object : XProvider<VB, D>(adapter) {
+    crossinline init: SmartProvider<VB, D>.(holder: XHolder<VB>) -> Unit = {},
+    crossinline bind: SmartProvider<VB, D>.(holder: XHolder<VB>, data: D, position: Int) -> Unit,
+): SmartProvider<VB, D> {
+    val provider = object : SmartProvider<VB, D>(adapter) {
 
-        override fun onCreated(holder: SmartHolder<VB>) {
+        override fun onCreated(holder: XHolder<VB>) {
             init.invoke(this, holder)
         }
 
-        override fun onBind(holder: SmartHolder<VB>, data: D, position: Int) {
+        override fun onBind(holder: XHolder<VB>, data: D, position: Int) {
             bind.invoke(this, holder, data, position)
         }
 
@@ -107,8 +107,8 @@ inline fun <reified VB : ViewBinding, D : Any?> XProvider<out ViewBinding, out A
 /**
  * Provider切换为Adapter
  */
-fun <VB : ViewBinding, D> XProvider<VB, D>.toAdapter(): XAdapter<ViewBinding, Any?> {
-    return this.adapter as XAdapter<ViewBinding, Any?>
+fun <VB : ViewBinding, D> SmartProvider<VB, D>.toAdapter(): SmartAdapter<ViewBinding, Any?> {
+    return this.adapter as SmartAdapter<ViewBinding, Any?>
 }
 
 

@@ -11,10 +11,10 @@ import pw.xiaohaozi.xadapter.databinding.ItemVerseBinding
 
 import pw.xiaohaozi.xadapter.databinding.ItemVerseDataBindingBinding
 import pw.xiaohaozi.xadapter.info.VerseInfo
-import pw.xiaohaozi.xadapter.smart.adapter.XAdapter
+import pw.xiaohaozi.xadapter.smart.adapter.SmartAdapter
 import pw.xiaohaozi.xadapter.smart.ext.createAdapter
-import pw.xiaohaozi.xadapter.smart.holder.SmartHolder
-import pw.xiaohaozi.xadapter.smart.provider.XProvider
+import pw.xiaohaozi.xadapter.smart.holder.XHolder
+import pw.xiaohaozi.xadapter.smart.provider.SmartProvider
 
 /**
  * 单布局
@@ -40,7 +40,7 @@ class SingleFragment : Fragment() {
      * 方法1
      * 使用XAdapter拓展方法创建
      */
-    private fun function1(): XAdapter<ItemVerseBinding, VerseInfo> {
+    private fun function1(): SmartAdapter<ItemVerseBinding, VerseInfo> {
         //泛型VB 确定布局文件，泛型D确定数据类型，回调函数中绑定数据
         return createAdapter<ItemVerseBinding, VerseInfo> { holder, data, position ->
             holder.binding.tvContent.text = data.content
@@ -60,17 +60,17 @@ class SingleFragment : Fragment() {
      * 如果逻辑较为简单，推荐使用方法1；
      * 如果逻辑复杂，推荐使用方法2.
      */
-    private fun function2(): XAdapter<ItemVerseBinding, VerseInfo> {
+    private fun function2(): SmartAdapter<ItemVerseBinding, VerseInfo> {
         //①创建Adapter
-        val xAdapter = XAdapter<ItemVerseBinding, VerseInfo>()
+        val SmartAdapter = SmartAdapter<ItemVerseBinding, VerseInfo>()
         //②创建Provider
-        val provider = object : XProvider<ItemVerseBinding, VerseInfo>(xAdapter) {
-            override fun onCreated(holder: SmartHolder<ItemVerseBinding>) {
+        val provider = object : SmartProvider<ItemVerseBinding, VerseInfo>(SmartAdapter) {
+            override fun onCreated(holder: XHolder<ItemVerseBinding>) {
 
             }
 
             override fun onBind(
-                holder: SmartHolder<ItemVerseBinding>,
+                holder: XHolder<ItemVerseBinding>,
                 data: VerseInfo,
                 position: Int
             ) {
@@ -81,8 +81,8 @@ class SingleFragment : Fragment() {
         }
         //③将Provider 添加到 Adapter中
         //方式一：使用方法添加，viewType可不填
-        xAdapter.addProvider(provider, 0)
-        return xAdapter
+        SmartAdapter.addProvider(provider, 0)
+        return SmartAdapter
         //方式一二：使用➕链接，viewType为空
 //        return xAdapter + provider
 
@@ -102,7 +102,7 @@ class SingleFragment : Fragment() {
      * }
      * ```
      */
-    private fun function3(): XAdapter<ItemVerseDataBindingBinding, VerseInfo> {
+    private fun function3(): SmartAdapter<ItemVerseDataBindingBinding, VerseInfo> {
         //一行代码实现Adapter的创建和数据绑定
         return createAdapter { holder, data, _ -> holder.binding.data = data }
     }
