@@ -11,8 +11,11 @@ import pw.xiaohaozi.xadapter.databinding.ItemHomeBinding
 import pw.xiaohaozi.xadapter.databinding.ItemHomeTitleBinding
 import pw.xiaohaozi.xadapter.databinding.ItemImageCardBinding
 import pw.xiaohaozi.xadapter.enableEdgeToEdge
+import pw.xiaohaozi.xadapter.fragment.EventFragment
 import pw.xiaohaozi.xadapter.fragment.MultipleFragment
+import pw.xiaohaozi.xadapter.fragment.SelectFragment
 import pw.xiaohaozi.xadapter.fragment.SingleFragment
+import pw.xiaohaozi.xadapter.fragment.SpecialLayoutFragment
 import pw.xiaohaozi.xadapter.smart.ext.createAdapter
 import pw.xiaohaozi.xadapter.info.HomeInfo
 import pw.xiaohaozi.xadapter.info.VerseInfo
@@ -58,31 +61,33 @@ class MainActivity : AppCompatActivity() {
 
     private val list = arrayListOf(
         R.mipmap.home_top,
-        "单布局",
+        "Adapter创建",
         HomeInfo(
-            "创建Adapter",
+            "创建单布局Adapter",
             "提供多种创建Adapter的方式",
             R.mipmap.ic_launcher,
             SingleFragment::class.java
         ),
         HomeInfo(
-            "选择事件",
-            "封装了item选择事件，可实现单选、多选、全选、全不选等",
-            R.mipmap.ic_launcher,
-
-            ),
-        HomeInfo(
-            "事件监听",
-            "封装了多种事件监听，如点击、长按、文本改变、选中状态、开关等",
-            R.mipmap.ic_launcher
+            "创建多布局Adapter", "快速创建Adapter", R.mipmap.ic_launcher, MultipleFragment::class.java
         ),
-        "多布局",
+        "Adapter使用",
         HomeInfo(
-            "创建Adapter", "快速创建Adapter", R.mipmap.ic_launcher, MultipleFragment::class.java
+            "item选择", "快速创建Adapter", R.mipmap.ic_launcher,
+            SelectFragment::class.java
         ),
-        HomeInfo("点击事件", "快速创建Adapter", R.mipmap.ic_launcher),
-        HomeInfo("选择事件", "快速创建Adapter", R.mipmap.ic_launcher),
-        HomeInfo("事件监听", "快速创建Adapter", R.mipmap.ic_launcher),
+        HomeInfo(
+            "事件监听", "快速创建Adapter", R.mipmap.ic_launcher,
+            EventFragment::class.java
+        ),
+        HomeInfo(
+            "特殊布局", "头布局、脚布局、空布局、错误布局、分组布局", R.mipmap.ic_launcher,
+            SpecialLayoutFragment::class.java
+        ),
+        HomeInfo(
+            "数据操作", "数据增删改查", R.mipmap.ic_launcher,
+            SpecialLayoutFragment::class.java
+        ),
     )
 
 }
