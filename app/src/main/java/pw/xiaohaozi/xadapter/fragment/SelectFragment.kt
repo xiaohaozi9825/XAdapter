@@ -92,7 +92,7 @@ class SelectFragment : Fragment() {
 
             }.setOnClickListener { holder, data, position, view ->
                 Toast.makeText(requireContext(), "点击拍照", Toast.LENGTH_SHORT).show()
-                getSmartAdapter().removeAt(1)
+//                getSmartAdapter().removeAt(1)
 //                getSmartAdapter().add(1, R.mipmap.home_top)
             }
             .withType<ItemImageSelectedBinding, Int>(select = true) { holder, data, position ->

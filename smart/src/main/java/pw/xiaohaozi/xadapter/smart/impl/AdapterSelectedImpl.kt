@@ -55,6 +55,7 @@ open class AdapterSelectedImpl<Employer : XProxy<Employer>, VB : ViewBinding, D>
     //当前状态是否为全选
     private var curSelectedAllStatus = false
 
+    //参与选择操作的Providers对应的itemType
     private val selectItemTypes by lazy {
         val temp = mutableListOf<Int>()
         adapter.providers.forEach { key, value ->
@@ -126,7 +127,6 @@ open class AdapterSelectedImpl<Employer : XProxy<Employer>, VB : ViewBinding, D>
 
         adapter.addOnViewHolderChanges(object : XAdapter.OnViewHolderChanges {
             override fun onCreated(provide: TypeProvider<*, *>, holder: XHolder<*>) {
-//                if (provide != employer) return
                 initListener(holder)
             }
 
@@ -156,15 +156,6 @@ open class AdapterSelectedImpl<Employer : XProxy<Employer>, VB : ViewBinding, D>
         dataImpl.removeOnListChangedCallback(onListChangedCallback)
     }
 
-    /*******************************************  核心方法  ******************************************************/
-    override fun setOnItemSelectListener(
-        id: Int?,
-        listener: OnItemSelectListener<Employer, VB, D>
-    ): Employer {
-        itemSelectListener = Pair(id, listener)
-        return employer
-    }
-
     private fun initListener(holder: XHolder<*>) {
         val selectedListener = this.itemSelectListener ?: return
         val viewId = selectedListener.first
@@ -177,6 +168,14 @@ open class AdapterSelectedImpl<Employer : XProxy<Employer>, VB : ViewBinding, D>
             if (!isAllowCancel && isCheck) return@setOnClickListener
             clickCheck(holder as? XHolder<VB>, !isCheck, position)
         }
+    }
+    /*******************************************  核心方法  ******************************************************/
+    override fun setOnItemSelectListener(
+        id: Int?,
+        listener: OnItemSelectListener<Employer, VB, D>
+    ): Employer {
+        itemSelectListener = Pair(id, listener)
+        return employer
     }
 
     override fun setOnSelectAllListener(listener: OnSelectAllListener<Employer>): Employer {
