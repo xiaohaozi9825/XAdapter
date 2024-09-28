@@ -34,7 +34,6 @@ open class XAdapter<VB : ViewBinding, D> : Adapter<XHolder<VB>>() {
     val providers: SparseArray<TypeProvider<*, *>> by lazy { SparseArray() }
     private var itemTypeCallback: (XAdapter<VB, D>.(data: D, position: Int) -> Int?)? = null
 
-    private val visibleHolderPositions = LinkedList<XHolder<VB>>()
     private val onViewHolderChanges: ArrayList<OnViewHolderChanges> = arrayListOf()
     private val onRecyclerViewChanges: ArrayList<OnRecyclerViewChanges> = arrayListOf()
     private val onViewChanges: ArrayList<OnViewChanges<VB>> = arrayListOf()
@@ -163,24 +162,9 @@ open class XAdapter<VB : ViewBinding, D> : Adapter<XHolder<VB>>() {
      * 处于效率考虑，该方法只刷新可见的item
      */
     fun notifyAllItemChanged(payload: Any? = null) {
-        val start = visibleHolderPositions.minOf { it.adapterPosition }
-        notifyItemRangeChanged(start, visibleHolderPositions.size, payload)
+        notifyItemRangeChanged(0, itemCount,payload)
     }
-    /**
-     * 更新所有item
-     * 使用notifyDataSetChanged()方法刷新列表，会将所有数据重新绑定一次，这样会出现闪烁。
-     * 如果不需要重新绑定数据，可以使用该方法，但是可能存在性能问题
-     */
-    fun notifyAllItemChanged() {
-        val size: Int = datas.size
-        for (i in 0 until size) {
-            notifyItemChanged(i)
-        }
-    }
-    /**
-     * 获取可见的所有Holder
-     */
-    fun getVisibleHolderPositionList() = visibleHolderPositions
+
 
     //自动生成itemType
     private fun automaticallyItemType(provider: TypeProvider<*, *>): Int {
@@ -234,14 +218,12 @@ open class XAdapter<VB : ViewBinding, D> : Adapter<XHolder<VB>>() {
 
     override fun onViewAttachedToWindow(holder: XHolder<VB>) {
         Log.i(TAG, "onViewAttachedToWindow: ")
-        visibleHolderPositions.add(holder)
         onViewChanges.tryNotify { onViewAttachedToWindow(holder) }
         tryNotifyProvider { onHolderAttachedToWindow(holder) }
     }
 
     override fun onViewDetachedFromWindow(holder: XHolder<VB>) {
         Log.i(TAG, "onViewDetachedFromWindow: ")
-        visibleHolderPositions.remove(holder)
         onViewChanges.tryNotify { onViewDetachedFromWindow(holder) }
         tryNotifyProvider { onHolderDetachedFromWindow(holder) }
     }

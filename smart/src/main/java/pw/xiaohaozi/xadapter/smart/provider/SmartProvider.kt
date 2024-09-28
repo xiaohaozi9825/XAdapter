@@ -1,9 +1,9 @@
 package pw.xiaohaozi.xadapter.smart.provider
 
 import androidx.viewbinding.ViewBinding
+import pw.xiaohaozi.xadapter.smart.adapter.SmartAdapter
 import pw.xiaohaozi.xadapter.smart.adapter.XAdapter
 import pw.xiaohaozi.xadapter.smart.impl.EventImpl
-import pw.xiaohaozi.xadapter.smart.impl.SmartProviderSelectedImpl
 import pw.xiaohaozi.xadapter.smart.proxy.EventProxy
 import pw.xiaohaozi.xadapter.smart.proxy.SelectedProxy
 
@@ -16,15 +16,14 @@ import pw.xiaohaozi.xadapter.smart.proxy.SelectedProxy
  * 创建时间：2024/6/9 22:08
  */
 abstract class SmartProvider<VB : ViewBinding, D>(
-    override val adapter: XAdapter<*, *>, //
+    override val adapter: SmartAdapter<*, *>, //
+    var select: Boolean = false,
     private val listener: EventImpl<SmartProvider<VB, D>, VB, D> = EventImpl(),//
-    private val selected: SmartProviderSelectedImpl<SmartProvider<VB, D>, VB, D> = SmartProviderSelectedImpl()//
-) : XProvider<VB, D>(adapter), EventProxy<SmartProvider<VB, D>, VB, D> by listener,//
-    SelectedProxy<SmartProvider<VB, D>, VB, D> by selected //
-{
+) : XProvider<VB, D>(adapter), EventProxy<SmartProvider<VB, D>, VB, D> by listener {
     init {
         initProxy()
     }
+
 
     override var employer: SmartProvider<VB, D>
         get() = this
@@ -32,7 +31,6 @@ abstract class SmartProvider<VB : ViewBinding, D>(
 
     override fun initProxy(employer: SmartProvider<VB, D>) {
         listener.initProxy(employer)
-        selected.initProxy(employer)
     }
 
     private fun initProxy() {
@@ -41,5 +39,9 @@ abstract class SmartProvider<VB : ViewBinding, D>(
 
     override fun isFixedViewType() = false
 
+
+    fun getSmartAdapter(): SmartAdapter<ViewBinding, Any?> {
+        return adapter as SmartAdapter<ViewBinding, Any?>
+    }
 
 }

@@ -17,7 +17,7 @@ import kotlin.coroutines.CoroutineContext
 
 /**
  * Adapter集
- * 描述：包含了SmartAdapter基础功能，数据操作功能，选择功能，事件监听功能
+ * 描述：包含了XAdapter基础功能，数据操作功能，选择功能，事件监听功能
  * 作者：小耗子
  * 简书地址：https://www.jianshu.com/u/2a2ea7b43087
  * github：https://github.com/xiaohaozi9825
