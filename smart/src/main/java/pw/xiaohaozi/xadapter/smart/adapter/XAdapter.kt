@@ -37,8 +37,7 @@ open class XAdapter<VB : ViewBinding, D> : Adapter<XHolder<VB>>() {
     private val onViewHolderChanges: ArrayList<OnViewHolderChanges> = arrayListOf()
     private val onRecyclerViewChanges: ArrayList<OnRecyclerViewChanges> = arrayListOf()
     private val onViewChanges: ArrayList<OnViewChanges<VB>> = arrayListOf()
-    private val onRecyclerViewAttachStateChanges: ArrayList<OnRecyclerViewAttachStateChanges> =
-        arrayListOf()
+    private val onRecyclerViewAttachStateChanges: ArrayList<OnRecyclerViewAttachStateChanges> =        arrayListOf()
     private val rvOnAttachStateChangeListener = RVOnAttachStateChangeListener()
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): XHolder<VB> {
