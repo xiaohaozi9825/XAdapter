@@ -36,7 +36,7 @@ interface SelectedProxy<Employer : XProxy<Employer>, VB : ViewBinding, D> :
     var itemSelectStatusChanges: OnItemSelectStatusChanges<Employer, D>?
 
     //选中事件，一个item只能一个view响应选中事件
-    var itemSelectListener: Pair<Int?, OnItemSelectListener<Employer, VB, D>>?
+    var itemSelectListener: Triple<Int?, String?,OnItemSelectListener<Employer, VB, D>>?
 
     //最大可选数
     var maxSelectCount: Int?
@@ -54,6 +54,7 @@ interface SelectedProxy<Employer : XProxy<Employer>, VB : ViewBinding, D> :
      */
     fun setOnItemSelectListener(
         id: Int? = null,
+        payload: String? = null,
         listener: OnItemSelectListener<Employer, VB, D>
     ): Employer
 

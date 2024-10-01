@@ -27,13 +27,13 @@ class MainActivity : AppCompatActivity() {
     private val binding by lazy { ActivityMainBinding.inflate(layoutInflater) }
 
     private val adapter = createAdapter()
-        .withType<ItemImageCardBinding, Int>(isFixed = true) { holder, data, position ->
+        .withType<ItemImageCardBinding, Int>(isFixed = true) { (holder, data) ->
             holder.binding.image.setImageResource(data)
         }
-        .withType<ItemHomeTitleBinding, String>(isFixed = true) { holder, data, position ->
+        .withType<ItemHomeTitleBinding, String>(isFixed = true) { (holder, data) ->
             holder.binding.tvTitle.text = data
         }
-        .withType<ItemHomeBinding, HomeInfo> { holder, data, position ->
+        .withType<ItemHomeBinding, HomeInfo> { (holder, data) ->
             holder.binding.data = data
         }
         .setOnClickListener { holder, data, position, view ->

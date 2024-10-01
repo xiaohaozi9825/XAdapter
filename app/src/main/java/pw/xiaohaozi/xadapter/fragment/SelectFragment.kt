@@ -53,7 +53,7 @@ class SelectFragment : Fragment() {
     @SuppressLint("SetTextI18n")
     private fun function1(): SmartAdapter<ItemImageSelectedBinding, Int> {
         //泛型VB 确定布局文件，泛型D确定数据类型，回调函数中绑定数据
-        return createAdapter<ItemImageSelectedBinding, Int> { holder, data, position ->
+        return createAdapter<ItemImageSelectedBinding, Int> { (holder, data) ->
             holder.binding.ivImage.load(data)
             val index = this.getSelectedIndex(data)
             if (index < 0) {
@@ -78,7 +78,7 @@ class SelectFragment : Fragment() {
     private fun function2(): SmartAdapter<ViewBinding, Any?> {
         //泛型VB 确定布局文件，泛型D确定数据类型，回调函数中绑定数据
         val adapter = createAdapter()
-            .setOnItemSelectListener { holder, data, position, index, fromUser ->
+            .setOnItemSelectListener(payload = "select") { holder, data, position, index, fromUser ->
                 binding.tvSelectedCount.text = "已选${getSelectedDatas().size}张"
             }.setOnItemSelectStatusChanges { data, position, index ->
                 Log.i(TAG, "setOnItemSelectedStatesChanges: $position -- $index")
@@ -88,15 +88,29 @@ class SelectFragment : Fragment() {
 //            .setMaxSelectCount(9)
 //            .isAutoCancel(false)
 //            .isAllowCancel(false)
-            .withType<ItemCameraBinding, Any?> { holder, data, position ->
+            .withType<ItemCameraBinding, Any?> {
 
             }.setOnClickListener { holder, data, position, view ->
                 Toast.makeText(requireContext(), "点击拍照", Toast.LENGTH_SHORT).show()
-//                getSmartAdapter().removeAt(1)
-//                getSmartAdapter().add(1, R.mipmap.home_top)
             }
-            .withType<ItemImageSelectedBinding, Int>(select = true) { holder, data, position ->
-                holder.binding.ivImage.load(data)
+//            .withType<ItemImageSelectedBinding, Int>(select = true) { holder, data, position, payloads ->
+//                if (!payloads.contains("select")) {
+//                    holder.binding.ivImage.load(data)
+//                }
+//                val index = this.adapter.getSelectedIndexAt(position)
+//                if (index < 0) {
+//                    holder.binding.tvSelectedIndex.text = ""
+//                    holder.binding.tvSelectedIndex.setBackgroundResource(R.drawable.bg_not_selected)
+//                } else {
+//                    holder.binding.tvSelectedIndex.text = "${index + 1}"
+//                    holder.binding.tvSelectedIndex.setBackgroundResource(R.drawable.bg_selected_position)
+//                }
+//
+//            }
+            .withType<ItemImageSelectedBinding, Int>(select = true) { (holder, data, position, payloads) ->
+                if (!payloads.contains("select")) {
+                    holder.binding.ivImage.load(data)
+                }
                 val index = this.adapter.getSelectedIndexAt(position)
                 if (index < 0) {
                     holder.binding.tvSelectedIndex.text = ""
@@ -105,8 +119,8 @@ class SelectFragment : Fragment() {
                     holder.binding.tvSelectedIndex.text = "${index + 1}"
                     holder.binding.tvSelectedIndex.setBackgroundResource(R.drawable.bg_selected_position)
                 }
-
-            }.toAdapter()
+            }
+            .toAdapter()
         return adapter
     }
 

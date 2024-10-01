@@ -11,9 +11,17 @@ import pw.xiaohaozi.xadapter.smart.provider.SmartProvider
  *****************************************************/
 typealias OnAdapterInitHolder<VB, D> = SmartAdapter<VB, D>.(holder: XHolder<VB>) -> Unit
 typealias OnProviderInitHolder<VB, D> = SmartProvider<VB, D>.(holder: XHolder<VB>) -> Unit
-typealias OnAdapterBindHolder<VB, D> = SmartAdapter<VB, D>.(holder: XHolder<VB>, data: D, position: Int) -> Unit
-typealias OnProviderBindHolder<VB, D> = SmartProvider<VB, D>.(holder: XHolder<VB>, data: D, position: Int) -> Unit
+typealias OnAdapterBindHolder<VB, D> = SmartAdapter<VB, D>.(params: OnBindParams<VB,D>) -> Unit
+typealias OnProviderBindHolder<VB, D> = SmartProvider<VB, D>.(params: OnBindParams<VB,D>) -> Unit
 typealias OnCustomType = (SmartAdapter<ViewBinding, Any?>.(data: Any?, position: Int) -> Int?)
+
+data class OnBindParams<VB : ViewBinding, D>(
+    val holder: XHolder<VB>,
+    val data: D,
+    val position: Int,
+    val payloads: List<Any?>
+)
+
 
 /**
  * 创建单布局Adapter
@@ -30,7 +38,10 @@ inline fun <VB : ViewBinding, D> createAdapter(
         }
 
         override fun onBind(holder: XHolder<VB>, data: D, position: Int) {
-            bind.invoke(adapter, holder, data, position)
+        }
+
+        override fun onBind(holder: XHolder<VB>, data: D, position: Int, payloads: List<Any?>) {
+            bind.invoke(adapter, OnBindParams(holder, data, position, payloads))
         }
     }
     adapter.addProvider(provider, 0)
@@ -53,6 +64,8 @@ fun createAdapter(custom: OnCustomType? = null): SmartAdapter<ViewBinding, Any?>
     return adapter
 }
 
+
+
 /**
  * 多布局切换
  * 返回Provider
@@ -71,7 +84,10 @@ inline fun <VB : ViewBinding, D : Any?> SmartAdapter<ViewBinding, Any?>.withType
         }
 
         override fun onBind(holder: XHolder<VB>, data: D, position: Int) {
-            bind.invoke(this, holder, data, position)
+        }
+
+        override fun onBind(holder: XHolder<VB>, data: D, position: Int, payloads: List<Any?>) {
+            bind.invoke(this, OnBindParams(holder, data, position, payloads))
         }
 
         override fun isFixedViewType(): Boolean {
@@ -82,6 +98,8 @@ inline fun <VB : ViewBinding, D : Any?> SmartAdapter<ViewBinding, Any?>.withType
     this.addProvider(provider, itemType)
     return provider
 }
+
+
 
 /**
  * 多布局切换
@@ -101,7 +119,12 @@ inline fun <reified VB : ViewBinding, D : Any?> SmartProvider<out ViewBinding, o
         }
 
         override fun onBind(holder: XHolder<VB>, data: D, position: Int) {
-            bind.invoke(this, holder, data, position)
+
+        }
+
+        override fun onBind(holder: XHolder<VB>, data: D, position: Int, payloads: List<Any?>) {
+            bind.invoke(this,  OnBindParams(holder, data, position, payloads))
+//            bind.invoke(this, OnBind(holder, data, position, payloads))
         }
 
         override fun isFixedViewType(): Boolean {
@@ -111,6 +134,7 @@ inline fun <reified VB : ViewBinding, D : Any?> SmartProvider<out ViewBinding, o
     adapter.addProvider(provider, itemType)
     return provider
 }
+
 
 /**
  * Provider切换为Adapter

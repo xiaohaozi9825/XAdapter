@@ -49,11 +49,11 @@ class MultipleFragment : Fragment() {
     private fun function1(): SmartAdapter<ViewBinding, Any?> {
         //泛型VB 确定布局文件，泛型D确定数据类型，回调函数中绑定数据
         return createAdapter()
-            .withType<ItemVerseBinding, VerseInfo> { holder, data, position ->
+            .withType<ItemVerseBinding, VerseInfo> { (holder, data, position) ->
                 holder.binding.tvContent.text = data.content
                 holder.binding.tvAuthor.text = data.author
             }
-            .withType<ItemImageCardBinding, Int> { holder, data, position ->
+            .withType<ItemImageCardBinding, Int> { (holder, data, position) ->
                 holder.binding.image.setImageResource(data)
             }
             .toAdapter()
@@ -132,10 +132,10 @@ class MultipleFragment : Fragment() {
         return createAdapter { data, position ->
             if (data is Int) return@createAdapter 9
             else null
-        }.withType<ItemVerseBinding, VerseInfo> { holder, data, position ->
+        }.withType<ItemVerseBinding, VerseInfo> { (holder, data, position) ->
             holder.binding.tvContent.text = data.content
             holder.binding.tvAuthor.text = data.author
-        }.withType<ItemImageCardBinding, Int>(itemType = 9) { holder, data, position ->
+        }.withType<ItemImageCardBinding, Int>(itemType = 9) { (holder, data, position)  ->
             holder.binding.image.setImageResource(data)
         }.toAdapter()
 
@@ -144,11 +144,11 @@ class MultipleFragment : Fragment() {
     private fun function4(): SmartAdapter<ViewBinding, Any?> {
         //泛型VB 确定布局文件，泛型D确定数据类型，回调函数中绑定数据
         return createAdapter()
-            .withType<ItemVerseBinding, MultipleVerseInfo>(itemType = 5) { holder, data, position ->
+            .withType<ItemVerseBinding, MultipleVerseInfo>(itemType = 5) { (holder, data, position)  ->
                 holder.binding.tvContent.text = data.verseInfo.content
                 holder.binding.tvAuthor.text = data.verseInfo.author
             }
-            .withType<ItemImageCardBinding, MultipleInt>(itemType = 8) { holder, data, position ->
+            .withType<ItemImageCardBinding, MultipleInt>(itemType = 8) { (holder, data, position)  ->
                 holder.binding.image.setImageResource(data.res)
             }
             .toAdapter()
