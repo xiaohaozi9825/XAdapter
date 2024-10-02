@@ -134,6 +134,10 @@ open class AdapterSelectedImpl<Employer : XProxy<Employer>, VB : ViewBinding, D>
 
             }
 
+            override fun onBinding(holder: XHolder<*>, position: Int, payloads: List<Any?>) {
+
+            }
+
         })
         adapter.addOnRecyclerViewChanges(object : XAdapter.OnRecyclerViewChanges {
             override fun onAttachedToRecyclerView(recyclerView: RecyclerView) {

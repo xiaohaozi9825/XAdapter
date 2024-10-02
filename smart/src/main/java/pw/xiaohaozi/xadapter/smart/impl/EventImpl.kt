@@ -16,6 +16,7 @@ import pw.xiaohaozi.xadapter.smart.proxy.OnItemLongClickListener
 import pw.xiaohaozi.xadapter.smart.proxy.OnItemTextChange
 import pw.xiaohaozi.xadapter.smart.proxy.XEmployer
 import pw.xiaohaozi.xadapter.smart.proxy.XProxy
+import kotlin.math.absoluteValue
 
 
 /**
@@ -55,6 +56,10 @@ class EventImpl<Employer : XProxy<Employer>, VB : ViewBinding, D> : EventProxy<E
 
             }
 
+            override fun onBinding(holder: XHolder<*>, position: Int, payloads: List<Any?>) {
+
+            }
+
         })
     }
 
@@ -64,8 +69,14 @@ class EventImpl<Employer : XProxy<Employer>, VB : ViewBinding, D> : EventProxy<E
             val value = it.value
             val tagger: View = id?.let { holder.itemView.findViewById(it) } ?: holder.itemView
             tagger.setOnClickListener {
-                val position = holder.adapterPosition
-                val data = getDatas()[position]
+                val position = holder.adapterPosition - adapter.getHeaderProviderCount()
+                val data = if (position < 0) {
+                    adapter.headers[holder.adapterPosition].third
+                } else if (position >= getDatas().size) {
+                    adapter.footers[holder.adapterPosition - (adapter.itemCount - adapter.footers.size)].third
+                } else {
+                    getDatas()[position]
+                }
                 value.invoke(employer, holder as XHolder<VB>, data as D, position, it)
             }
         }
@@ -74,8 +85,14 @@ class EventImpl<Employer : XProxy<Employer>, VB : ViewBinding, D> : EventProxy<E
             val value = it.value
             val tagger: View = id?.let { holder.itemView.findViewById(it) } ?: holder.itemView
             tagger.setOnLongClickListener {
-                val position = holder.adapterPosition
-                val data = getDatas()[position]
+                val position = holder.adapterPosition - adapter.getHeaderProviderCount()
+                val data = if (position < 0) {
+                    adapter.headers[holder.adapterPosition].third
+                } else if (position >= getDatas().size) {
+                    adapter.footers[position - getDatas().size].third
+                } else {
+                    getDatas()[position]
+                }
                 value.invoke(employer, holder as XHolder<VB>, data as D, position, it)
             }
         }
@@ -84,8 +101,14 @@ class EventImpl<Employer : XProxy<Employer>, VB : ViewBinding, D> : EventProxy<E
             val value = it.value
             val tagger: CompoundButton? = (id?.let { holder.itemView.findViewById(it) } ?: holder.itemView) as? CompoundButton
             tagger?.setOnCheckedChangeListener { buttonView, isChecked ->
-                val position = holder.adapterPosition
-                val data = getDatas()[position]
+                val position = holder.adapterPosition - adapter.getHeaderProviderCount()
+                val data = if (position < 0) {
+                    adapter.headers[holder.adapterPosition].third
+                } else if (position >= getDatas().size) {
+                    adapter.footers[position - getDatas().size].third
+                } else {
+                    getDatas()[position]
+                }
                 value.invoke(employer, holder as XHolder<VB>, data as D, position, buttonView, isChecked)
             }
         }
@@ -94,8 +117,14 @@ class EventImpl<Employer : XProxy<Employer>, VB : ViewBinding, D> : EventProxy<E
             val value = it.value
             val tagger: TextView? = (id?.let { holder.itemView.findViewById(it) } ?: holder.itemView) as? TextView
             tagger?.addTextChangedListener {
-                val position = holder.adapterPosition
-                val data = getDatas()[position]
+                val position = holder.adapterPosition - adapter.getHeaderProviderCount()
+                val data = if (position < 0) {
+                    adapter.headers[holder.adapterPosition].third
+                } else if (position >= getDatas().size) {
+                    adapter.footers[position - getDatas().size].third
+                } else {
+                    getDatas()[position]
+                }
                 value.invoke(employer, holder as XHolder<VB>, data as D, position, tagger, it)
             }
         }

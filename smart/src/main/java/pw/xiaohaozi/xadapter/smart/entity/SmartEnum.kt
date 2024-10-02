@@ -8,8 +8,8 @@ package pw.xiaohaozi.xadapter.smart.entity
  * github：https://github.com/xiaohaozi9825
  * 创建时间：2022/10/7 8:51
  */
-sealed class SmartEnum(val tag: String)
-class HEADER(tag: String) : SmartEnum(tag)
-class FOOTER(tag: String) : SmartEnum(tag)
+sealed class SmartEnum(val tag: Any)
+class HEADER(tag: Any) : SmartEnum(tag)
+class FOOTER(tag: Any) : SmartEnum(tag)
 object EMPTY : SmartEnum("")
 object ERROR : SmartEnum("")

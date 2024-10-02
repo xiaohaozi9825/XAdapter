@@ -2,6 +2,7 @@ package pw.xiaohaozi.xadapter.smart.ext
 
 import androidx.viewbinding.ViewBinding
 import pw.xiaohaozi.xadapter.smart.adapter.SmartAdapter
+import pw.xiaohaozi.xadapter.smart.entity.HEADER
 import pw.xiaohaozi.xadapter.smart.holder.XHolder
 import pw.xiaohaozi.xadapter.smart.provider.SmartProvider
 
@@ -11,8 +12,8 @@ import pw.xiaohaozi.xadapter.smart.provider.SmartProvider
  *****************************************************/
 typealias OnAdapterInitHolder<VB, D> = SmartAdapter<VB, D>.(holder: XHolder<VB>) -> Unit
 typealias OnProviderInitHolder<VB, D> = SmartProvider<VB, D>.(holder: XHolder<VB>) -> Unit
-typealias OnAdapterBindHolder<VB, D> = SmartAdapter<VB, D>.(params: OnBindParams<VB,D>) -> Unit
-typealias OnProviderBindHolder<VB, D> = SmartProvider<VB, D>.(params: OnBindParams<VB,D>) -> Unit
+typealias OnAdapterBindHolder<VB, D> = SmartAdapter<VB, D>.(params: OnBindParams<VB, D>) -> Unit
+typealias OnProviderBindHolder<VB, D> = SmartProvider<VB, D>.(params: OnBindParams<VB, D>) -> Unit
 typealias OnCustomType = (SmartAdapter<ViewBinding, Any?>.(data: Any?, position: Int) -> Int?)
 
 data class OnBindParams<VB : ViewBinding, D>(
@@ -65,7 +66,6 @@ fun createAdapter(custom: OnCustomType? = null): SmartAdapter<ViewBinding, Any?>
 }
 
 
-
 /**
  * 多布局切换
  * 返回Provider
@@ -100,7 +100,6 @@ inline fun <VB : ViewBinding, D : Any?> SmartAdapter<ViewBinding, Any?>.withType
 }
 
 
-
 /**
  * 多布局切换
  * 返回Provider
@@ -123,7 +122,7 @@ inline fun <reified VB : ViewBinding, D : Any?> SmartProvider<out ViewBinding, o
         }
 
         override fun onBind(holder: XHolder<VB>, data: D, position: Int, payloads: List<Any?>) {
-            bind.invoke(this,  OnBindParams(holder, data, position, payloads))
+            bind.invoke(this, OnBindParams(holder, data, position, payloads))
 //            bind.invoke(this, OnBind(holder, data, position, payloads))
         }
 
@@ -142,6 +141,8 @@ inline fun <reified VB : ViewBinding, D : Any?> SmartProvider<out ViewBinding, o
 fun <VB : ViewBinding, D> SmartProvider<VB, D>.toAdapter(): SmartAdapter<ViewBinding, Any?> {
     return this.adapter as SmartAdapter<ViewBinding, Any?>
 }
+
+
 
 
 /*****************************************************

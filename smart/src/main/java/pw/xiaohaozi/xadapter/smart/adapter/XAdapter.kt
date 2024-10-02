@@ -10,11 +10,15 @@ import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.RecyclerView.Adapter
 import androidx.viewbinding.ViewBinding
 import pw.xiaohaozi.xadapter.smart.XAdapterException
+import pw.xiaohaozi.xadapter.smart.entity.EMPTY
+import pw.xiaohaozi.xadapter.smart.entity.ERROR
+import pw.xiaohaozi.xadapter.smart.entity.FOOTER
+import pw.xiaohaozi.xadapter.smart.entity.HEADER
 import pw.xiaohaozi.xadapter.smart.entity.XMultiItemEntity
 import pw.xiaohaozi.xadapter.smart.holder.XHolder
 import pw.xiaohaozi.xadapter.smart.provider.TypeProvider
+import pw.xiaohaozi.xadapter.smart.provider.XProvider
 import java.lang.reflect.ParameterizedType
-import java.util.LinkedList
 
 /**
  * Adapter基类，提供Adapter基础功能
@@ -37,8 +41,14 @@ open class XAdapter<VB : ViewBinding, D> : Adapter<XHolder<VB>>() {
     private val onViewHolderChanges: ArrayList<OnViewHolderChanges> = arrayListOf()
     private val onRecyclerViewChanges: ArrayList<OnRecyclerViewChanges> = arrayListOf()
     private val onViewChanges: ArrayList<OnViewChanges<VB>> = arrayListOf()
-    private val onRecyclerViewAttachStateChanges: ArrayList<OnRecyclerViewAttachStateChanges> =        arrayListOf()
+    private val onRecyclerViewAttachStateChanges: ArrayList<OnRecyclerViewAttachStateChanges> = arrayListOf()
     private val rvOnAttachStateChangeListener = RVOnAttachStateChangeListener()
+
+    val headers = arrayListOf<Triple<XProvider<*, *>, Int, HEADER>>()
+    val footers = arrayListOf<Triple<XProvider<*, *>, Int, FOOTER>>()
+    var emptyTriple: Triple<XProvider<*, *>, Int, EMPTY>? = null
+    var errorTriple: Triple<XProvider<*, *>, Int, ERROR>? = null
+    private var isShowError = false
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): XHolder<VB> {
         val provide = providers[viewType]
@@ -49,26 +59,202 @@ open class XAdapter<VB : ViewBinding, D> : Adapter<XHolder<VB>>() {
         return holder as XHolder<VB>
     }
 
+
     override fun onBindViewHolder(holder: XHolder<VB>, position: Int) {
-        val viewType = getItemViewType(position)
-        val provide = providers[viewType]
-        Log.i(TAG, "onBindViewHolder: viewType = $viewType -- provide = $provide")
-        onViewHolderChanges.tryNotify { onBinding(holder, position) }
-        provide.onBindViewHolder(holder, datas[position], position)
+        bindViewHolder(holder, position, null)
     }
 
+    override fun onBindViewHolder(holder: XHolder<VB>, position: Int, payloads: MutableList<Any>) {
+        bindViewHolder(holder, position, payloads)
+    }
 
-    override fun onBindViewHolder(
-        holder: XHolder<VB>, position: Int, payloads: MutableList<Any>
+    private fun bindViewHolder(holder: XHolder<VB>, position: Int, payloads: MutableList<Any>?) {
+        if (position < 0) return
+        val provide = providers[holder.itemViewType] ?: providers[getItemViewType(position)]
+        ?: throw NullPointerException("没有找到 itemViewType = ${holder.itemViewType} 的 Provider")
+        onViewHolderChanges.tryNotify { if (payloads == null) onBinding(holder, position) else onBinding(holder, position, payloads) }
+        val headerCount = getHeaderProviderCount()
+        val dataSize = datas.size
+        if (errorTriple != null && isShowError) {
+            when {
+                hasHeader && hasFooter -> {
+                    //头布局
+                    if (position < headerCount) provideViewHolder(provide, holder, headers[position].third, position, payloads)
+                    //脚布局
+                    else if (position >= headerCount + 1) {
+                        val footerPosition = position - headerCount - 1
+                        provideViewHolder(provide, holder, footers[footerPosition].third, footerPosition, payloads)
+                    }
+                    //错误布局
+                    else provideViewHolder(provide, holder, errorTriple!!.third, 0)
+                }
+
+                hasHeader && !hasFooter -> {
+                    //头布局
+                    if (position < headerCount) provideViewHolder(provide, holder, headers[position].third, position, payloads)
+                    //错误布局
+                    else provideViewHolder(provide, holder, errorTriple!!.third, 0, payloads)
+                }
+
+                !hasHeader && hasFooter -> {
+                    //错误布局
+                    if (position == 0)
+                        provideViewHolder(provide, holder, errorTriple!!.third, 0, payloads)
+                    //脚布局
+                    else
+                        provideViewHolder(provide, holder, footers[position - 1].third, position - 1, payloads)
+                }
+
+                else -> {
+                    provideViewHolder(provide, holder, errorTriple!!.third, 0, payloads)
+                }
+            }
+            return
+        }
+        if (emptyTriple != null && dataSize == 0) {
+            when {
+                hasHeader && hasFooter -> {
+                    //头布局
+                    if (position < headerCount)
+                        provideViewHolder(provide, holder, headers[position].third, position, payloads)
+                    //脚布局
+                    else if (position >= headerCount + 1) {
+                        val footerPosition = position - headerCount - 1
+                        provideViewHolder(provide, holder, footers[footerPosition].third, footerPosition, payloads)
+                    }
+
+                    //空布局
+                    else
+                        provideViewHolder(provide, holder, emptyTriple!!.third, 0, payloads)
+                }
+
+                hasHeader && !hasFooter -> {
+                    //头布局
+                    if (position < headerCount)
+                        provideViewHolder(provide, holder, headers[position].third, position, payloads)
+                    //空布局
+                    else
+                        provideViewHolder(provide, holder, emptyTriple!!.third, 0, payloads)
+                }
+
+                !hasHeader && hasFooter -> {
+                    //空布局
+                    if (position == 0)
+                        provideViewHolder(provide, holder, emptyTriple!!.third, 0, payloads)
+                    //脚布局
+                    else
+                        provideViewHolder(provide, holder, footers[position - 1].third, position - 1, payloads)
+                }
+
+                else -> {
+                    provideViewHolder(provide, holder, emptyTriple!!.third, 0, payloads)
+                }
+            }
+            return
+        }
+
+        if (position < headerCount)
+            provideViewHolder(provide, holder, headers[position].third, position, payloads)
+        else if (position >= headerCount + dataSize) {
+            val footerPosition = position - headerCount - dataSize
+            provideViewHolder(provide, holder, footers[footerPosition].third, footerPosition, payloads)
+        } else {
+            val dataPosition = position - headerCount
+            val d = datas[dataPosition]
+            provideViewHolder(provide, holder, d, dataPosition, payloads)
+        }
+    }
+
+    private fun provideViewHolder(
+        provide: TypeProvider<*, *>,
+        holder: XHolder<VB>,
+        data: Any?,
+        position: Int,
+        payloads: List<Any>? = null
     ) {
-        val viewType = getItemViewType(position)
-        val provide = providers[viewType]
-        Log.i(TAG, "onBindViewHolder: viewType = $viewType -- provide = $provide")
-        provide.onBindViewHolder(holder, datas[position], position, payloads)
+        if (payloads == null) provide.onBindViewHolder(holder, data, position)
+        else provide.onBindViewHolder(holder, data, position, payloads)
     }
 
     override fun getItemViewType(position: Int): Int {
-        val data = datas[position]
+        val dataSize = datas.size
+        val headerCount = getHeaderProviderCount()
+
+        //如果设置了错误布局且显示错误布局，则使用错误布局
+        if (errorTriple != null && isShowError) {
+            return when {
+                hasHeader && hasFooter -> {
+                    //头布局
+                    if (position < headerCount) headers[position].second
+                    //脚布局
+                    else if (position >= headerCount + 1) footers[position - headerCount - 1].second
+                    //错误布局
+                    else errorTriple!!.second
+                }
+
+                hasHeader && !hasFooter -> {
+                    //头布局
+                    if (position < headerCount) headers[position].second
+                    //错误布局
+                    else errorTriple!!.second
+                }
+
+                !hasHeader && hasFooter -> {
+                    //错误布局
+                    if (position == 0) errorTriple!!.second
+                    //脚布局
+                    else footers[position - 1].second
+                }
+
+                else -> {
+                    errorTriple!!.second
+                }
+            }
+        }
+        if (emptyTriple != null && dataSize == 0) {
+            return when {
+                hasHeader && hasFooter -> {
+                    //头布局
+                    if (position < headerCount) headers[position].second
+                    //脚布局
+                    else if (position >= headerCount + 1) footers[position - headerCount - 1].second
+                    //空布局
+                    else emptyTriple!!.second
+                }
+
+                hasHeader && !hasFooter -> {
+                    //头布局
+                    if (position < headerCount) headers[position].second
+                    //空布局
+                    else emptyTriple!!.second
+                }
+
+                !hasHeader && hasFooter -> {
+                    //空布局
+                    if (position == 0) emptyTriple!!.second
+                    //脚布局
+                    else footers[position - 1].second
+                }
+
+                else -> {
+                    emptyTriple!!.second
+                }
+            }
+        }
+
+        //头布局
+        if (position < headerCount) return headers[position].second
+        //脚布局
+        else if (position >= headerCount + dataSize) return footers[position - headerCount - dataSize].second
+        //用户自定义布局
+        else {
+            val pos = position - headerCount
+            val data = datas[pos]
+            return getCustomType(data, position)
+        }
+    }
+
+    private fun getCustomType(data: D, position: Int): Int {
         if (itemTypeCallback != null) {
             val type = itemTypeCallback?.invoke(this, data, position)
             if (type != null) return type
@@ -83,10 +269,6 @@ open class XAdapter<VB : ViewBinding, D> : Adapter<XHolder<VB>>() {
             //如果有 itemType ==0的情况，则返回0
             //否则返回itemType 满足条件的最小值
             if (providers.get(0) != null) return 0
-            for (index in 0 until providers.size()) {
-                val key = providers.keyAt(index)
-            }
-
             providers.forEach { key, value ->
                 Log.i(TAG, "getItemViewType: key = $key")
 //                val kClass = value::class
@@ -121,12 +303,18 @@ open class XAdapter<VB : ViewBinding, D> : Adapter<XHolder<VB>>() {
                 }
             }
         }
-
         return 0
     }
 
+    var hasHeader: Boolean = true
+    var hasFooter: Boolean = true
     override fun getItemCount(): Int {
-        return datas.size
+        val headerCount = if (hasHeader) getHeaderProviderCount() else 0
+        val footerCount = if (hasFooter) footers.size else 0
+        val dataCount = datas.size
+        if (errorTriple != null && isShowError) return headerCount + footerCount + 1
+        if (emptyTriple != null && dataCount == 0) return headerCount + footerCount + 1
+        return getHeaderProviderCount() + footers.size + dataCount
     }
 
 
@@ -156,12 +344,85 @@ open class XAdapter<VB : ViewBinding, D> : Adapter<XHolder<VB>>() {
         return this
     }
 
+    fun addHeaderProvider(provider: XProvider<*, *>, header: HEADER) {
+        val type = automaticallyItemType(provider)
+        providers[type] = provider
+        headers.add(0, Triple(provider, type, header))
+        notifyItemInserted(0)
+    }
+
+    fun removeHeaderProvider(tag: Any = "") {
+        val headCount = getHeaderProviderCount()
+        headers.filter { it.third.tag == tag }
+            .forEach {
+                providers.remove(it.second)
+                headers.remove(it)
+            }
+        notifyItemRangeChanged(0, headCount)
+    }
+
+    fun getHeaderProviderCount() = headers.size
+    fun addFooterProvider(provider: XProvider<*, *>, footer: FOOTER) {
+        val type = automaticallyItemType(provider)
+        providers[type] = provider
+        footers.add(Triple(provider, type, footer))
+        notifyItemInserted(itemCount - 1)
+    }
+
+    fun removeFooterProvider(tag: Any = "") {
+        val footCount = getHeaderProviderCount()
+        footers.filter { it.third.tag == tag }
+            .forEach {
+                providers.remove(it.second)
+                footers.remove(it)
+            }
+        notifyItemRangeChanged(itemCount - footCount, footCount)
+    }
+
+    fun setEmptyProvider(provider: XProvider<*, *>, footer: EMPTY) {
+        val type = automaticallyItemType(provider)
+        emptyTriple = Triple(provider, type, footer)
+        providers[type] = provider
+        notifyAllItemChanged()
+    }
+
+    fun deleteEmptyProvider() {
+        emptyTriple?.let {
+            providers.remove(it.second)
+            emptyTriple = null
+        }
+        notifyAllItemChanged()
+    }
+
+    fun setErrorProvider(provider: XProvider<*, *>, error: ERROR) {
+        val itemType = -providers.size() - 1
+        errorTriple = Triple(provider, itemType, error)
+        providers[itemType] = provider
+    }
+
+    fun deleteErrorProvider() {
+        errorTriple?.let {
+            providers.remove(it.second)
+            errorTriple = null
+        }
+    }
+
+    fun showError() {
+        isShowError = true
+        notifyAllItemChanged()
+    }
+
+    fun hintError() {
+        isShowError = false
+        notifyAllItemChanged()
+    }
+
     /**
      * 刷新列表所有item
      * 处于效率考虑，该方法只刷新可见的item
      */
     fun notifyAllItemChanged(payload: Any? = null) {
-        notifyItemRangeChanged(0, itemCount,payload)
+        notifyItemRangeChanged(0, itemCount, payload)
     }
 
 
@@ -278,6 +539,7 @@ open class XAdapter<VB : ViewBinding, D> : Adapter<XHolder<VB>>() {
     interface OnViewHolderChanges {
         fun onCreated(provide: TypeProvider<*, *>, holder: XHolder<*>)
         fun onBinding(holder: XHolder<*>, position: Int)
+        fun onBinding(holder: XHolder<*>, position: Int, payloads: List<Any?>)
     }
 
     interface OnRecyclerViewChanges {
