@@ -12,6 +12,8 @@ import pw.xiaohaozi.xadapter.databinding.ItemVerseBinding
 import pw.xiaohaozi.xadapter.databinding.ItemVerseDataBindingBinding
 import pw.xiaohaozi.xadapter.info.VerseInfo
 import pw.xiaohaozi.xadapter.smart.adapter.SmartAdapter
+import pw.xiaohaozi.xadapter.smart.dragswipe.dragSort
+import pw.xiaohaozi.xadapter.smart.dragswipe.swipeDelete
 import pw.xiaohaozi.xadapter.smart.ext.createAdapter
 import pw.xiaohaozi.xadapter.smart.holder.XHolder
 import pw.xiaohaozi.xadapter.smart.provider.SmartProvider
@@ -23,6 +25,8 @@ class SingleFragment : Fragment() {
     private lateinit var binding: FragmentRecyclerBinding
 
     private val adapter = function2()
+        .dragSort()
+        .swipeDelete()
 
     override fun onCreateView(
         inflater: LayoutInflater,

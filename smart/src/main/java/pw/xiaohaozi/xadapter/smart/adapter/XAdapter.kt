@@ -165,6 +165,10 @@ open class XAdapter<VB : ViewBinding, D> : Adapter<XHolder<VB>>() {
         }
     }
 
+    fun getCustomPosition(position: Int): Int {
+        return getHeaderProviderCount() + position
+    }
+
     private fun provideViewHolder(
         provide: TypeProvider<*, *>,
         holder: XHolder<VB>,

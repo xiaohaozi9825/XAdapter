@@ -61,9 +61,9 @@ class MultipleFragment : Fragment() {
 
     private fun function2(): SmartAdapter<ViewBinding, Any?> {
         //①创建Adapter
-        val SmartAdapter = SmartAdapter<ViewBinding, Any?>()
+        val smartAdapter = SmartAdapter<ViewBinding, Any?>()
         //②创建Provider
-        val provider1 = object : SmartProvider<ItemImageCardBinding, Int>(SmartAdapter) {
+        val provider1 = object : SmartProvider<ItemImageCardBinding, Int>(smartAdapter) {
             override fun onCreated(holder: XHolder<ItemImageCardBinding>) {
 
             }
@@ -78,7 +78,7 @@ class MultipleFragment : Fragment() {
 
 
         }
-        val provider2 = object : SmartProvider<ItemVerseBinding, VerseInfo?>(SmartAdapter) {
+        val provider2 = object : SmartProvider<ItemVerseBinding, VerseInfo?>(smartAdapter) {
             override fun onCreated(holder: XHolder<ItemVerseBinding>) {
 
             }
@@ -96,10 +96,10 @@ class MultipleFragment : Fragment() {
         //③将Provider 添加到 Adapter中
         //方式一：使用方法添加，viewType可不填
 
-        SmartAdapter.addProvider(provider2)
-        SmartAdapter.addProvider(provider1)
+        smartAdapter.addProvider(provider2)
+        smartAdapter.addProvider(provider1)
 //
-        return SmartAdapter
+        return smartAdapter
         //方式一二：使用➕链接，viewType为空
 //        return xAdapter + provider2 + provider1
 
