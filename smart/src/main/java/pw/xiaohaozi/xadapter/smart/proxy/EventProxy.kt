@@ -1,5 +1,6 @@
 package pw.xiaohaozi.xadapter.smart.proxy
 
+import android.text.Editable
 import android.view.View
 import android.widget.CompoundButton
 import android.widget.TextView
@@ -10,7 +11,7 @@ import pw.xiaohaozi.xadapter.smart.holder.XHolder
 typealias OnItemClickListener<Employer, VB, D> = Employer.(holder: XHolder<VB>, data: D, position: Int, view: View) -> Unit
 typealias OnItemLongClickListener<Employer, VB, D> = Employer.(holder: XHolder<VB>, data: D, position: Int, view: View) -> Boolean
 typealias OnItemCheckedChangeListener<Employer, VB, D> = Employer.(holder: XHolder<VB>, data: D, position: Int, view: CompoundButton, isCheck: Boolean) -> Unit
-typealias OnItemTextChange<Employer, VB, D> = Employer.(holder: XHolder<VB>, data: D, position: Int, view: TextView, text: CharSequence?) -> Unit
+typealias OnItemTextChange<Employer, VB, D> = Employer.(holder: XHolder<VB>, data: D, position: Int, view: TextView, text: Editable?) -> Unit
 
 /**
  * 事件监听接口
@@ -43,9 +44,17 @@ interface EventProxy<Employer : XProxy<Employer>, VB : ViewBinding, D> : XProxy<
      */
     fun setOnLongClickListener(@IdRes id: Int? = null, listener: OnItemLongClickListener<Employer, VB, D>): Employer
 
-    fun setOnCheckedChangeListener(id: Int? = null, listener: OnItemCheckedChangeListener<Employer, VB, D>): Employer
+    /**
+     * 设置选中事件监听
+     * @param id 被监听的控件id，必须是CompoundButton的子组件，如RadioButton、CheckBox
+     */
+    fun setOnCheckedChangeListener(id: Int?, listener: OnItemCheckedChangeListener<Employer, VB, D>): Employer
 
-    fun setOnTextChange(id: Int? = null, listener: OnItemTextChange<Employer, VB, D>): Employer
+    /**
+     * 设置文本变化监听
+     * @param id 被监听的控件id，必须是TextView或TextView子控件，如EditText
+     */
+    fun setOnTextChange(id: Int?, listener: OnItemTextChange<Employer, VB, D>): Employer
 
 }
 

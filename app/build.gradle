@@ -7,7 +7,7 @@ plugins {
 
 android {
     namespace 'pw.xiaohaozi.xadapter'
-    compileSdk 33
+    compileSdk 34
 
     defaultConfig {
         applicationId "pw.xiaohaozi.xadapter"
