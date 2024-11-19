@@ -13,17 +13,15 @@ import pw.xiaohaozi.xadapter.R
 import pw.xiaohaozi.xadapter.databinding.ActivityMainBinding
 import pw.xiaohaozi.xadapter.databinding.ItemHomeBinding
 import pw.xiaohaozi.xadapter.databinding.ItemHomeEmptyBinding
-import pw.xiaohaozi.xadapter.databinding.ItemHomeFooterBinding
 import pw.xiaohaozi.xadapter.databinding.ItemHomeHeaderBinding
 import pw.xiaohaozi.xadapter.databinding.ItemHomeTitleBinding
 import pw.xiaohaozi.xadapter.databinding.ItemImageCardBinding
 import pw.xiaohaozi.xadapter.enableEdgeToEdge
 import pw.xiaohaozi.xadapter.fragment.CheckFragment
 import pw.xiaohaozi.xadapter.fragment.ClickFragment
-import pw.xiaohaozi.xadapter.fragment.EventFragment
 import pw.xiaohaozi.xadapter.fragment.LongClickFragment
 import pw.xiaohaozi.xadapter.fragment.MultipleFragment
-import pw.xiaohaozi.xadapter.fragment.SelectFragment
+import pw.xiaohaozi.xadapter.fragment.ImageSelectFragment
 import pw.xiaohaozi.xadapter.fragment.SingleFragment
 import pw.xiaohaozi.xadapter.fragment.SpecialLayoutFragment
 import pw.xiaohaozi.xadapter.fragment.TextChangeFragment
@@ -90,52 +88,22 @@ class MainActivity : AppCompatActivity() {
 
     private val list = arrayListOf(
         "Adapter创建",
-        HomeInfo(
-            "创建单布局Adapter", "提供多种创建Adapter的方式", R.mipmap.ic_launcher, SingleFragment::class.java
-        ),
-        HomeInfo(
-            "创建多布局Adapter", "快速创建Adapter", R.mipmap.ic_launcher, MultipleFragment::class.java
-        ),
+        HomeInfo("创建单布局", "单布局创建方式", R.mipmap.ic_launcher, SingleFragment::class.java),
+        HomeInfo("创建多布局", "多布局创建方式", R.mipmap.ic_launcher, MultipleFragment::class.java),
         "item事件监听",
-        HomeInfo(
-            "点击事件", "View点击事件", R.mipmap.ic_launcher, ClickFragment::class.java
-        ),
-        HomeInfo(
-            "长按事件", "View长按事件", R.mipmap.ic_launcher, LongClickFragment::class.java
-        ),
-        HomeInfo(
-            "选中事件", "RadioButton、CheckBox选中状态监听", R.mipmap.ic_launcher, CheckFragment::class.java
-        ),
-        HomeInfo(
-            "文本变化", "EditText文本变化监听", R.mipmap.ic_launcher, TextChangeFragment::class.java
-        ),
+        HomeInfo("点击事件", "item点击事件", R.mipmap.ic_launcher, ClickFragment::class.java),
+        HomeInfo("长按事件", "item长按事件", R.mipmap.ic_launcher, LongClickFragment::class.java),
+        HomeInfo("选中事件", "RadioButton、CheckBox选中状态监听", R.mipmap.ic_launcher, CheckFragment::class.java),
+        HomeInfo("文本变化", "EditText文本变化监听", R.mipmap.ic_launcher, TextChangeFragment::class.java),
 
         "选择操作",
-        HomeInfo(
-            "选择", "单选、多选", R.mipmap.ic_launcher,
-            SelectFragment::class.java
-        ),
+        HomeInfo("选择", "item选择操作", R.mipmap.ic_launcher, ImageSelectFragment::class.java),
         "数据操作",
-        HomeInfo(
-            "数据操作", "数据增删改查", R.mipmap.ic_launcher,
-
-            ),
-        HomeInfo(
-            "数据操作", "数据增删改查", R.mipmap.ic_launcher,
-            SpecialLayoutFragment::class.java
-        ),
-        HomeInfo(
-            "数据操作", "数据增删改查", R.mipmap.ic_launcher,
-            SpecialLayoutFragment::class.java
-        ),
-        HomeInfo(
-            "数据操作", "数据增删改查", R.mipmap.ic_launcher,
-            SpecialLayoutFragment::class.java
-        ),
-        HomeInfo(
-            "数据操作", "数据增删改查", R.mipmap.ic_launcher,
-            SpecialLayoutFragment::class.java
-        ),
+        HomeInfo("数据操作", "数据增删改查", R.mipmap.ic_launcher),
+        HomeInfo("数据操作", "数据增删改查", R.mipmap.ic_launcher, SpecialLayoutFragment::class.java),
+        HomeInfo("数据操作", "数据增删改查", R.mipmap.ic_launcher, SpecialLayoutFragment::class.java),
+        HomeInfo("数据操作", "数据增删改查", R.mipmap.ic_launcher, SpecialLayoutFragment::class.java),
+        HomeInfo("数据操作", "数据增删改查", R.mipmap.ic_launcher, SpecialLayoutFragment::class.java),
     )
 
 }

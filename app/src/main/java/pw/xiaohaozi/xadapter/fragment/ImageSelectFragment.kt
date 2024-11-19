@@ -20,10 +20,10 @@ import pw.xiaohaozi.xadapter.smart.ext.toAdapter
 import pw.xiaohaozi.xadapter.smart.ext.withType
 
 /**
- * 多布局
+ * item选择
  */
-class SelectFragment : Fragment() {
-    val TAG = "SelectFragment"
+class ImageSelectFragment : Fragment() {
+    val TAG = "ImageSelectFragment"
     private lateinit var binding: FragmentSelectedBinding
     private val adapter = function2()
     override fun onCreateView(
@@ -75,6 +75,7 @@ class SelectFragment : Fragment() {
 
     }
 
+    @SuppressLint("SetTextI18n")
     private fun function2(): SmartAdapter<ViewBinding, Any?> {
         //泛型VB 确定布局文件，泛型D确定数据类型，回调函数中绑定数据
         val adapter = createAdapter()
