@@ -1,17 +1,15 @@
 package pw.xiaohaozi.xadapter.smart.adapter
 
 import android.widget.Toast
-import androidx.recyclerview.widget.RecyclerView.Adapter
 import androidx.viewbinding.ViewBinding
 import kotlinx.coroutines.CoroutineName
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import pw.xiaohaozi.xadapter.smart.entity.EMPTY
-import pw.xiaohaozi.xadapter.smart.entity.ERROR
+import pw.xiaohaozi.xadapter.smart.entity.DEFAULT_PAGE
 import pw.xiaohaozi.xadapter.smart.entity.FOOTER
 import pw.xiaohaozi.xadapter.smart.entity.HEADER
-import pw.xiaohaozi.xadapter.smart.ext.OnBindParams
 import pw.xiaohaozi.xadapter.smart.holder.XHolder
 import pw.xiaohaozi.xadapter.smart.impl.AdapterSelectedImpl
 import pw.xiaohaozi.xadapter.smart.impl.EventImpl
@@ -73,114 +71,178 @@ open class SmartAdapter<VB : ViewBinding, D>(
         return this
     }
 
-
+    /**
+     * 添加头布局
+     * 改方法可动态设置，设置后直接展示。
+     *
+     * @param tag 备用字段，可用于标记，或数据存储与传递
+     * @param init 初始化时回调，可在此设置事件监听操作
+     * @param create 创建ViewHolder后调用，可用于初始化item
+     * @param bind 绑定视图时调用
+     */
     inline fun <reified vb : ViewBinding> addHeader(
         tag: String = "",
-        noinline bind: (SmartAdapter<VB, D>.(holder: XHolder<vb>) -> Unit)? = null
+        noinline init: (SmartProvider<vb, HEADER>.() -> Unit)? = null,
+        noinline create: (SmartProvider<vb, HEADER>.(holder: XHolder<vb>) -> Unit)? = null,
+        noinline bind: (SmartProvider<vb, HEADER>.(holder: XHolder<vb>) -> Unit)? = null,
     ): SmartAdapter<VB, D> {
         val provider = object : SmartProvider<vb, HEADER>(this) {
 
             override fun onCreated(holder: XHolder<vb>) {
+                create?.invoke(this, holder)
             }
 
             override fun onBind(holder: XHolder<vb>, data: HEADER, position: Int) {
-                bind?.invoke(this@SmartAdapter, holder)
+                bind?.invoke(this, holder)
             }
 
             override fun isFixedViewType(): Boolean {
                 return true
             }
         }
-        provider.setOnClickListener { holder, data, position, view ->
-            Toast.makeText(view.context, "点击头${data.tag}", Toast.LENGTH_SHORT).show()
-        }
         addHeaderProvider(provider, HEADER(tag))
+        init?.invoke(provider)
         return this
     }
 
-    fun removeHeader(tag: String = ""): SmartAdapter<VB, D> {
+    /**
+     * 删除指定头布局
+     */
+    fun removeHeader(tag: String): SmartAdapter<VB, D> {
         removeHeaderProvider(tag)
         return this
     }
 
+    /**
+     * 删除指定头布局
+     */
+    inline fun <reified T : ViewBinding> removeHeader(): SmartAdapter<VB, D> {
+        removeHeaderProvider<T>()
+        return this
+    }
+
+    /**
+     * 添加脚布局
+     * 改方法可动态设置，设置后直接展示。
+     *
+     * @param tag 备用字段，可用于标记，或数据存储与传递
+     * @param init 初始化时回调，可在此设置事件监听操作
+     * @param create 创建ViewHolder后调用，可用于初始化item
+     * @param bind 绑定视图时调用
+     */
     inline fun <reified vb : ViewBinding> addFooter(
         tag: String = "",
-        noinline bind: (SmartAdapter<VB, D>.(holder: XHolder<vb>) -> Unit)? = null
+        noinline init: (SmartProvider<vb, FOOTER>.() -> Unit)? = null,
+        noinline create: (SmartProvider<vb, FOOTER>.(holder: XHolder<vb>) -> Unit)? = null,
+        noinline bind: (SmartProvider<vb, FOOTER>.(holder: XHolder<vb>) -> Unit)? = null,
     ): SmartAdapter<VB, D> {
         val provider = object : SmartProvider<vb, FOOTER>(this) {
 
             override fun onCreated(holder: XHolder<vb>) {
+                create?.invoke(this, holder)
             }
 
             override fun onBind(holder: XHolder<vb>, data: FOOTER, position: Int) {
-                bind?.invoke(this@SmartAdapter, holder)
+                bind?.invoke(this, holder)
             }
 
             override fun isFixedViewType(): Boolean {
                 return true
             }
         }
-        provider.setOnClickListener { holder, data, position, view ->
-            Toast.makeText(view.context, "点击脚${data.tag}", Toast.LENGTH_SHORT).show()
-        }
         addFooterProvider(provider, FOOTER(tag))
+        init?.invoke(provider)
         return this
     }
 
-    fun removeFooter(tag: String = ""): SmartAdapter<VB, D> {
+    /**
+     * 删除指定脚布局
+     */
+    fun removeFooter(tag: String): SmartAdapter<VB, D> {
         removeFooterProvider(tag)
         return this
     }
 
+    /**
+     * 删除指定脚布局
+     */
+    inline fun <reified T : ViewBinding> removeFooter(): SmartAdapter<VB, D> {
+        removeFooterProvider<T>()
+        return this
+    }
 
-    inline fun <reified vb : ViewBinding> setEmpty(noinline bind: ((holder: XHolder<vb>) -> Unit)? = null): SmartAdapter<VB, D> {
-        val provider = object : SmartProvider<vb, EMPTY?>(this) {
+    /**
+     * 设置空布局
+     * 改方法需在初始化adapter时设置，设置后并不直接显示。
+     * 当adapter无数据时自动显示，有数据时自动隐藏。
+     *
+     * @param init 初始化时回调，可在此设置事件监听操作
+     * @param create 创建ViewHolder后调用，可用于初始化item
+     * @param bind 绑定视图时调用
+     */
+    inline fun <reified vb : ViewBinding> setEmpty(
+        noinline init: (SmartProvider<vb, EMPTY>.() -> Unit)? = null,
+        noinline create: (SmartProvider<vb, EMPTY>.(holder: XHolder<vb>) -> Unit)? = null,
+        noinline bind: (SmartProvider<vb, EMPTY>.(holder: XHolder<vb>) -> Unit)? = null,
+    ): SmartAdapter<VB, D> {
+        val provider = object : SmartProvider<vb, EMPTY>(this) {
 
             override fun isFixedViewType(): Boolean {
                 return true
             }
 
-            override fun onBind(holder: XHolder<vb>, data: EMPTY?, position: Int) {
-                bind?.invoke(holder)
+            override fun onBind(holder: XHolder<vb>, data: EMPTY, position: Int) {
+                bind?.invoke(this, holder)
             }
 
             override fun onCreated(holder: XHolder<vb>) {
+                create?.invoke(this, holder)
             }
 
         }
         setEmptyProvider(provider, EMPTY)
+        init?.invoke(provider)
         return this
     }
 
-    fun deleteEmpty(): SmartAdapter<VB, D> {
-        deleteEmptyProvider()
-        return this
-    }
 
-    inline fun <reified vb : ViewBinding> setError(noinline bind: ((holder: XHolder<vb>) -> Unit)? = null): SmartAdapter<VB, D> {
-        val provider =
-            object : SmartProvider<vb, ERROR?>(this) {
+    /**
+     * 设置缺省页
+     * 改方法需在初始化adapter时设置，设置后并不直接显示。
+     * 显示与隐藏需调用：
+     * @see showDefaultPage
+     * @see hintDefaultPage
+     *
+     * @param tag 备用字段，可用于标记，或数据存储与传递
+     * @param init 初始化时回调，可在此设置事件监听操作
+     * @param create 创建ViewHolder后调用，可用于初始化item
+     * @param bind 绑定视图时调用
+     */
+    inline fun <reified vb : ViewBinding> setDefaultPage(
+        tag: Any = "",
+        noinline init: (SmartProvider<vb, DEFAULT_PAGE>.() -> Unit)? = null,
+        noinline create: (SmartProvider<vb, DEFAULT_PAGE>.(holder: XHolder<vb>) -> Unit)? = null,
+        noinline bind: (SmartProvider<vb, DEFAULT_PAGE>.(holder: XHolder<vb>) -> Unit)? = null,
+    ): SmartAdapter<VB, D> {
+        val provider = object : SmartProvider<vb, DEFAULT_PAGE>(this) {
 
-                override fun isFixedViewType(): Boolean {
-                    return true
-                }
-
-                override fun onBind(holder: XHolder<vb>, data: ERROR?, position: Int) {
-                    bind?.invoke(holder)
-                }
-
-                override fun onCreated(holder: XHolder<vb>) {
-
-                }
-
+            override fun isFixedViewType(): Boolean {
+                return true
             }
-        setErrorProvider(provider, ERROR)
+
+            override fun onBind(holder: XHolder<vb>, data: DEFAULT_PAGE, position: Int) {
+                bind?.invoke(this, holder)
+            }
+
+            override fun onCreated(holder: XHolder<vb>) {
+                create?.invoke(this, holder)
+            }
+
+        }
+        setDefaultPageProvider(provider, DEFAULT_PAGE(tag))
+        init?.invoke(provider)
         return this
     }
 
-    fun deleteError(): SmartAdapter<VB, D> {
-        deleteErrorProvider()
-        return this
-    }
 
 }

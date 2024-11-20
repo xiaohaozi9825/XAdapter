@@ -1,5 +1,6 @@
 package pw.xiaohaozi.xadapter.smart.impl
 
+import android.util.Log
 import android.view.View
 import android.widget.CompoundButton
 import android.widget.TextView
@@ -70,12 +71,18 @@ class EventImpl<Employer : XProxy<Employer>, VB : ViewBinding, D> : EventProxy<E
             val tagger: View = id?.let { holder.itemView.findViewById(it) } ?: holder.itemView
             tagger.setOnClickListener {
                 val position = holder.adapterPosition - adapter.getHeaderProviderCount()
-                val data = if (position < 0) {
-                    adapter.headers[holder.adapterPosition].third
-                } else if (position >= getDatas().size) {
-                    adapter.footers[holder.adapterPosition - (adapter.itemCount - adapter.footers.size)].third
+                val data = if (adapter.defaultPageTriple?.third != null) {
+                    adapter.defaultPageTriple?.third
+                } else if (getDatas().isEmpty()) {
+                    adapter.emptyTriple?.third
                 } else {
-                    getDatas()[position]
+                    if (position < 0) {
+                        adapter.headers[holder.adapterPosition].third
+                    } else if (position >= getDatas().size) {
+                        adapter.footers[holder.adapterPosition - (adapter.itemCount - adapter.footers.size)].third
+                    } else {
+                        getDatas()[position]
+                    }
                 }
                 value.invoke(employer, holder as XHolder<VB>, data as D, position, it)
             }
@@ -86,12 +93,18 @@ class EventImpl<Employer : XProxy<Employer>, VB : ViewBinding, D> : EventProxy<E
             val tagger: View = id?.let { holder.itemView.findViewById(it) } ?: holder.itemView
             tagger.setOnLongClickListener {
                 val position = holder.adapterPosition - adapter.getHeaderProviderCount()
-                val data = if (position < 0) {
-                    adapter.headers[holder.adapterPosition].third
-                } else if (position >= getDatas().size) {
-                    adapter.footers[position - getDatas().size].third
+                val data = if (adapter.defaultPageTriple?.third != null) {
+                    adapter.defaultPageTriple?.third
+                } else if (getDatas().isEmpty()) {
+                    adapter.emptyTriple?.third
                 } else {
-                    getDatas()[position]
+                    if (position < 0) {
+                        adapter.headers[holder.adapterPosition].third
+                    } else if (position >= getDatas().size) {
+                        adapter.footers[position - getDatas().size].third
+                    } else {
+                        getDatas()[position]
+                    }
                 }
                 value.invoke(employer, holder as XHolder<VB>, data as D, position, it)
             }
@@ -102,12 +115,18 @@ class EventImpl<Employer : XProxy<Employer>, VB : ViewBinding, D> : EventProxy<E
             val tagger: CompoundButton? = (id?.let { holder.itemView.findViewById(it) } ?: holder.itemView) as? CompoundButton
             tagger?.setOnCheckedChangeListener { buttonView, isChecked ->
                 val position = holder.adapterPosition - adapter.getHeaderProviderCount()
-                val data = if (position < 0) {
-                    adapter.headers[holder.adapterPosition].third
-                } else if (position >= getDatas().size) {
-                    adapter.footers[position - getDatas().size].third
+                val data = if (adapter.defaultPageTriple?.third != null) {
+                    adapter.defaultPageTriple?.third
+                } else if (getDatas().isEmpty()) {
+                    adapter.emptyTriple?.third
                 } else {
-                    getDatas()[position]
+                    if (position < 0) {
+                        adapter.headers[holder.adapterPosition].third
+                    } else if (position >= getDatas().size) {
+                        adapter.footers[position - getDatas().size].third
+                    } else {
+                        getDatas()[position]
+                    }
                 }
                 value.invoke(employer, holder as XHolder<VB>, data as D, position, buttonView, isChecked)
             }
@@ -118,12 +137,18 @@ class EventImpl<Employer : XProxy<Employer>, VB : ViewBinding, D> : EventProxy<E
             val tagger: TextView? = (id?.let { holder.itemView.findViewById(it) } ?: holder.itemView) as? TextView
             tagger?.addTextChangedListener {
                 val position = holder.adapterPosition - adapter.getHeaderProviderCount()
-                val data = if (position < 0) {
-                    adapter.headers[holder.adapterPosition].third
-                } else if (position >= getDatas().size) {
-                    adapter.footers[position - getDatas().size].third
+                val data = if (adapter.defaultPageTriple?.third != null) {
+                    adapter.defaultPageTriple?.third
+                } else if (getDatas().isEmpty()) {
+                    adapter.emptyTriple?.third
                 } else {
-                    getDatas()[position]
+                    if (position < 0) {
+                        adapter.headers[holder.adapterPosition].third
+                    } else if (position >= getDatas().size) {
+                        adapter.footers[position - getDatas().size].third
+                    } else {
+                        getDatas()[position]
+                    }
                 }
                 value.invoke(employer, holder as XHolder<VB>, data as D, position, tagger, it)
             }

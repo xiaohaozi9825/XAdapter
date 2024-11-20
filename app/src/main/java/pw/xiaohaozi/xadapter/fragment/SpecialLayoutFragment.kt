@@ -4,42 +4,88 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.viewbinding.ViewBinding
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import pw.xiaohaozi.xadapter.R
-import pw.xiaohaozi.xadapter.databinding.FragmentRecyclerBinding
+import pw.xiaohaozi.xadapter.databinding.FragmentSpecialLayoutBinding
+import pw.xiaohaozi.xadapter.databinding.ItemEmptyBinding
+import pw.xiaohaozi.xadapter.databinding.ItemHomeFooterBinding
+import pw.xiaohaozi.xadapter.databinding.ItemHomeHeaderBinding
 import pw.xiaohaozi.xadapter.databinding.ItemImageCardBinding
+import pw.xiaohaozi.xadapter.databinding.ItemLoadFailBinding
+import pw.xiaohaozi.xadapter.databinding.ItemLoadingBinding
 import pw.xiaohaozi.xadapter.databinding.ItemVerseBinding
 import pw.xiaohaozi.xadapter.info.VerseInfo
 import pw.xiaohaozi.xadapter.smart.adapter.SmartAdapter
-import pw.xiaohaozi.xadapter.smart.entity.XMultiItemEntity
 import pw.xiaohaozi.xadapter.smart.ext.createAdapter
 import pw.xiaohaozi.xadapter.smart.ext.toAdapter
 import pw.xiaohaozi.xadapter.smart.ext.withType
-import pw.xiaohaozi.xadapter.smart.holder.XHolder
-import pw.xiaohaozi.xadapter.smart.provider.SmartProvider
 
 /**
- * 多布局
+ * 特殊布局，如头布局，脚布局，空布局、错误布局
  */
 class SpecialLayoutFragment : Fragment() {
-    private lateinit var binding: FragmentRecyclerBinding
+    private lateinit var binding: FragmentSpecialLayoutBinding
     private val adapter = function1()
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        binding = FragmentRecyclerBinding.inflate(inflater)
+        binding = FragmentSpecialLayoutBinding.inflate(inflater)
         binding.recycleView.layoutManager = LinearLayoutManager(requireContext())
         binding.recycleView.adapter = adapter
+        binding.tvEmpty.setOnClickListener {
+            lifecycleScope.launch {
+                adapter.removeHeader<ItemHomeHeaderBinding>()
+                adapter.removeFooter<ItemHomeFooterBinding>()
+                adapter.showDefaultPage<ItemLoadingBinding>()
+                delay(1000)
+                adapter.hintDefaultPage()
+                adapter.removeHeader<ItemHomeHeaderBinding>()
+                adapter.removeFooter<ItemHomeFooterBinding>()
+                adapter.reset(listOf())
+            }
+        }
 
+        binding.tvLoadSuccess.setOnClickListener {
+            lifecycleScope.launch {
+                adapter.removeHeader<ItemHomeHeaderBinding>()
+                adapter.removeFooter<ItemHomeFooterBinding>()
+                adapter.showDefaultPage<ItemLoadingBinding>()
+                delay(1000)
+                adapter.hintDefaultPage()
+                adapter.addHeader<ItemHomeHeaderBinding>()
+                adapter.addFooter<ItemHomeFooterBinding>()
+                adapter.reset(list)
+            }
+
+        }
+        binding.tvLoadFail.setOnClickListener {
+            lifecycleScope.launch {
+                adapter.removeHeader<ItemHomeHeaderBinding>()
+                adapter.removeFooter<ItemHomeFooterBinding>()
+                adapter.showDefaultPage<ItemLoadingBinding>()
+                delay(1000)
+                adapter.showDefaultPage<ItemLoadFailBinding>()
+            }
+
+        }
         return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        adapter.reset(list)
+        lifecycleScope.launch {
+            adapter.showDefaultPage<ItemLoadingBinding>()
+            delay(1000)
+            adapter.reset(list)
+            adapter.hintDefaultPage()
+        }
     }
 
     /**
@@ -49,111 +95,40 @@ class SpecialLayoutFragment : Fragment() {
     private fun function1(): SmartAdapter<ViewBinding, Any?> {
         //泛型VB 确定布局文件，泛型D确定数据类型，回调函数中绑定数据
         return createAdapter()
-            .withType<ItemVerseBinding, VerseInfo> {(holder, data, position)  ->
+            .withType<ItemVerseBinding, VerseInfo>(init = {
+                setOnClickListener { holder, data, position, view ->
+                    Toast.makeText(requireContext(), "点击了诗句", Toast.LENGTH_SHORT).show()
+                }
+            }) { (holder, data) ->
                 holder.binding.tvContent.text = data.content
                 holder.binding.tvAuthor.text = data.author
             }
-            .withType<ItemImageCardBinding, Int> { (holder, data, position) ->
+            .withType<ItemImageCardBinding, Int> { (holder, data) ->
                 holder.binding.image.setImageResource(data)
             }
-            .toAdapter()
-    }
-
-    private fun function2(): SmartAdapter<ViewBinding, Any?> {
-        //①创建Adapter
-        val SmartAdapter = SmartAdapter<ViewBinding, Any?>()
-        //②创建Provider
-        val provider1 = object : SmartProvider<ItemImageCardBinding, Int>(SmartAdapter) {
-            override fun onCreated(holder: XHolder<ItemImageCardBinding>) {
-
-            }
-
-            override fun onBind(
-                holder: XHolder<ItemImageCardBinding>,
-                data: Int,
-                position: Int
-            ) {
-                holder.binding.image.setImageResource(data)
-            }
-
-
-        }
-        val provider2 = object : SmartProvider<ItemVerseBinding, VerseInfo?>(SmartAdapter) {
-            override fun onCreated(holder: XHolder<ItemVerseBinding>) {
-
-            }
-
-            override fun onBind(
-                holder: XHolder<ItemVerseBinding>,
-                data: VerseInfo?,
-                position: Int
-            ) {
-                holder.binding.tvContent.text = data?.content
-                holder.binding.tvAuthor.text = data?.author
-            }
-
-        }
-        //③将Provider 添加到 Adapter中
-        //方式一：使用方法添加，viewType可不填
-
-        SmartAdapter.addProvider(provider2)
-        SmartAdapter.addProvider(provider1)
-//
-        return SmartAdapter
-        //方式一二：使用➕链接，viewType为空
-//        return xAdapter + provider2 + provider1
-
-    }
-
-    //多布局itemViewType与province对应的方式：
-    //1、根据数据类型自动查找对应的province。
-    // 优点：使用简单，数据类不需要实现任何接口，甚至可以是基本数据类型；
-    // 缺点：每个province泛型中的数据类型不能相同，否则无法正确匹配。
-
-    //2、数据类实现MultiItemEntity接口。
-    // 优点：匹配度高；
-    // 缺点：使用繁琐。数据类必须实现MultiItemEntity接口，且getItemViewType()方法返回值必须为正整数，同时在addProvince方法中形参itemType不能为空。
-
-    //3、使用adapter.customItemType（）方法动态确定itemViewType。
-    // 优点：可以允许province泛型中的数据类型相同，数据类无需实现MultiItemEntity接口；
-    // 缺点：使用繁琐。customItemType回调返回值必须为正整数，同时在addProvince方法中形参itemType不能为空。
-
-    //建议：
-    //如果多个布局的数据类型不一样，建议使用方法1；
-    //如果数据类型有相同的，但是数据类可以实现MultiItemEntity接口，建议使用方法2
-    //以上条件都不满足，那就使用方法3
-    //优先级：动态指定>MultiItemEntity>自动生成
-
-    //数据可空：
-    //最多只能存在一个province数据类型为可空类型，优先使用itemType==0 的province，如果没有，则找itemType最小的province
-    //如果使用了kotlin-reflect库，会查找data为空，且itemType最小的province
-
-    private fun function3(): SmartAdapter<ViewBinding, Any?> {
-        return createAdapter { data, position ->
-            if (data is Int) return@createAdapter 9
-            else null
-        }.withType<ItemVerseBinding, VerseInfo> { (holder, data, position)  ->
-            holder.binding.tvContent.text = data.content
-            holder.binding.tvAuthor.text = data.author
-        }.withType<ItemImageCardBinding, Int>(itemType = 9) {(holder, data, position)  ->
-            holder.binding.image.setImageResource(data)
-        }.toAdapter()
-
-    }
-
-    private fun function4(): SmartAdapter<ViewBinding, Any?> {
-        //泛型VB 确定布局文件，泛型D确定数据类型，回调函数中绑定数据
-        return createAdapter()
-            .withType<ItemVerseBinding, MultipleVerseInfo>(itemType = 5) { (holder, data, position)  ->
-                holder.binding.tvContent.text = data.verseInfo.content
-                holder.binding.tvAuthor.text = data.verseInfo.author
-            }
-            .withType<ItemImageCardBinding, MultipleInt>(itemType = 8) { (holder, data, position)  ->
-                holder.binding.image.setImageResource(data.res)
+            .setOnClickListener { holder, data, position, view ->
+                Toast.makeText(requireContext(), "点击图片", Toast.LENGTH_SHORT).show()
             }
             .toAdapter()
-
+            .setEmpty<ItemEmptyBinding>(init = {
+                setOnClickListener { holder, data, position, view ->
+                    Toast.makeText(requireContext(), "点击了空数据", Toast.LENGTH_SHORT).show()
+                }
+            })
+            .setDefaultPage<ItemLoadingBinding>(init = {
+                setOnClickListener { holder, data, position, view ->
+                    Toast.makeText(requireContext(), "点击了loading", Toast.LENGTH_SHORT).show()
+                }
+            })
+            .setDefaultPage<ItemLoadFailBinding>(init = {
+                setOnClickListener { holder, data, position, view ->
+                    Toast.makeText(requireContext(), "点击刷新", Toast.LENGTH_SHORT).show()
+                }
+            }).setOnClickListener { holder, data, position, view ->
+                Toast.makeText(requireContext(), "点击任意地方", Toast.LENGTH_SHORT).show()
+            }
     }
+
 
     private val list = arrayListOf(
         R.mipmap.snow1,
@@ -261,35 +236,6 @@ class SpecialLayoutFragment : Fragment() {
         VerseInfo("100、将军玉帐貂鼠衣，手持酒杯看雪飞。", "——刘基《北风行》"),
     )
 
-    data class MultipleVerseInfo(val verseInfo: VerseInfo) : XMultiItemEntity {
-        override fun getItemViewType(): Int {
-            return 5
-        }
-    }
 
-    data class MultipleInt(val res: Int) : XMultiItemEntity {
-        override fun getItemViewType(): Int {
-            return 8
-        }
-    }
-
-    private val list2 = arrayListOf(
-        MultipleInt(R.mipmap.snow1),
-        MultipleVerseInfo(
-            VerseInfo(
-                "1、何时杖尔看南雪，我与梅花两白头。",
-                "——查辛香《清稗类钞·咏罗浮藤杖所作》"
-            )
-        ),
-        MultipleVerseInfo(VerseInfo("2、晚来天欲雪，能饮一杯无？", "——白居易《问刘十九》")),
-        MultipleVerseInfo(VerseInfo("3、昔去雪如花，今来花似雪。", "——范云《别诗》")),
-        MultipleVerseInfo(VerseInfo("4、柴门闻犬吠，风雪夜归人。", "——刘长卿《逢雪宿芙蓉山主人》")),
-        MultipleVerseInfo(
-            VerseInfo(
-                "5、忽如一夜春风来，千树万树梨花开。",
-                "——岑参《白雪歌送武判官归京》"
-            )
-        ),
-    )
 }
 

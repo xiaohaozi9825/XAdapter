@@ -11,7 +11,7 @@ import androidx.recyclerview.widget.RecyclerView.Adapter
 import androidx.viewbinding.ViewBinding
 import pw.xiaohaozi.xadapter.smart.XAdapterException
 import pw.xiaohaozi.xadapter.smart.entity.EMPTY
-import pw.xiaohaozi.xadapter.smart.entity.ERROR
+import pw.xiaohaozi.xadapter.smart.entity.DEFAULT_PAGE
 import pw.xiaohaozi.xadapter.smart.entity.FOOTER
 import pw.xiaohaozi.xadapter.smart.entity.HEADER
 import pw.xiaohaozi.xadapter.smart.entity.XMultiItemEntity
@@ -46,9 +46,9 @@ open class XAdapter<VB : ViewBinding, D> : Adapter<XHolder<VB>>() {
 
     val headers = arrayListOf<Triple<XProvider<*, *>, Int, HEADER>>()
     val footers = arrayListOf<Triple<XProvider<*, *>, Int, FOOTER>>()
+    val defaultPages = arrayListOf<Triple<XProvider<*, *>, Int, DEFAULT_PAGE>>()
+    var defaultPageTriple: Triple<XProvider<*, *>, Int, DEFAULT_PAGE>? = null
     var emptyTriple: Triple<XProvider<*, *>, Int, EMPTY>? = null
-    var errorTriple: Triple<XProvider<*, *>, Int, ERROR>? = null
-    private var isShowError = false
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): XHolder<VB> {
         val provide = providers[viewType]
@@ -75,7 +75,7 @@ open class XAdapter<VB : ViewBinding, D> : Adapter<XHolder<VB>>() {
         onViewHolderChanges.tryNotify { if (payloads == null) onBinding(holder, position) else onBinding(holder, position, payloads) }
         val headerCount = getHeaderProviderCount()
         val dataSize = datas.size
-        if (errorTriple != null && isShowError) {
+        if (defaultPageTriple != null) {
             when {
                 hasHeader && hasFooter -> {
                     //头布局
@@ -85,28 +85,29 @@ open class XAdapter<VB : ViewBinding, D> : Adapter<XHolder<VB>>() {
                         val footerPosition = position - headerCount - 1
                         provideViewHolder(provide, holder, footers[footerPosition].third, footerPosition, payloads)
                     }
-                    //错误布局
-                    else provideViewHolder(provide, holder, errorTriple!!.third, 0)
+                    //缺省页
+                    else provideViewHolder(provide, holder, defaultPageTriple!!.third, 0)
                 }
 
                 hasHeader && !hasFooter -> {
                     //头布局
                     if (position < headerCount) provideViewHolder(provide, holder, headers[position].third, position, payloads)
-                    //错误布局
-                    else provideViewHolder(provide, holder, errorTriple!!.third, 0, payloads)
+                    //缺省页
+                    else provideViewHolder(provide, holder, defaultPageTriple!!.third, 0, payloads)
                 }
 
                 !hasHeader && hasFooter -> {
-                    //错误布局
+                    //缺省页
                     if (position == 0)
-                        provideViewHolder(provide, holder, errorTriple!!.third, 0, payloads)
+                        provideViewHolder(provide, holder, defaultPageTriple!!.third, 0, payloads)
                     //脚布局
                     else
                         provideViewHolder(provide, holder, footers[position - 1].third, position - 1, payloads)
                 }
 
                 else -> {
-                    provideViewHolder(provide, holder, errorTriple!!.third, 0, payloads)
+                    //缺省页
+                    provideViewHolder(provide, holder, defaultPageTriple!!.third, 0, payloads)
                 }
             }
             return
@@ -184,34 +185,34 @@ open class XAdapter<VB : ViewBinding, D> : Adapter<XHolder<VB>>() {
         val dataSize = datas.size
         val headerCount = getHeaderProviderCount()
 
-        //如果设置了错误布局且显示错误布局，则使用错误布局
-        if (errorTriple != null && isShowError) {
+        //如果设置了缺省页，则使用缺省页
+        if (defaultPageTriple != null) {
             return when {
                 hasHeader && hasFooter -> {
                     //头布局
                     if (position < headerCount) headers[position].second
                     //脚布局
                     else if (position >= headerCount + 1) footers[position - headerCount - 1].second
-                    //错误布局
-                    else errorTriple!!.second
+                    //缺省页
+                    else defaultPageTriple!!.second
                 }
 
                 hasHeader && !hasFooter -> {
                     //头布局
                     if (position < headerCount) headers[position].second
-                    //错误布局
-                    else errorTriple!!.second
+                    //缺省页
+                    else defaultPageTriple!!.second
                 }
 
                 !hasHeader && hasFooter -> {
-                    //错误布局
-                    if (position == 0) errorTriple!!.second
+                    //缺省页
+                    if (position == 0) defaultPageTriple!!.second
                     //脚布局
                     else footers[position - 1].second
                 }
 
                 else -> {
-                    errorTriple!!.second
+                    defaultPageTriple!!.second
                 }
             }
         }
@@ -316,7 +317,7 @@ open class XAdapter<VB : ViewBinding, D> : Adapter<XHolder<VB>>() {
         val headerCount = if (hasHeader) getHeaderProviderCount() else 0
         val footerCount = if (hasFooter) footers.size else 0
         val dataCount = datas.size
-        if (errorTriple != null && isShowError) return headerCount + footerCount + 1
+        if (defaultPageTriple != null) return headerCount + footerCount + 1
         if (emptyTriple != null && dataCount == 0) return headerCount + footerCount + 1
         return getHeaderProviderCount() + footers.size + dataCount
     }
@@ -365,6 +366,18 @@ open class XAdapter<VB : ViewBinding, D> : Adapter<XHolder<VB>>() {
         notifyItemRangeChanged(0, headCount)
     }
 
+    inline fun <reified T : ViewBinding> removeHeaderProvider() {
+        val headCount = getHeaderProviderCount()
+        headers.filter {
+            val genericSuperclass = it.first.javaClass.genericSuperclass as? ParameterizedType
+            genericSuperclass?.actualTypeArguments?.contains(T::class.java) == true
+        }.forEach {
+            providers.remove(it.second)
+            headers.remove(it)
+        }
+        notifyItemRangeChanged(0, headCount)
+    }
+
     fun getHeaderProviderCount() = headers.size
     fun addFooterProvider(provider: XProvider<*, *>, footer: FOOTER) {
         val type = automaticallyItemType(provider)
@@ -383,43 +396,49 @@ open class XAdapter<VB : ViewBinding, D> : Adapter<XHolder<VB>>() {
         notifyItemRangeChanged(itemCount - footCount, footCount)
     }
 
+    inline fun <reified T : ViewBinding> removeFooterProvider() {
+        val footCount = getHeaderProviderCount()
+        footers.filter {
+            val genericSuperclass = it.first.javaClass.genericSuperclass as? ParameterizedType
+            genericSuperclass?.actualTypeArguments?.contains(T::class.java) == true
+        }.forEach {
+            providers.remove(it.second)
+            footers.remove(it)
+        }
+        notifyItemRangeChanged(itemCount - footCount, footCount)
+    }
+
     fun setEmptyProvider(provider: XProvider<*, *>, footer: EMPTY) {
         val type = automaticallyItemType(provider)
         emptyTriple = Triple(provider, type, footer)
         providers[type] = provider
-        notifyAllItemChanged()
     }
 
-    fun deleteEmptyProvider() {
-        emptyTriple?.let {
-            providers.remove(it.second)
-            emptyTriple = null
-        }
-        notifyAllItemChanged()
-    }
 
-    fun setErrorProvider(provider: XProvider<*, *>, error: ERROR) {
+    fun setDefaultPageProvider(provider: XProvider<*, *>, page: DEFAULT_PAGE) {
         val itemType = -providers.size() - 1
-        errorTriple = Triple(provider, itemType, error)
+        defaultPages.add(Triple(provider, itemType, page))
         providers[itemType] = provider
     }
 
-    fun deleteErrorProvider() {
-        errorTriple?.let {
-            providers.remove(it.second)
-            errorTriple = null
+    inline fun <reified T : ViewBinding> showDefaultPage() {
+        defaultPageTriple = defaultPages.findLast {
+            val genericSuperclass = it.first.javaClass.genericSuperclass as? ParameterizedType
+            genericSuperclass?.actualTypeArguments?.contains(T::class.java) == true
         }
+        notifyDataSetChanged()
     }
 
-    fun showError() {
-        isShowError = true
-        notifyAllItemChanged()
+    inline fun showDefaultPage(tag: Any) {
+        defaultPageTriple = defaultPages.find { it.third.tag == tag }
+        notifyDataSetChanged()
     }
 
-    fun hintError() {
-        isShowError = false
-        notifyAllItemChanged()
+    fun hintDefaultPage() {
+        defaultPageTriple = null
+        notifyDataSetChanged()
     }
+
 
     /**
      * 刷新列表所有item
@@ -446,7 +465,7 @@ open class XAdapter<VB : ViewBinding, D> : Adapter<XHolder<VB>>() {
 
 
     /**************************************************************************/
-    /**************************   生命周期同步   ********************************/
+    /**************************   生命周期同步   ******************************/
     /**************************************************************************/
     override fun onViewRecycled(holder: XHolder<VB>) {
         tryNotifyProvider { onViewRecycled(holder) }

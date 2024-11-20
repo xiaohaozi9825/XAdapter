@@ -166,6 +166,7 @@ class SmartDataImpl<Employer : XProxy<Employer>, VB : ViewBinding, D> : SmartDat
 //        mAdapterSelectedImpl?.selectedCache?.clear()
         getDatas().clear()
         getDatas().addAll(list)
+        getAdapter().notifyDataSetChanged()
         notifyChanged()
     }
 

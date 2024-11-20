@@ -5,23 +5,17 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
-import androidx.lifecycle.lifecycleScope
-import coil.load
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 import pw.xiaohaozi.xadapter.R
 import pw.xiaohaozi.xadapter.databinding.ActivityMainBinding
 import pw.xiaohaozi.xadapter.databinding.ItemHomeBinding
-import pw.xiaohaozi.xadapter.databinding.ItemHomeEmptyBinding
 import pw.xiaohaozi.xadapter.databinding.ItemHomeHeaderBinding
 import pw.xiaohaozi.xadapter.databinding.ItemHomeTitleBinding
-import pw.xiaohaozi.xadapter.databinding.ItemImageCardBinding
 import pw.xiaohaozi.xadapter.enableEdgeToEdge
 import pw.xiaohaozi.xadapter.fragment.CheckFragment
 import pw.xiaohaozi.xadapter.fragment.ClickFragment
+import pw.xiaohaozi.xadapter.fragment.ImageSelectFragment
 import pw.xiaohaozi.xadapter.fragment.LongClickFragment
 import pw.xiaohaozi.xadapter.fragment.MultipleFragment
-import pw.xiaohaozi.xadapter.fragment.ImageSelectFragment
 import pw.xiaohaozi.xadapter.fragment.SingleFragment
 import pw.xiaohaozi.xadapter.fragment.SpecialLayoutFragment
 import pw.xiaohaozi.xadapter.fragment.TextChangeFragment
@@ -36,14 +30,7 @@ class MainActivity : AppCompatActivity() {
     private val binding by lazy { ActivityMainBinding.inflate(layoutInflater) }
 
     private val adapter = createAdapter()
-        .addHeader<ItemHomeHeaderBinding>("head-001") {
-
-        }
-        .addHeader<ItemImageCardBinding>("head-002") {
-            it.binding.image.load(R.mipmap.snow3)
-        }
-//        .addFooter<ItemHomeFooterBinding>("foot-001")
-
+        .addHeader<ItemHomeHeaderBinding> { }
         .withType<ItemHomeTitleBinding, String>(isFixed = true) { (holder, data) ->
             holder.binding.tvTitle.text = data
         }
@@ -51,25 +38,14 @@ class MainActivity : AppCompatActivity() {
             holder.binding.data = data
         }
         .setOnClickListener { holder, data, position, view ->
-            val clazz = data?.clazz
+            val clazz = data.clazz
             if (clazz == null) {
                 Toast.makeText(this@MainActivity, "敬请期待", Toast.LENGTH_SHORT).show()
-                adapter.setEmpty<ItemHomeEmptyBinding>()
-                adapter.reset(mutableListOf())
-                click()
-
             } else
                 toEmptyActivity(clazz, data.label, clazz.simpleName)
         }
         .toAdapter()
 
-    private fun click() {
-        lifecycleScope.launch {
-            delay(2000)
-            adapter.deleteEmpty()
-            this@MainActivity.adapter.reset(list)
-        }
-    }
 
     var data: VerseInfo? = null
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -98,6 +74,8 @@ class MainActivity : AppCompatActivity() {
 
         "选择操作",
         HomeInfo("选择", "item选择操作", R.mipmap.ic_launcher, ImageSelectFragment::class.java),
+        "特殊布局",
+        HomeInfo("特殊布局", "如头布局，脚布局，空布局、错误布局", R.mipmap.ic_launcher, SpecialLayoutFragment::class.java),
         "数据操作",
         HomeInfo("数据操作", "数据增删改查", R.mipmap.ic_launcher),
         HomeInfo("数据操作", "数据增删改查", R.mipmap.ic_launcher, SpecialLayoutFragment::class.java),

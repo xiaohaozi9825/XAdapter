@@ -2,7 +2,6 @@ package pw.xiaohaozi.xadapter.smart.ext
 
 import androidx.viewbinding.ViewBinding
 import pw.xiaohaozi.xadapter.smart.adapter.SmartAdapter
-import pw.xiaohaozi.xadapter.smart.entity.HEADER
 import pw.xiaohaozi.xadapter.smart.holder.XHolder
 import pw.xiaohaozi.xadapter.smart.provider.SmartProvider
 
@@ -28,14 +27,15 @@ data class OnBindParams<VB : ViewBinding, D>(
  * 创建单布局Adapter
  */
 inline fun <VB : ViewBinding, D> createAdapter(
-    crossinline init: OnAdapterInitHolder<VB, D> = {},
+    crossinline init: (SmartProvider<VB, D>.() -> Unit) = {},
+    crossinline create: OnAdapterInitHolder<VB, D> = {},
     crossinline bind: OnAdapterBindHolder<VB, D>,
 ): SmartAdapter<VB, D> {
     val adapter = SmartAdapter<VB, D>()
     val provider = object : SmartProvider<VB, D>(adapter, select = true) {
 
         override fun onCreated(holder: XHolder<VB>) {
-            init.invoke(adapter, holder)
+            create.invoke(adapter, holder)
         }
 
         override fun onBind(holder: XHolder<VB>, data: D, position: Int) {
@@ -46,6 +46,7 @@ inline fun <VB : ViewBinding, D> createAdapter(
         }
     }
     adapter.addProvider(provider, 0)
+    init.invoke(provider)
     return adapter
 }
 
@@ -74,13 +75,14 @@ inline fun <VB : ViewBinding, D : Any?> SmartAdapter<ViewBinding, Any?>.withType
     isFixed: Boolean? = null,
     itemType: Int? = null,
     select: Boolean = false,
-    crossinline init: OnProviderInitHolder<VB, D> = {},
+    crossinline init: (SmartProvider<VB, D>.() -> Unit) = {},
+    crossinline create: OnProviderInitHolder<VB, D> = {},
     crossinline bind: OnProviderBindHolder<VB, D>,
 ): SmartProvider<VB, D> {
     val provider = object : SmartProvider<VB, D>(this, select = select) {
 
         override fun onCreated(holder: XHolder<VB>) {
-            init.invoke(this, holder)
+            create.invoke(this, holder)
         }
 
         override fun onBind(holder: XHolder<VB>, data: D, position: Int) {
@@ -96,6 +98,7 @@ inline fun <VB : ViewBinding, D : Any?> SmartAdapter<ViewBinding, Any?>.withType
 
     }
     this.addProvider(provider, itemType)
+    init.invoke(provider)
     return provider
 }
 
@@ -108,13 +111,14 @@ inline fun <reified VB : ViewBinding, D : Any?> SmartProvider<out ViewBinding, o
     isFixed: Boolean? = null,
     itemType: Int? = null,
     select: Boolean = false,
-    crossinline init: OnProviderInitHolder<VB, D> = {},
+    crossinline init: (SmartProvider<VB, D>.() -> Unit) = {},
+    crossinline create: OnProviderInitHolder<VB, D> = {},
     crossinline bind: OnProviderBindHolder<VB, D>,
 ): SmartProvider<VB, D> {
     val provider = object : SmartProvider<VB, D>(adapter, select = select) {
 
         override fun onCreated(holder: XHolder<VB>) {
-            init.invoke(this, holder)
+            create.invoke(this, holder)
         }
 
         override fun onBind(holder: XHolder<VB>, data: D, position: Int) {
@@ -131,6 +135,7 @@ inline fun <reified VB : ViewBinding, D : Any?> SmartProvider<out ViewBinding, o
         }
     }
     adapter.addProvider(provider, itemType)
+    init.invoke(provider)
     return provider
 }
 
@@ -141,8 +146,6 @@ inline fun <reified VB : ViewBinding, D : Any?> SmartProvider<out ViewBinding, o
 fun <VB : ViewBinding, D> SmartProvider<VB, D>.toAdapter(): SmartAdapter<ViewBinding, Any?> {
     return this.adapter as SmartAdapter<ViewBinding, Any?>
 }
-
-
 
 
 /*****************************************************
