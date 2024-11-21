@@ -8,20 +8,18 @@ import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import pw.xiaohaozi.xadapter.databinding.FragmentRecyclerBinding
 import pw.xiaohaozi.xadapter.databinding.ItemVerseBinding
-import pw.xiaohaozi.xadapter.databinding.ItemVerseDataBindingBinding
 import pw.xiaohaozi.xadapter.info.VerseInfo
 import pw.xiaohaozi.xadapter.smart.adapter.SmartAdapter
 import pw.xiaohaozi.xadapter.smart.ext.createAdapter
-import pw.xiaohaozi.xadapter.smart.holder.XHolder
-import pw.xiaohaozi.xadapter.smart.provider.SmartProvider
+import pw.xiaohaozi.xadapter.smart.ext.dragSort
 
 /**
  * 单布局
  */
-class SingleFragment : Fragment() {
+class DragSortFragment : Fragment() {
     private lateinit var binding: FragmentRecyclerBinding
 
-    private val adapter = function2()
+    private val adapter = function1()
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -41,71 +39,11 @@ class SingleFragment : Fragment() {
      */
     private fun function1(): SmartAdapter<ItemVerseBinding, VerseInfo> {
         //泛型VB 确定布局文件，泛型D确定数据类型，回调函数中绑定数据
-        return createAdapter<ItemVerseBinding, VerseInfo> { (holder, data, position)  ->
+        return createAdapter<ItemVerseBinding, VerseInfo> { (holder, data,)  ->
             holder.binding.tvContent.text = data.content
             holder.binding.tvAuthor.text = data.author
-        }
+        }.dragSort()
     }
-
-    /**
-     * 方法2
-     * 使用Adapter+Provider的方式创建
-     *
-     * 比较：
-     * 方法1实际上是对方法2的封装，使用更方便；
-     * 方法2步骤繁琐，但是暴露的方法较多，而且可以添加多个Provider，灵活度更高
-     *
-     * 推荐：
-     * 如果逻辑较为简单，推荐使用方法1；
-     * 如果逻辑复杂，推荐使用方法2.
-     */
-    private fun function2(): SmartAdapter<ItemVerseBinding, VerseInfo> {
-        //①创建Adapter
-        val SmartAdapter = SmartAdapter<ItemVerseBinding, VerseInfo>()
-        //②创建Provider
-        val provider = object : SmartProvider<ItemVerseBinding, VerseInfo>(SmartAdapter) {
-            override fun onCreated(holder: XHolder<ItemVerseBinding>) {
-
-            }
-
-            override fun onBind(
-                holder: XHolder<ItemVerseBinding>,
-                data: VerseInfo,
-                position: Int
-            ) {
-                holder.binding.tvContent.text = data?.content
-                holder.binding.tvAuthor.text = data?.author
-            }
-
-        }
-        //③将Provider 添加到 Adapter中
-        //方式一：使用方法添加，viewType可不填
-        SmartAdapter.addProvider(provider, 0)
-        return SmartAdapter
-        //方式一二：使用➕链接，viewType为空
-//        return xAdapter + provider
-
-    }
-
-    /**
-     * 结合 dataBinding 绑定数据，可以一行代码实现Adapter的创建和数据绑定
-     *
-     * 注意和function1() 中的布局文件不是同一个，
-     * function3()的 ItemSingleTypeDataBindingBinding 是使用了dataBinding 的，
-     * 而function1()的 ItemSingleTypeViewBindingBinding 没有使用dataBinding的。
-     *
-     * 此处代码简化前如下,如果单独写，需要注意指定泛型：
-     * ```
-     * return createAdapter<ItemSingleTypeDataBindingBinding, Verse> { holder, data, position ->
-     *     holder.binding.data = data
-     * }
-     * ```
-     */
-    private fun function3(): SmartAdapter<ItemVerseDataBindingBinding, VerseInfo> {
-        //一行代码实现Adapter的创建和数据绑定
-        return createAdapter { (holder, data, position)  -> holder.binding.data = data }
-    }
-
 
 
     private val list = arrayListOf(

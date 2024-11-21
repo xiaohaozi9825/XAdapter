@@ -13,11 +13,14 @@ import pw.xiaohaozi.xadapter.databinding.ItemHomeTitleBinding
 import pw.xiaohaozi.xadapter.enableEdgeToEdge
 import pw.xiaohaozi.xadapter.fragment.CheckFragment
 import pw.xiaohaozi.xadapter.fragment.ClickFragment
+import pw.xiaohaozi.xadapter.fragment.DragSortFragment
 import pw.xiaohaozi.xadapter.fragment.ImageSelectFragment
 import pw.xiaohaozi.xadapter.fragment.LongClickFragment
 import pw.xiaohaozi.xadapter.fragment.MultipleFragment
 import pw.xiaohaozi.xadapter.fragment.SingleFragment
 import pw.xiaohaozi.xadapter.fragment.SpecialLayoutFragment
+import pw.xiaohaozi.xadapter.fragment.SwipeDeleteFragment
+import pw.xiaohaozi.xadapter.fragment.SwipeMenuFragment
 import pw.xiaohaozi.xadapter.fragment.TextChangeFragment
 import pw.xiaohaozi.xadapter.info.HomeInfo
 import pw.xiaohaozi.xadapter.info.VerseInfo
@@ -75,7 +78,11 @@ class MainActivity : AppCompatActivity() {
         "选择操作",
         HomeInfo("选择", "item选择操作", R.mipmap.ic_launcher, ImageSelectFragment::class.java),
         "特殊布局",
-        HomeInfo("特殊布局", "如头布局，脚布局，空布局、错误布局", R.mipmap.ic_launcher, SpecialLayoutFragment::class.java),
+        HomeInfo("特殊布局", "如头布局，脚布局，空布局、缺省页", R.mipmap.ic_launcher, SpecialLayoutFragment::class.java),
+        "拖拽与侧滑",
+        HomeInfo("侧滑删除", "", R.mipmap.ic_launcher, SwipeDeleteFragment::class.java),
+        HomeInfo("拖拽排序", "", R.mipmap.ic_launcher, DragSortFragment::class.java),
+        HomeInfo("侧滑菜单", "类似QQ侧滑效果", R.mipmap.ic_launcher, SwipeMenuFragment::class.java),
         "数据操作",
         HomeInfo("数据操作", "数据增删改查", R.mipmap.ic_launcher),
         HomeInfo("数据操作", "数据增删改查", R.mipmap.ic_launcher, SpecialLayoutFragment::class.java),

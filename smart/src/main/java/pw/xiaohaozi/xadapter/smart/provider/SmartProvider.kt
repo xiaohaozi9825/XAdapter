@@ -2,10 +2,8 @@ package pw.xiaohaozi.xadapter.smart.provider
 
 import androidx.viewbinding.ViewBinding
 import pw.xiaohaozi.xadapter.smart.adapter.SmartAdapter
-import pw.xiaohaozi.xadapter.smart.adapter.XAdapter
 import pw.xiaohaozi.xadapter.smart.impl.EventImpl
 import pw.xiaohaozi.xadapter.smart.proxy.EventProxy
-import pw.xiaohaozi.xadapter.smart.proxy.SelectedProxy
 
 /**
  *

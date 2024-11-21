@@ -1,9 +1,15 @@
 package pw.xiaohaozi.xadapter.smart.ext
 
+import androidx.recyclerview.widget.ItemTouchHelper
+import androidx.recyclerview.widget.RecyclerView
 import androidx.viewbinding.ViewBinding
 import pw.xiaohaozi.xadapter.smart.adapter.SmartAdapter
+import pw.xiaohaozi.xadapter.smart.adapter.XAdapter
+import pw.xiaohaozi.xadapter.smart.dragswipe.DragSort
+import pw.xiaohaozi.xadapter.smart.dragswipe.ItemDrag
 import pw.xiaohaozi.xadapter.smart.holder.XHolder
 import pw.xiaohaozi.xadapter.smart.provider.SmartProvider
+import pw.xiaohaozi.xadapter.smart.widgets.SwipeItemLayout
 
 
 /*****************************************************
@@ -151,6 +157,109 @@ fun <VB : ViewBinding, D> SmartProvider<VB, D>.toAdapter(): SmartAdapter<ViewBin
 /*****************************************************
  * 其他操作
  *****************************************************/
+
+/**
+ * 侧滑菜单
+ * item 根布局必须使用 SwipeItemLayout
+ */
+fun <A : SmartAdapter<VB, D>, VB : ViewBinding, D> A.swipeMenu(): A {
+    addOnRecyclerViewChanges(object : XAdapter.OnRecyclerViewChanges {
+        lateinit var listener: RecyclerView.OnItemTouchListener
+        override fun onAttachedToRecyclerView(recyclerView: RecyclerView) {
+            listener = SwipeItemLayout.OnSwipeItemTouchListener(recyclerView.context)
+            recyclerView.addOnItemTouchListener(listener)
+        }
+
+        override fun onDetachedFromRecyclerView(recyclerView: RecyclerView) {
+            recyclerView.removeOnItemTouchListener(listener)
+        }
+    })
+    return this
+}
+
+/**
+ * 拖拽排序
+ *
+ * @param threshold 设置用户在拖拽视图时应该移动视图的比例。在视图移动到这个位置之后，ItemTouchHelper开始检查视图下方是否有可能的删除。一个浮点值，表示视图大小的百分比。缺省值为。1f。
+ * @param flags 触发方向
+ * @param start 开始拖拽
+ * @param end 结束拖拽（松开手就会调用）
+ * @param onMove 被拖拽的item多拽到其他item位置上是调用,该参数会替换掉现有的onMove逻辑
+ * @param swap 当两个item交换时调用
+ */
+fun <T : SmartAdapter<*, *>> T.dragSort(
+    threshold: Float = 0.1f,
+    flags: (recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder) -> Int = { _, _ -> ItemTouchHelper.UP or ItemTouchHelper.DOWN or ItemTouchHelper.START or ItemTouchHelper.END },
+    start: ((viewHolder: RecyclerView.ViewHolder?) -> Unit)? = null,
+    end: ((recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder) -> Unit)? = null,
+    onMove: ((
+        recyclerView: RecyclerView,
+        source: RecyclerView.ViewHolder,
+        target: RecyclerView.ViewHolder
+    ) -> Boolean)? = null,
+    swap: ((
+        recyclerView: RecyclerView,
+        source: RecyclerView.ViewHolder,
+        target: RecyclerView.ViewHolder,
+        fromPosition: Int,
+        toPosition: Int,
+    ) -> Unit)? = null,
+): T {
+    addOnRecyclerViewChanges(object : XAdapter.OnRecyclerViewChanges {
+        override fun onAttachedToRecyclerView(recyclerView: RecyclerView) {
+            ItemTouchHelper(ItemDrag(DragSort(threshold, flags, start, end, onMove, swap)))
+                .attachToRecyclerView(recyclerView)
+        }
+
+        override fun onDetachedFromRecyclerView(recyclerView: RecyclerView) {
+
+        }
+    })
+
+    return this
+}
+
+
+/**
+ * 拖拽排序
+ *
+ * @param threshold 设置用户在拖拽视图时应该移动视图的比例。在视图移动到这个位置之后，ItemTouchHelper开始检查视图下方是否有可能的删除。一个浮点值，表示视图大小的百分比。缺省值为。1f。
+ * @param flags 触发方向
+ * @param start 开始拖拽
+ * @param end 结束拖拽（松开手就会调用）
+ * @param onMove 被拖拽的item多拽到其他item位置上是调用,该参数会替换掉现有的onMove逻辑
+ * @param swap 当两个item交换时调用
+ */
+fun <VB : ViewBinding, D> SmartProvider<VB, D>.dragSort(
+    threshold: Float = 0.1f,
+    flags: (recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder) -> Int = { _, holder -> if (holder.itemViewType == getItemViewType()) ItemTouchHelper.UP or ItemTouchHelper.DOWN or ItemTouchHelper.START or ItemTouchHelper.END else 0 },
+    start: ((viewHolder: RecyclerView.ViewHolder?) -> Unit)? = null,
+    end: ((recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder) -> Unit)? = null,
+    onMove: ((
+        recyclerView: RecyclerView,
+        source: RecyclerView.ViewHolder,
+        target: RecyclerView.ViewHolder
+    ) -> Boolean)? = null,
+    swap: ((
+        recyclerView: RecyclerView,
+        source: RecyclerView.ViewHolder,
+        target: RecyclerView.ViewHolder,
+        fromPosition: Int,
+        toPosition: Int,
+    ) -> Unit)? = null,
+): SmartProvider<VB, D> {
+    adapter.addOnRecyclerViewChanges(object : XAdapter.OnRecyclerViewChanges {
+        override fun onAttachedToRecyclerView(recyclerView: RecyclerView) {
+            ItemTouchHelper(ItemDrag(DragSort(threshold, flags, start, end, onMove, swap)))
+                .attachToRecyclerView(recyclerView)
+        }
+
+        override fun onDetachedFromRecyclerView(recyclerView: RecyclerView) {
+
+        }
+    })
+    return this
+}
 //
 ///**
 // * 设置为单选
