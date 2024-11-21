@@ -1,13 +1,12 @@
 package pw.xiaohaozi.xadapter.smart.adapter
 
-import android.widget.Toast
 import androidx.viewbinding.ViewBinding
 import kotlinx.coroutines.CoroutineName
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
-import pw.xiaohaozi.xadapter.smart.entity.EMPTY
 import pw.xiaohaozi.xadapter.smart.entity.DEFAULT_PAGE
+import pw.xiaohaozi.xadapter.smart.entity.EMPTY
 import pw.xiaohaozi.xadapter.smart.entity.FOOTER
 import pw.xiaohaozi.xadapter.smart.entity.HEADER
 import pw.xiaohaozi.xadapter.smart.holder.XHolder
@@ -105,13 +104,6 @@ open class SmartAdapter<VB : ViewBinding, D>(
         return this
     }
 
-    /**
-     * 删除指定头布局
-     */
-    fun removeHeader(tag: String): SmartAdapter<VB, D> {
-        removeHeaderProvider(tag)
-        return this
-    }
 
     /**
      * 删除指定头布局
@@ -155,13 +147,6 @@ open class SmartAdapter<VB : ViewBinding, D>(
         return this
     }
 
-    /**
-     * 删除指定脚布局
-     */
-    fun removeFooter(tag: String): SmartAdapter<VB, D> {
-        removeFooterProvider(tag)
-        return this
-    }
 
     /**
      * 删除指定脚布局

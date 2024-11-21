@@ -4,7 +4,6 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -39,52 +38,55 @@ class SpecialLayoutFragment : Fragment() {
         binding = FragmentSpecialLayoutBinding.inflate(inflater)
         binding.recycleView.layoutManager = LinearLayoutManager(requireContext())
         binding.recycleView.adapter = adapter
+        //模拟空数据
         binding.tvEmpty.setOnClickListener {
             lifecycleScope.launch {
-                adapter.removeHeader<ItemHomeHeaderBinding>()
-                adapter.removeFooter<ItemHomeFooterBinding>()
-                adapter.showDefaultPage<ItemLoadingBinding>()
-                delay(1000)
-                adapter.hintDefaultPage()
-                adapter.removeHeader<ItemHomeHeaderBinding>()
-                adapter.removeFooter<ItemHomeFooterBinding>()
-                adapter.reset(listOf())
+                loading()
+                adapter.hintDefaultPage()//隐藏加载中缺省页
+                adapter.reset(listOf())//刷新数据
             }
         }
-
+        //模拟加载成功
         binding.tvLoadSuccess.setOnClickListener {
             lifecycleScope.launch {
-                adapter.removeHeader<ItemHomeHeaderBinding>()
-                adapter.removeFooter<ItemHomeFooterBinding>()
-                adapter.showDefaultPage<ItemLoadingBinding>()
-                delay(1000)
-                adapter.hintDefaultPage()
-                adapter.addHeader<ItemHomeHeaderBinding>()
+                loading()
+                adapter.hasHeader = true
+//                adapter.addHeader<ItemHomeHeaderBinding> { }
                 adapter.addFooter<ItemHomeFooterBinding>()
-                adapter.reset(list)
+                adapter.hintDefaultPage()//隐藏加载中缺省页
+                adapter.reset(list)//刷新数据
             }
 
         }
+        //模拟加载失败
         binding.tvLoadFail.setOnClickListener {
             lifecycleScope.launch {
-                adapter.removeHeader<ItemHomeHeaderBinding>()
-                adapter.removeFooter<ItemHomeFooterBinding>()
-                adapter.showDefaultPage<ItemLoadingBinding>()
-                delay(1000)
-                adapter.showDefaultPage<ItemLoadFailBinding>()
+                loading()
+                adapter.showDefaultPage<ItemLoadFailBinding>()//显示加载失败缺省页，这里会替换加载中缺省页
             }
 
         }
         return binding.root
     }
 
+    //模拟加载中
+    private suspend fun loading() {
+        //隐藏头布局和脚布局
+        adapter.hasHeader = false
+//        adapter.removeHeader<ItemHomeHeaderBinding>()
+        adapter.removeFooter<ItemHomeFooterBinding>()
+        //显示加载中缺省页
+        adapter.showDefaultPage<ItemLoadingBinding>()
+        //模拟加载耗时1s
+        delay(1000)
+    }
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         lifecycleScope.launch {
-            adapter.showDefaultPage<ItemLoadingBinding>()
-            delay(1000)
-            adapter.reset(list)
+            loading()
             adapter.hintDefaultPage()
+            adapter.reset(list)
         }
     }
 
@@ -95,38 +97,19 @@ class SpecialLayoutFragment : Fragment() {
     private fun function1(): SmartAdapter<ViewBinding, Any?> {
         //泛型VB 确定布局文件，泛型D确定数据类型，回调函数中绑定数据
         return createAdapter()
-            .withType<ItemVerseBinding, VerseInfo>(init = {
-                setOnClickListener { holder, data, position, view ->
-                    Toast.makeText(requireContext(), "点击了诗句", Toast.LENGTH_SHORT).show()
-                }
-            }) { (holder, data) ->
+            .withType<ItemVerseBinding, VerseInfo> { (holder, data) ->
                 holder.binding.tvContent.text = data.content
                 holder.binding.tvAuthor.text = data.author
             }
             .withType<ItemImageCardBinding, Int> { (holder, data) ->
                 holder.binding.image.setImageResource(data)
             }
-            .setOnClickListener { holder, data, position, view ->
-                Toast.makeText(requireContext(), "点击图片", Toast.LENGTH_SHORT).show()
-            }
             .toAdapter()
-            .setEmpty<ItemEmptyBinding>(init = {
-                setOnClickListener { holder, data, position, view ->
-                    Toast.makeText(requireContext(), "点击了空数据", Toast.LENGTH_SHORT).show()
-                }
-            })
-            .setDefaultPage<ItemLoadingBinding>(init = {
-                setOnClickListener { holder, data, position, view ->
-                    Toast.makeText(requireContext(), "点击了loading", Toast.LENGTH_SHORT).show()
-                }
-            })
-            .setDefaultPage<ItemLoadFailBinding>(init = {
-                setOnClickListener { holder, data, position, view ->
-                    Toast.makeText(requireContext(), "点击刷新", Toast.LENGTH_SHORT).show()
-                }
-            }).setOnClickListener { holder, data, position, view ->
-                Toast.makeText(requireContext(), "点击任意地方", Toast.LENGTH_SHORT).show()
-            }
+            .setEmpty<ItemEmptyBinding>()//设置空布局，无数据时展示
+            .setDefaultPage<ItemLoadingBinding>()//设置加载中缺省页，调用showDefaultPage()方法时显示
+            .setDefaultPage<ItemLoadFailBinding>()//设置加载失败缺省页，调用showDefaultPage()方法时显示
+            .addHeader<ItemHomeHeaderBinding>()//添加并展示头布局
+            .addFooter<ItemHomeFooterBinding>()//添加并展示脚布局
     }
 
 

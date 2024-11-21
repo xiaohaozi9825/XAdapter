@@ -5,15 +5,13 @@
     android:layout_height="match_parent">
 
 
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:gravity="center"
-        android:padding="8dp"
-        android:text="加载中。。。"
-        android:textColor="@color/black"
-        android:textSize="14sp"
-        android:textStyle="bold" />
+    <ProgressBar
+        android:layout_width="64dp"
+        android:layout_height="64dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

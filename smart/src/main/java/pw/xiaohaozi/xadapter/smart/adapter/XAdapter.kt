@@ -73,7 +73,7 @@ open class XAdapter<VB : ViewBinding, D> : Adapter<XHolder<VB>>() {
         val provide = providers[holder.itemViewType] ?: providers[getItemViewType(position)]
         ?: throw NullPointerException("没有找到 itemViewType = ${holder.itemViewType} 的 Provider")
         onViewHolderChanges.tryNotify { if (payloads == null) onBinding(holder, position) else onBinding(holder, position, payloads) }
-        val headerCount = getHeaderProviderCount()
+        val headerCount = if (hasHeader) getHeaderProviderCount() else 0
         val dataSize = datas.size
         if (defaultPageTriple != null) {
             when {
@@ -154,13 +154,13 @@ open class XAdapter<VB : ViewBinding, D> : Adapter<XHolder<VB>>() {
             return
         }
 
-        if (position < headerCount)
+        if (hasHeader && position < headerCount)
             provideViewHolder(provide, holder, headers[position].third, position, payloads)
-        else if (position >= headerCount + dataSize) {
+        else if (hasFooter && position >= headerCount + dataSize) {
             val footerPosition = position - headerCount - dataSize
             provideViewHolder(provide, holder, footers[footerPosition].third, footerPosition, payloads)
         } else {
-            val dataPosition = position - headerCount
+            val dataPosition = getDataPosition(position)
             val d = datas[dataPosition]
             provideViewHolder(provide, holder, d, dataPosition, payloads)
         }
@@ -248,12 +248,12 @@ open class XAdapter<VB : ViewBinding, D> : Adapter<XHolder<VB>>() {
         }
 
         //头布局
-        if (position < headerCount) return headers[position].second
+        if (hasHeader && position < headerCount) return headers[position].second
         //脚布局
-        else if (position >= headerCount + dataSize) return footers[position - headerCount - dataSize].second
+        else if (hasFooter && position >= headerCount + dataSize) return footers[position - headerCount - dataSize].second
         //用户自定义布局
         else {
-            val pos = position - headerCount
+            val pos = getDataPosition(position)
             val data = datas[pos]
             return getCustomType(data, position)
         }
@@ -312,14 +312,35 @@ open class XAdapter<VB : ViewBinding, D> : Adapter<XHolder<VB>>() {
     }
 
     var hasHeader: Boolean = true
+        set(value) {
+            if (field == value) return
+            field = value
+            if (value) {
+                notifyItemRangeInserted(0, getHeaderProviderCount())
+            } else {
+                notifyItemRangeRemoved(0, getHeaderProviderCount())
+            }
+        }
     var hasFooter: Boolean = true
+        set(value) {
+            if (field == value) return
+            field = value
+            val itemCount = itemCount
+            val footersCount = getFooterProviderCount()
+            if (value) {
+                notifyItemRangeInserted(itemCount - footersCount, footersCount)
+            } else {
+                notifyItemRangeRemoved(itemCount - footersCount, footersCount)
+            }
+        }
+
     override fun getItemCount(): Int {
         val headerCount = if (hasHeader) getHeaderProviderCount() else 0
-        val footerCount = if (hasFooter) footers.size else 0
+        val footerCount = if (hasFooter) getFooterProviderCount() else 0
         val dataCount = datas.size
         if (defaultPageTriple != null) return headerCount + footerCount + 1
         if (emptyTriple != null && dataCount == 0) return headerCount + footerCount + 1
-        return getHeaderProviderCount() + footers.size + dataCount
+        return headerCount + footerCount + dataCount
     }
 
 
@@ -349,63 +370,55 @@ open class XAdapter<VB : ViewBinding, D> : Adapter<XHolder<VB>>() {
         return this
     }
 
+    fun getHeaderProviderCount() = headers.size
+    fun getFooterProviderCount() = footers.size
+
+    /**
+     * 当有头布局时，回调函数中的position均为adapterPosition，如果需要对应数据的索引，这里需要做一次计算
+     */
+    fun getDataPosition(position: Int): Int {
+        return if (!hasHeader) position
+        else position - getHeaderProviderCount()
+    }
+
     fun addHeaderProvider(provider: XProvider<*, *>, header: HEADER) {
         val type = automaticallyItemType(provider)
         providers[type] = provider
         headers.add(0, Triple(provider, type, header))
-        notifyItemInserted(0)
-    }
-
-    fun removeHeaderProvider(tag: Any = "") {
-        val headCount = getHeaderProviderCount()
-        headers.filter { it.third.tag == tag }
-            .forEach {
-                providers.remove(it.second)
-                headers.remove(it)
-            }
-        notifyItemRangeChanged(0, headCount)
+        if (hasHeader) notifyItemInserted(0)
     }
 
     inline fun <reified T : ViewBinding> removeHeaderProvider() {
-        val headCount = getHeaderProviderCount()
-        headers.filter {
+        headers.find {
             val genericSuperclass = it.first.javaClass.genericSuperclass as? ParameterizedType
             genericSuperclass?.actualTypeArguments?.contains(T::class.java) == true
-        }.forEach {
+        }?.let {
+            val position = headers.indexOf(it)
             providers.remove(it.second)
             headers.remove(it)
+            if (hasHeader) notifyItemRemoved(position)
         }
-        notifyItemRangeChanged(0, headCount)
     }
 
-    fun getHeaderProviderCount() = headers.size
+
     fun addFooterProvider(provider: XProvider<*, *>, footer: FOOTER) {
         val type = automaticallyItemType(provider)
         providers[type] = provider
         footers.add(Triple(provider, type, footer))
-        notifyItemInserted(itemCount - 1)
+        if (hasFooter) notifyItemInserted(itemCount - 1)
     }
 
-    fun removeFooterProvider(tag: Any = "") {
-        val footCount = getHeaderProviderCount()
-        footers.filter { it.third.tag == tag }
-            .forEach {
-                providers.remove(it.second)
-                footers.remove(it)
-            }
-        notifyItemRangeChanged(itemCount - footCount, footCount)
-    }
 
     inline fun <reified T : ViewBinding> removeFooterProvider() {
-        val footCount = getHeaderProviderCount()
-        footers.filter {
+        footers.find {
             val genericSuperclass = it.first.javaClass.genericSuperclass as? ParameterizedType
             genericSuperclass?.actualTypeArguments?.contains(T::class.java) == true
-        }.forEach {
+        }?.let {
+            val position = itemCount - getFooterProviderCount() + footers.indexOf(it)
             providers.remove(it.second)
             footers.remove(it)
+            if (hasFooter) notifyItemRemoved(position)
         }
-        notifyItemRangeChanged(itemCount - footCount, footCount)
     }
 
     fun setEmptyProvider(provider: XProvider<*, *>, footer: EMPTY) {
@@ -422,21 +435,38 @@ open class XAdapter<VB : ViewBinding, D> : Adapter<XHolder<VB>>() {
     }
 
     inline fun <reified T : ViewBinding> showDefaultPage() {
-        defaultPageTriple = defaultPages.findLast {
+        val defaultPageTriple = defaultPages.findLast {
             val genericSuperclass = it.first.javaClass.genericSuperclass as? ParameterizedType
             genericSuperclass?.actualTypeArguments?.contains(T::class.java) == true
         }
-        notifyDataSetChanged()
+        //找到了对应的缺省页，且与上次展示的不一样时，才刷新
+        if (defaultPageTriple != null && defaultPageTriple != this.defaultPageTriple) {
+            val itemCount = itemCount
+            val headerCount = if (hasHeader) getHeaderProviderCount() else 0
+            val footerCount = if (hasFooter) getFooterProviderCount() else 0
+            notifyItemRangeRemoved(headerCount, itemCount - headerCount - footerCount)
+            this.defaultPageTriple = defaultPageTriple
+            notifyItemInserted(headerCount)
+        }
     }
 
-    inline fun showDefaultPage(tag: Any) {
-        defaultPageTriple = defaultPages.find { it.third.tag == tag }
-        notifyDataSetChanged()
+    fun showDefaultPage(tag: Any) {
+        val defaultPageTriple = defaultPages.find { it.third.tag == tag }
+        //找到了对应的缺省页，且与上次展示的不一样时，才刷新
+        if (defaultPageTriple != null && defaultPageTriple != this.defaultPageTriple) {
+            val itemCount = itemCount
+            val headerCount = if (hasHeader) getHeaderProviderCount() else 0
+            val footerCount = if (hasFooter) getFooterProviderCount() else 0
+            notifyItemRangeRemoved(headerCount, itemCount - headerCount - footerCount)
+            this.defaultPageTriple = defaultPageTriple
+            notifyItemInserted(headerCount)
+        }
     }
 
     fun hintDefaultPage() {
         defaultPageTriple = null
-        notifyDataSetChanged()
+        val headerCount = if (hasHeader) getHeaderProviderCount() else 0
+        notifyItemRemoved(headerCount)
     }
 
 
