@@ -19,7 +19,6 @@ import pw.xiaohaozi.xadapter.smart.proxy.SelectedProxy
 import pw.xiaohaozi.xadapter.smart.proxy.SmartDataProxy
 import pw.xiaohaozi.xadapter.smart.proxy.XEmployer
 import pw.xiaohaozi.xadapter.smart.proxy.XProxy
-import kotlin.math.log
 
 /**
  *
@@ -238,7 +237,7 @@ open class AdapterSelectedImpl<Employer : XProxy<Employer>, VB : ViewBinding, D>
         selects.forEachIndexed { position, data ->
             val indexOf = selectedCache.indexOf(data)
             notifyItemSelectedChanges(null, data, position, indexOf, false)
-            notifyCheckIndexChanges(data, position, indexOf)
+            notifySelectedStatusChanges(data, position, indexOf)
             notifySelectAllChanges(curSelectedAllStatus)
         }
         return selectedCache.size
@@ -252,7 +251,7 @@ open class AdapterSelectedImpl<Employer : XProxy<Employer>, VB : ViewBinding, D>
         datas.forEachIndexed { position, data ->
             val indexOf = selectedCache.indexOf(data)
             notifyItemSelectedChanges(null, data, position, indexOf, false)
-            notifyCheckIndexChanges(data, position, indexOf)
+            notifySelectedStatusChanges(data, position, indexOf)
             notifySelectAllChanges(curSelectedAllStatus)
         }
         return 0
@@ -283,7 +282,7 @@ open class AdapterSelectedImpl<Employer : XProxy<Employer>, VB : ViewBinding, D>
         datas.forEachIndexed { position, d ->
             if (d == data) {
                 notifyItemSelectedChanges(holder, d, position, -1, fromUser)
-                notifyCheckIndexChanges(d, position, -1)
+                notifySelectedStatusChanges(d, position, -1)
                 notifySelectAllChanges(curSelectedAllStatus)
             }
         }
@@ -292,7 +291,7 @@ open class AdapterSelectedImpl<Employer : XProxy<Employer>, VB : ViewBinding, D>
         val filter = selectedCache.filterIndexed { index, _ -> index >= indexOf }
         datas.forEachIndexed { position, d ->
             if (filter.contains(d)) {
-                notifyCheckIndexChanges(d, position, selectedCache.indexOf(d))
+                notifySelectedStatusChanges(d, position, selectedCache.indexOf(d))
             }
         }
         return 1
@@ -324,9 +323,9 @@ open class AdapterSelectedImpl<Employer : XProxy<Employer>, VB : ViewBinding, D>
         //更新被选中的item
         datas.forEachIndexed { position, d ->
             if (d == data) {
-                adapter.notifyItemChanged(position,itemSelectListener?.second)
+                adapter.notifyItemChanged(position, itemSelectListener?.second)
                 notifyItemSelectedChanges(holder, d, position, indexOf, fromUser)
-                notifyCheckIndexChanges(d, position, indexOf)
+                notifySelectedStatusChanges(d, position, indexOf)
                 notifySelectAllChanges(curSelectedAllStatus)
             }
         }
@@ -350,7 +349,8 @@ open class AdapterSelectedImpl<Employer : XProxy<Employer>, VB : ViewBinding, D>
     //计算是否全选
     private fun dpSelectAll(): Boolean {
         val selects = filterSelectTypeDatas()
-        return if (selectedCache.size == selects.size) true
+        return if (selectedCache.isEmpty()) false
+        else if (selectedCache.size == selects.size) true
         else {
             selectedCache.containsAll(selects)
         }
@@ -386,7 +386,7 @@ open class AdapterSelectedImpl<Employer : XProxy<Employer>, VB : ViewBinding, D>
     }
 
     //通知更新选中索引变化
-    protected open fun notifyCheckIndexChanges(data: D, position: Int, index: Int) {
+    protected open fun notifySelectedStatusChanges(data: D, position: Int, index: Int) {
         itemSelectStatusChanges?.invoke(employer, data, position, index)
     }
 

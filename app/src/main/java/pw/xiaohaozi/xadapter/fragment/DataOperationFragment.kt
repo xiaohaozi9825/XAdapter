@@ -1,109 +1,117 @@
 package pw.xiaohaozi.xadapter.fragment
 
+import android.annotation.SuppressLint
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.fragment.app.Fragment
-import androidx.recyclerview.widget.LinearLayoutManager
-import pw.xiaohaozi.xadapter.databinding.FragmentRecyclerBinding
-import pw.xiaohaozi.xadapter.databinding.ItemVerseBinding
-import pw.xiaohaozi.xadapter.databinding.ItemVerseDataBindingBinding
+import androidx.viewbinding.ViewBinding
+import coil.load
+import pw.xiaohaozi.xadapter.R
+import pw.xiaohaozi.xadapter.databinding.FragmentDataOperationBinding
+import pw.xiaohaozi.xadapter.databinding.FragmentSelectedBinding
+import pw.xiaohaozi.xadapter.databinding.ItemCameraBinding
+import pw.xiaohaozi.xadapter.databinding.ItemDataOperationBinding
+import pw.xiaohaozi.xadapter.databinding.ItemImageSelectedBinding
 import pw.xiaohaozi.xadapter.info.VerseInfo
 import pw.xiaohaozi.xadapter.smart.adapter.SmartAdapter
+import pw.xiaohaozi.xadapter.smart.dragswipe.swipeDelete
 import pw.xiaohaozi.xadapter.smart.ext.createAdapter
-import pw.xiaohaozi.xadapter.smart.holder.XHolder
-import pw.xiaohaozi.xadapter.smart.provider.SmartProvider
+import pw.xiaohaozi.xadapter.smart.ext.dragSort
+import pw.xiaohaozi.xadapter.smart.ext.toAdapter
+import pw.xiaohaozi.xadapter.smart.ext.withType
+import pw.xiaohaozi.xadapter.smart.proxy.ObservableList
 
 /**
- * 单布局
+ * item选择
  */
-class SingleFragment : Fragment() {
-    private lateinit var binding: FragmentRecyclerBinding
+class DataOperationFragment : Fragment() {
+    val TAG = "DataOperationFragment"
+    private lateinit var binding: FragmentDataOperationBinding
+    private val adapter = function()
 
-    private val adapter = function2()
-
+    var pos = 0
     override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
+        inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        binding = FragmentRecyclerBinding.inflate(inflater)
-        binding.recycleView.layoutManager = LinearLayoutManager(requireContext())
-        binding.recycleView.adapter = adapter
-        adapter.reset(list)
+        binding = FragmentDataOperationBinding.inflate(inflater)
+        binding.llSelectedAll.setOnClickListener {
+            if (adapter.isSelectAll())
+                adapter.deselectAll()
+            else
+                adapter.selectAll()
+        }
+        binding.btnAddData.setOnClickListener {
+            val index = pos++ % list.size
+            val data = list[index]
+            adapter.add(data)
+        }
+
+        binding.btnDeleteSelected.setOnClickListener {
+            adapter.remove(adapter.getSelectedDatas())
+        }
+        binding.rvList.adapter = adapter
+        adapter.addOnListChangedCallback(object : ObservableList.OnListChangedCallback<MutableList<VerseInfo>>() {
+            override fun onChanged(sender: MutableList<VerseInfo>) {
+                binding.tvItemCount.text = "共${sender.size}条数据"
+            }
+
+            override fun onItemRangeChanged(sender: MutableList<VerseInfo>, positionStart: Int, itemCount: Int) {
+                binding.tvItemCount.text = "共${sender.size}条数据"
+
+            }
+
+            override fun onItemRangeInserted(sender: MutableList<VerseInfo>, positionStart: Int, itemCount: Int) {
+                binding.tvItemCount.text = "共${sender.size}条数据"
+            }
+
+            override fun onItemRangeMoved(sender: MutableList<VerseInfo>, fromPosition: Int, toPosition: Int, itemCount: Int) {
+                binding.tvItemCount.text = "共${sender.size}条数据"
+            }
+
+            override fun onItemRangeRemoved(sender: MutableList<VerseInfo>, positionStart: Int, itemCount: Int) {
+                binding.tvItemCount.text = "共${sender.size}条数据"
+            }
+
+        })
         return binding.root
     }
 
-    /**
-     * 方法1
-     * 使用XAdapter拓展方法创建
-     */
-    private fun function1(): SmartAdapter<ItemVerseBinding, VerseInfo> {
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+    }
+
+
+    @SuppressLint("SetTextI18n")
+    private fun function(): SmartAdapter<ItemDataOperationBinding, VerseInfo> {
         //泛型VB 确定布局文件，泛型D确定数据类型，回调函数中绑定数据
-        return createAdapter { (holder, data) ->
+        return createAdapter<ItemDataOperationBinding, VerseInfo> { (holder, data) ->
             holder.binding.tvContent.text = data.content
             holder.binding.tvAuthor.text = data.author
-        }
-    }
-
-    /**
-     * 方法2
-     * 使用Adapter+Provider的方式创建
-     *
-     * 比较：
-     * 方法1实际上是对方法2的封装，使用更方便；
-     * 方法2步骤繁琐，但是暴露的方法较多，而且可以添加多个Provider，灵活度更高
-     *
-     * 推荐：
-     * 如果逻辑较为简单，推荐使用方法1；
-     * 如果逻辑复杂，推荐使用方法2.
-     */
-    private fun function2(): SmartAdapter<ItemVerseBinding, VerseInfo> {
-        //①创建Adapter
-        val SmartAdapter = SmartAdapter<ItemVerseBinding, VerseInfo>()
-        //②创建Provider
-        val provider = object : SmartProvider<ItemVerseBinding, VerseInfo>(SmartAdapter) {
-            override fun onCreated(holder: XHolder<ItemVerseBinding>) {
-
+            val index = this.getSelectedIndex(data)
+            if (index < 0) {
+                holder.binding.tvSelectedIndex.text = ""
+                holder.binding.tvSelectedIndex.setBackgroundResource(R.drawable.bg_not_selected)
+            } else {
+                holder.binding.tvSelectedIndex.text = "${index + 1}"
+                holder.binding.tvSelectedIndex.setBackgroundResource(R.drawable.bg_selected_position)
             }
 
-            override fun onBind(
-                holder: XHolder<ItemVerseBinding>,
-                data: VerseInfo,
-                position: Int
-            ) {
-                holder.binding.tvContent.text = data?.content
-                holder.binding.tvAuthor.text = data?.author
-            }
+        }.setOnItemSelectStatusChanges { data, position, index ->
 
+        }.setOnItemSelectListener { holder, data, position, index, fromUser ->
+            binding.tvSelectedCount.text = "已选${getSelectedDatas().size}张"
+        }.setOnSelectAllListener {
+            binding.ivSelectedAll.isSelected = it
+            binding.tvSelectedAll.text = if (it) "全不选" else "全选"
         }
-        //③将Provider 添加到 Adapter中
-        //方式一：使用方法添加，viewType可不填
-        SmartAdapter.addProvider(provider, 0)
-        return SmartAdapter
-        //方式一二：使用➕链接，viewType为空
-//        return xAdapter + provider
+            .swipeDelete()
+            .dragSort()
 
-    }
-
-    /**
-     * 结合 dataBinding 绑定数据，可以一行代码实现Adapter的创建和数据绑定
-     *
-     * 注意和function1() 中的布局文件不是同一个，
-     * function3()的 ItemSingleTypeDataBindingBinding 是使用了dataBinding 的，
-     * 而function1()的 ItemSingleTypeViewBindingBinding 没有使用dataBinding的。
-     *
-     * 此处代码简化前如下,如果单独写，需要注意指定泛型：
-     * ```
-     * return createAdapter<ItemSingleTypeDataBindingBinding, Verse> { holder, data, position ->
-     *     holder.binding.data = data
-     * }
-     * ```
-     */
-    private fun function3(): SmartAdapter<ItemVerseDataBindingBinding, VerseInfo> {
-        //一行代码实现Adapter的创建和数据绑定
-        return createAdapter { (holder, data, position) -> holder.binding.data = data }
     }
 
 
@@ -209,5 +217,6 @@ class SingleFragment : Fragment() {
         VerseInfo("99、侵陵雪色还萱草，漏泄春光有柳条。", "——杜甫《腊日》"),
         VerseInfo("100、将军玉帐貂鼠衣，手持酒杯看雪飞。", "——刘基《北风行》"),
     )
+
 }
 

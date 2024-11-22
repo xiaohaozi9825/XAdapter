@@ -50,6 +50,7 @@ open class XAdapter<VB : ViewBinding, D> : Adapter<XHolder<VB>>() {
     var defaultPageTriple: Triple<XProvider<*, *>, Int, DEFAULT_PAGE>? = null
     var emptyTriple: Triple<XProvider<*, *>, Int, EMPTY>? = null
 
+
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): XHolder<VB> {
         val provide = providers[viewType]
         val holder: XHolder<*> = provide.onCreateViewHolder(parent, viewType)
@@ -165,7 +166,9 @@ open class XAdapter<VB : ViewBinding, D> : Adapter<XHolder<VB>>() {
             provideViewHolder(provide, holder, d, dataPosition, payloads)
         }
     }
-
+    fun setXxxDatas(list: MutableList<*>) {
+        datas = list as MutableList<D>
+    }
     fun getCustomPosition(position: Int): Int {
         return getHeaderProviderCount() + position
     }

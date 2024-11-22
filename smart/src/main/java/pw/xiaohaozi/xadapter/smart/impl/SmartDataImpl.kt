@@ -20,14 +20,14 @@ import java.util.*
  */
 class SmartDataImpl<Employer : XProxy<Employer>, VB : ViewBinding, D> : SmartDataProxy<Employer, VB, D> {
     override lateinit var employer: Employer
-    fun getAdapter(): XAdapter<*, *> {
+    private fun getAdapter(): XAdapter<*, *> {
         return when (val e = employer) {
             is XEmployer -> e.getEmployerAdapter()
             else -> throw NullPointerException("找不到对应的Adapter对象")
         }
     }
 
-    fun getDatas(): MutableList<D> = getAdapter().datas as MutableList<D>
+    private fun getDatas(): MutableList<D> = getAdapter().datas as MutableList<D>
 
 
     /**
@@ -83,9 +83,6 @@ class SmartDataImpl<Employer : XProxy<Employer>, VB : ViewBinding, D> : SmartDat
      * @param index
      */
     override fun removeAt(@IntRange(from = 0) index: Int) {
-        val data = getDatas()[index]
-//        val count = getDatas().count { it == data }
-//        if (count == 1) mAdapterSelectedImpl?.selectedCache?.remove(data)
         getDatas().removeAt(index)
         getAdapter().notifyItemRemoved(index)
         notifyItemRangeRemoved(index, 1)
@@ -98,11 +95,6 @@ class SmartDataImpl<Employer : XProxy<Employer>, VB : ViewBinding, D> : SmartDat
      * @param count 移除多少个元素
      */
     override fun remove(@IntRange(from = 0) start: Int, @IntRange(from = 1) count: Int) {
-//        for (index in start until start + count) {
-//            val data = datas[index]
-//            val count1 = getDatas().count { it == data }
-//            if (count1 == 1) mAdapterSelectedImpl?.selectedCache?.remove(data)
-//        }
         getDatas().remove(start, count)
         getAdapter().notifyItemRangeRemoved(start, count)
         notifyItemRangeRemoved(start, count)
@@ -114,8 +106,6 @@ class SmartDataImpl<Employer : XProxy<Employer>, VB : ViewBinding, D> : SmartDat
      * @param data
      */
     override fun remove(data: D) {
-//        val count = getDatas().count { it == data }
-//        if (count == 1) mAdapterSelectedImpl?.selectedCache?.remove(data)
         val indexOf: Int = getDatas().indexOf(data)
         if (indexOf >= 0) {
             getDatas().remove(data)
@@ -130,10 +120,6 @@ class SmartDataImpl<Employer : XProxy<Employer>, VB : ViewBinding, D> : SmartDat
      */
     override fun <L : Collection<D>> remove(list: L) {
         if (list.isEmpty()) return
-//        list.forEach { data ->
-//            val count = getDatas().count { it == data }
-//            if (count == 1) mAdapterSelectedImpl?.selectedCache?.remove(data)
-//        }
         getDatas().removeAll(list)
         getAdapter().notifyDataSetChanged()//list 在 datas 中的位置可能是不连续的，所以需要刷新全部数据
         notifyItemRangeRemoved(-1, list.size)//此处无法判断起始点
@@ -145,7 +131,6 @@ class SmartDataImpl<Employer : XProxy<Employer>, VB : ViewBinding, D> : SmartDat
     override fun remove() {
         if (getDatas().isEmpty()) return
         getDatas().clear()
-//        mAdapterSelectedImpl?.selectedCache?.clear()
         getAdapter().notifyDataSetChanged()
         notifyItemRangeRemoved(0, getDatas().size)
     }
@@ -156,14 +141,12 @@ class SmartDataImpl<Employer : XProxy<Employer>, VB : ViewBinding, D> : SmartDat
      * @param list 如果list是MutableList类型，则data==list；否则data！=list
      */
     override fun <L : MutableList<D>> refresh(list: L) {
-//        mAdapterSelectedImpl?.selectedCache?.clear()
-//        getAdapter().datas = list
-//        getAdapter().notifyDataSetChanged()
-//        notifyChanged()
+        getAdapter().setXxxDatas(list)
+        getAdapter().notifyDataSetChanged()
+        notifyChanged()
     }
 
     override fun <L : Collection<D>> reset(list: L) {
-//        mAdapterSelectedImpl?.selectedCache?.clear()
         getDatas().clear()
         getDatas().addAll(list)
         getAdapter().notifyDataSetChanged()
