@@ -64,13 +64,13 @@ class ImageSelectFragment : Fragment() {
                 holder.binding.tvSelectedIndex.setBackgroundResource(R.drawable.bg_selected_position)
             }
 
-        }.setOnItemSelectStatusChanges { data, position, index ->
-
-        }.setOnItemSelectListener { holder, data, position, index, fromUser ->
+        }.setOnItemSelectListener { data, position, index, fromUser ->
             binding.tvSelectedCount.text = "已选${getSelectedDatas().size}张"
-        }.setOnSelectAllListener {
-            binding.ivSelectedAll.isSelected = it
-            binding.tvSelectedAll.text = if (it) "全不选" else "全选"
+        }.setOnSelectAllListener { selectedCache, isSelectedAll ->
+            if (binding.ivSelectedAll.isSelected != isSelectedAll) {
+                binding.ivSelectedAll.isSelected = isSelectedAll
+                binding.tvSelectedAll.text = if (isSelectedAll) "全不选" else "全选"
+            }
         }
 
     }
@@ -79,12 +79,13 @@ class ImageSelectFragment : Fragment() {
     private fun function2(): SmartAdapter<ViewBinding, Any?> {
         //泛型VB 确定布局文件，泛型D确定数据类型，回调函数中绑定数据
         val adapter = createAdapter()
-            .setOnItemSelectListener(payload = "select") { holder, data, position, index, fromUser ->
+            .setOnItemSelectListener(payload = "select") { data, position, index, fromUser ->
                 binding.tvSelectedCount.text = "已选${getSelectedDatas().size}张"
-            }.setOnItemSelectStatusChanges { data, position, index ->
-                Log.i(TAG, "setOnItemSelectedStatesChanges: $position -- $index")
-            }.setOnSelectAllListener {
-                binding.ivSelectedAll.isSelected = it
+            }.setOnSelectAllListener { selectedCache, isSelectedAll ->
+                if (binding.ivSelectedAll.isSelected != isSelectedAll) {
+                    binding.ivSelectedAll.isSelected = isSelectedAll
+                    binding.tvSelectedAll.text = if (isSelectedAll) "全不选" else "全选"
+                }
             }
 //            .setMaxSelectCount(9)
 //            .isAutoCancel(false)

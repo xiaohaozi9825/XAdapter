@@ -2,27 +2,18 @@ package pw.xiaohaozi.xadapter.fragment
 
 import android.annotation.SuppressLint
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
 import androidx.fragment.app.Fragment
-import androidx.viewbinding.ViewBinding
-import coil.load
 import pw.xiaohaozi.xadapter.R
 import pw.xiaohaozi.xadapter.databinding.FragmentDataOperationBinding
-import pw.xiaohaozi.xadapter.databinding.FragmentSelectedBinding
-import pw.xiaohaozi.xadapter.databinding.ItemCameraBinding
 import pw.xiaohaozi.xadapter.databinding.ItemDataOperationBinding
-import pw.xiaohaozi.xadapter.databinding.ItemImageSelectedBinding
 import pw.xiaohaozi.xadapter.info.VerseInfo
 import pw.xiaohaozi.xadapter.smart.adapter.SmartAdapter
 import pw.xiaohaozi.xadapter.smart.dragswipe.swipeDelete
 import pw.xiaohaozi.xadapter.smart.ext.createAdapter
 import pw.xiaohaozi.xadapter.smart.ext.dragSort
-import pw.xiaohaozi.xadapter.smart.ext.toAdapter
-import pw.xiaohaozi.xadapter.smart.ext.withType
 import pw.xiaohaozi.xadapter.smart.proxy.ObservableList
 
 /**
@@ -73,9 +64,10 @@ class DataOperationFragment : Fragment() {
                 binding.tvItemCount.text = "共${sender.size}条数据"
             }
 
-            override fun onItemRangeRemoved(sender: MutableList<VerseInfo>, positionStart: Int, itemCount: Int) {
+            override fun onItemRangeRemoved(sender: MutableList<VerseInfo>,  changeDatas: MutableList<VerseInfo>,positionStart: Int, itemCount: Int) {
                 binding.tvItemCount.text = "共${sender.size}条数据"
             }
+
 
         })
         return binding.root
@@ -100,14 +92,14 @@ class DataOperationFragment : Fragment() {
                 holder.binding.tvSelectedIndex.text = "${index + 1}"
                 holder.binding.tvSelectedIndex.setBackgroundResource(R.drawable.bg_selected_position)
             }
+        }.setOnItemSelectListener { data, position, index, fromUser ->
 
-        }.setOnItemSelectStatusChanges { data, position, index ->
-
-        }.setOnItemSelectListener { holder, data, position, index, fromUser ->
-            binding.tvSelectedCount.text = "已选${getSelectedDatas().size}张"
-        }.setOnSelectAllListener {
-            binding.ivSelectedAll.isSelected = it
-            binding.tvSelectedAll.text = if (it) "全不选" else "全选"
+        }.setOnSelectAllListener { selectedCache, isSelectedAll ->
+            if (binding.ivSelectedAll.isSelected != isSelectedAll) {
+                binding.ivSelectedAll.isSelected = isSelectedAll
+                binding.tvSelectedAll.text = if (isSelectedAll) "全不选" else "全选"
+            }
+            binding.tvSelectedCount.text = "已选${selectedCache.size}张"
         }
             .swipeDelete()
             .dragSort()

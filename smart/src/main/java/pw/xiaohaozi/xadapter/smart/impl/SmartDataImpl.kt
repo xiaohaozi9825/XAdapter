@@ -7,8 +7,9 @@ import pw.xiaohaozi.xadapter.smart.proxy.ObservableList
 import pw.xiaohaozi.xadapter.smart.proxy.SmartDataProxy
 import pw.xiaohaozi.xadapter.smart.proxy.XEmployer
 import pw.xiaohaozi.xadapter.smart.proxy.XProxy
-import pw.xiaohaozi.xadapter.smart.ext.remove
+import pw.xiaohaozi.xadapter.smart.ext.removeRange
 import java.util.*
+import kotlin.collections.ArrayList
 
 /**
  *
@@ -83,9 +84,9 @@ class SmartDataImpl<Employer : XProxy<Employer>, VB : ViewBinding, D> : SmartDat
      * @param index
      */
     override fun removeAt(@IntRange(from = 0) index: Int) {
-        getDatas().removeAt(index)
+        val data = getDatas().removeAt(index)
         getAdapter().notifyItemRemoved(index)
-        notifyItemRangeRemoved(index, 1)
+        notifyItemRangeRemoved(mutableListOf(data), index, 1)
     }
 
     /**
@@ -95,9 +96,9 @@ class SmartDataImpl<Employer : XProxy<Employer>, VB : ViewBinding, D> : SmartDat
      * @param count 移除多少个元素
      */
     override fun remove(@IntRange(from = 0) start: Int, @IntRange(from = 1) count: Int) {
-        getDatas().remove(start, count)
+        val list = getDatas().removeRange(start, count)
         getAdapter().notifyItemRangeRemoved(start, count)
-        notifyItemRangeRemoved(start, count)
+        notifyItemRangeRemoved(list, start, count)
     }
 
     /**
@@ -110,7 +111,7 @@ class SmartDataImpl<Employer : XProxy<Employer>, VB : ViewBinding, D> : SmartDat
         if (indexOf >= 0) {
             getDatas().remove(data)
             getAdapter().notifyItemRemoved(indexOf)
-            notifyItemRangeRemoved(indexOf, 1)
+            notifyItemRangeRemoved(mutableListOf(data), indexOf, 1)
         }
     }
 
@@ -122,17 +123,19 @@ class SmartDataImpl<Employer : XProxy<Employer>, VB : ViewBinding, D> : SmartDat
         if (list.isEmpty()) return
         getDatas().removeAll(list)
         getAdapter().notifyDataSetChanged()//list 在 datas 中的位置可能是不连续的，所以需要刷新全部数据
-        notifyItemRangeRemoved(-1, list.size)//此处无法判断起始点
+        notifyItemRangeRemoved(list.toMutableList(), -1, list.size)//此处无法判断起始点
     }
 
     /**
      * 移除所有数据
      */
     override fun remove() {
-        if (getDatas().isEmpty()) return
-        getDatas().clear()
-        getAdapter().notifyDataSetChanged()
-        notifyItemRangeRemoved(0, getDatas().size)
+        val datas = getDatas()
+        if (datas.isEmpty()) return
+        val temp: MutableList<D> = ArrayList(datas)
+        datas.clear()
+        getAdapter().notifyItemRangeRemoved(0, temp.size)
+        notifyItemRangeRemoved(temp, 0, temp.size)
     }
 
     /**
@@ -245,9 +248,9 @@ class SmartDataImpl<Employer : XProxy<Employer>, VB : ViewBinding, D> : SmartDat
         }
     }
 
-    private fun notifyItemRangeRemoved(positionStart: Int, itemCount: Int) {
+    private fun notifyItemRangeRemoved(changeDatas: MutableList<D>, positionStart: Int, itemCount: Int) {
         callbacks.forEach {
-            it?.onItemRangeRemoved(getDatas(), positionStart, itemCount)
+            it?.onItemRangeRemoved(getDatas(), changeDatas, positionStart, itemCount)
         }
     }
 

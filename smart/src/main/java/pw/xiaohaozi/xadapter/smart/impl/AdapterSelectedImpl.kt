@@ -13,12 +13,13 @@ import pw.xiaohaozi.xadapter.smart.provider.SmartProvider
 import pw.xiaohaozi.xadapter.smart.provider.TypeProvider
 import pw.xiaohaozi.xadapter.smart.proxy.ObservableList
 import pw.xiaohaozi.xadapter.smart.proxy.OnItemSelectListener
-import pw.xiaohaozi.xadapter.smart.proxy.OnItemSelectStatusChanges
-import pw.xiaohaozi.xadapter.smart.proxy.OnSelectAllListener
+import pw.xiaohaozi.xadapter.smart.proxy.OnSelectedDataChangesListener
 import pw.xiaohaozi.xadapter.smart.proxy.SelectedProxy
 import pw.xiaohaozi.xadapter.smart.proxy.SmartDataProxy
 import pw.xiaohaozi.xadapter.smart.proxy.XEmployer
 import pw.xiaohaozi.xadapter.smart.proxy.XProxy
+import kotlin.math.max
+import kotlin.math.min
 
 /**
  *
@@ -41,9 +42,8 @@ open class AdapterSelectedImpl<Employer : XProxy<Employer>, VB : ViewBinding, D>
     private val datas: MutableList<D> by lazy { adapter.datas as MutableList<D> }
 
     override val selectedCache: SelectedList<D> by lazy { SelectedList() }
-    override var selectAllChanges: OnSelectAllListener<Employer>? = null
-    override var itemSelectStatusChanges: OnItemSelectStatusChanges<Employer, D>? = null
-    override var itemSelectListener: Triple<Int?, String?, OnItemSelectListener<Employer, VB, D>>? = null
+    override var onSelectedDataChangesListener: OnSelectedDataChangesListener<Employer, D>? = null
+    override var itemSelectListener: Triple<Int?, String?, OnItemSelectListener<Employer, D>>? = null
     override var maxSelectCount: Int? = null
     override var isAllowCancel: Boolean = true
     override var isAutoCancel: Boolean = true
@@ -64,9 +64,10 @@ open class AdapterSelectedImpl<Employer : XProxy<Employer>, VB : ViewBinding, D>
     }
 
 
-    private val onListChangedCallback = object :
-        ObservableList.OnListChangedCallback<MutableList<D>>() {
+    private val onListChangedCallback = object : ObservableList.OnListChangedCallback<MutableList<D>>() {
         val TAG = "OnListChangedCallback"
+
+        //刷新所有数据时回调
         override fun onChanged(sender: MutableList<D>) {
             Log.i(TAG, "onChanged: ")
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
@@ -75,50 +76,69 @@ open class AdapterSelectedImpl<Employer : XProxy<Employer>, VB : ViewBinding, D>
                 selectedCache.removeAll(selectedCache.filter { !sender.contains(it) }.toSet())
             }
             curSelectedAllStatus = false
-            notifySelectAllChanges(false)
+
+            val start = 0
+            val end = sender.size
+            for (position: Int in start until end) {
+                notifyItemSelectedChanges(sender[position], position, -1, false)
+            }
+            notifySelectedDataChanges(false)
         }
 
-        override fun onItemRangeChanged(
-            sender: MutableList<D>,
-            positionStart: Int,
-            itemCount: Int
-        ) {
+        //更新部分数据时回调
+        override fun onItemRangeChanged(sender: MutableList<D>, positionStart: Int, itemCount: Int) {
             Log.i(TAG, "onItemRangeChanged: ")
+            notifySelectedDataChanges(curSelectedAllStatus)
         }
 
-        override fun onItemRangeInserted(
-            sender: MutableList<D>,
-            positionStart: Int,
-            itemCount: Int
-        ) {
+        //插入数据时回调
+        override fun onItemRangeInserted(sender: MutableList<D>, positionStart: Int, itemCount: Int) {
             Log.i(TAG, "onItemRangeInserted: ")
             curSelectedAllStatus = false
-            notifySelectAllChanges(false)
+            val start = max(positionStart, 0)
+            val end = min(positionStart + itemCount, sender.size)
+            for (position: Int in start until end) {
+                notifyItemSelectedChanges(sender[position], position, -1, false)
+            }
+            notifySelectedDataChanges(false)
         }
 
-        override fun onItemRangeMoved(
-            sender: MutableList<D>,
-            fromPosition: Int,
-            toPosition: Int,
-            itemCount: Int
-        ) {
+        //移动数据时回调
+        override fun onItemRangeMoved(sender: MutableList<D>, fromPosition: Int, toPosition: Int, itemCount: Int) {
             Log.i(TAG, "onItemRangeMoved: ")
         }
 
-        override fun onItemRangeRemoved(
-            sender: MutableList<D>,
-            positionStart: Int,
-            itemCount: Int
-        ) {
-            Log.i(TAG, "onItemRangeRemoved: ")
+        //删除数据时回调
+        override fun onItemRangeRemoved(sender: MutableList<D>, changeDatas: MutableList<D>, positionStart: Int, itemCount: Int) {
+            Log.i(TAG, "onItemRangeRemoved: ${changeDatas.size}")
+            //被删除的元素在selectedCache中的起始索引
+            val startIndex = if (positionStart > -1) positionStart
+            else selectedCache.indexOfFirst { changeDatas.contains(it) }
+
+            Log.i(TAG, "onItemRangeRemoved: indexOf = ${startIndex}")
+            //找到被取消选中的item后面的所有item，并更新
+            val filter = selectedCache.filterIndexed { index, _ -> index >= startIndex }
+            Log.i(TAG, "onItemRangeRemoved: filter = ${filter.size}")
+
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                selectedCache.removeIf { !sender.contains(it) }
+                selectedCache.removeIf { changeDatas.contains(it) }
             } else {
-                selectedCache.removeAll(selectedCache.filter { !sender.contains(it) }.toSet())
+                selectedCache.removeAll(selectedCache.filter { changeDatas.contains(it) }.toSet())
             }
             curSelectedAllStatus = dpSelectAll()
-            notifySelectAllChanges(curSelectedAllStatus)
+
+
+            datas.forEachIndexed { position, d ->
+                if (filter.contains(d)) {
+                    Log.i(TAG, "notifyItemChanged: position = ${position}")
+                    adapter.notifyItemChanged(position)
+                    notifyItemSelectedChanges(d, position, -1, false)
+                }
+            }
+            notifySelectedDataChanges(curSelectedAllStatus)
         }
+
+
     }
 
     override fun initProxy(employer: Employer) {
@@ -177,19 +197,14 @@ open class AdapterSelectedImpl<Employer : XProxy<Employer>, VB : ViewBinding, D>
     override fun setOnItemSelectListener(
         id: Int?,
         payload: String?,
-        listener: OnItemSelectListener<Employer, VB, D>
+        listener: OnItemSelectListener<Employer, D>
     ): Employer {
         itemSelectListener = Triple(id, payload, listener)
         return employer
     }
 
-    override fun setOnSelectAllListener(listener: OnSelectAllListener<Employer>): Employer {
-        selectAllChanges = listener
-        return employer
-    }
-
-    override fun setOnItemSelectStatusChanges(listener: OnItemSelectStatusChanges<Employer, D>): Employer {
-        itemSelectStatusChanges = listener
+    override fun setOnSelectAllListener(listener: OnSelectedDataChangesListener<Employer, D>): Employer {
+        onSelectedDataChangesListener = listener
         return employer
     }
 
@@ -213,8 +228,8 @@ open class AdapterSelectedImpl<Employer : XProxy<Employer>, VB : ViewBinding, D>
     }
 
     override fun setSelect(data: D, isSelect: Boolean, fromUser: Boolean): Int {
-        return if (isSelect) setCheck(data, null, fromUser)
-        else cancelCheck(data, null, fromUser)
+        return if (isSelect) setCheck(data, fromUser)
+        else cancelCheck(data, fromUser)
     }
 
     override fun isSelectAll(): Boolean {
@@ -236,10 +251,9 @@ open class AdapterSelectedImpl<Employer : XProxy<Employer>, VB : ViewBinding, D>
         adapter.notifyAllItemChanged(itemSelectListener?.second)
         selects.forEachIndexed { position, data ->
             val indexOf = selectedCache.indexOf(data)
-            notifyItemSelectedChanges(null, data, position, indexOf, false)
-            notifySelectedStatusChanges(data, position, indexOf)
-            notifySelectAllChanges(curSelectedAllStatus)
+            notifyItemSelectedChanges(data, position, indexOf, false)
         }
+        notifySelectedDataChanges(curSelectedAllStatus)
         return selectedCache.size
     }
 
@@ -250,10 +264,9 @@ open class AdapterSelectedImpl<Employer : XProxy<Employer>, VB : ViewBinding, D>
         adapter.notifyAllItemChanged(itemSelectListener?.second)
         datas.forEachIndexed { position, data ->
             val indexOf = selectedCache.indexOf(data)
-            notifyItemSelectedChanges(null, data, position, indexOf, false)
-            notifySelectedStatusChanges(data, position, indexOf)
-            notifySelectAllChanges(curSelectedAllStatus)
+            notifyItemSelectedChanges(data, position, indexOf, false)
         }
+        notifySelectedDataChanges(curSelectedAllStatus)
         return 0
     }
 
@@ -266,11 +279,7 @@ open class AdapterSelectedImpl<Employer : XProxy<Employer>, VB : ViewBinding, D>
 
     /*******************************************  辅助方法  ******************************************************/
     //取消选中
-    protected open fun cancelCheck(
-        data: D,
-        holder: XHolder<VB>?,
-        fromUser: Boolean
-    ): Int {
+    protected open fun cancelCheck(data: D, fromUser: Boolean): Int {
         if (!isAllowCancel) return -1//如果不允许取消，则无法选择，操作失败
         //必须在删除前拿到被删除item索引
         val indexOf = selectedCache.indexOf(data)
@@ -281,28 +290,22 @@ open class AdapterSelectedImpl<Employer : XProxy<Employer>, VB : ViewBinding, D>
         //更新被取消选中的item
         datas.forEachIndexed { position, d ->
             if (d == data) {
-                notifyItemSelectedChanges(holder, d, position, -1, fromUser)
-                notifySelectedStatusChanges(d, position, -1)
-                notifySelectAllChanges(curSelectedAllStatus)
+                notifyItemSelectedChanges(d, position, -1, fromUser)
             }
         }
-        if (itemSelectStatusChanges == null) return 1//如果未设置监听，则不更新，减少不必要的性能损耗
         //找到被取消选中的item后面的所有item，并更新
         val filter = selectedCache.filterIndexed { index, _ -> index >= indexOf }
         datas.forEachIndexed { position, d ->
             if (filter.contains(d)) {
-                notifySelectedStatusChanges(d, position, selectedCache.indexOf(d))
+                notifyItemSelectedChanges(d, position, -1, fromUser)
             }
         }
+        notifySelectedDataChanges(curSelectedAllStatus)
         return 1
     }
 
     //设置为选中
-    protected open fun setCheck(
-        data: D,
-        holder: XHolder<VB>?,
-        fromUser: Boolean
-    ): Int {
+    protected open fun setCheck(data: D, fromUser: Boolean): Int {
         if (maxSelectCount != null) {
             val selectedSize = selectedCache.size
             if (selectedSize >= maxSelectCount!!) {//如果超出了最大选择数
@@ -311,7 +314,7 @@ open class AdapterSelectedImpl<Employer : XProxy<Employer>, VB : ViewBinding, D>
                 //超出范围自动取消
                 while (selectedCache.size >= (maxSelectCount!!)) {
                     val get = selectedCache.firstOrNull()
-                    if (get != null) cancelCheck(get, null, false)
+                    if (get != null) cancelCheck(get, false)
                 }
             }
         }
@@ -324,25 +327,20 @@ open class AdapterSelectedImpl<Employer : XProxy<Employer>, VB : ViewBinding, D>
         datas.forEachIndexed { position, d ->
             if (d == data) {
                 adapter.notifyItemChanged(position, itemSelectListener?.second)
-                notifyItemSelectedChanges(holder, d, position, indexOf, fromUser)
-                notifySelectedStatusChanges(d, position, indexOf)
-                notifySelectAllChanges(curSelectedAllStatus)
+                notifyItemSelectedChanges(d, position, indexOf, fromUser)
             }
         }
+        notifySelectedDataChanges(curSelectedAllStatus)
         return 1
     }
 
     //点击事件触发选中或取消
-    protected open fun clickCheck(
-        holder: XHolder<VB>?,
-        isCheck: Boolean,
-        position: Int
-    ) {
+    protected open fun clickCheck(holder: XHolder<VB>?, isCheck: Boolean, position: Int) {
         val data = datas[position] ?: return
         if (isCheck) {
-            setCheck(data, holder, true)
+            setCheck(data, true)
         } else {
-            cancelCheck(data, holder, true)
+            cancelCheck(data, true)
         }
     }
 
@@ -366,28 +364,20 @@ open class AdapterSelectedImpl<Employer : XProxy<Employer>, VB : ViewBinding, D>
 
     //通知更新选中状态改变
     protected open fun notifyItemSelectedChanges(
-        holder: XHolder<VB>?,
         data: D,
         position: Int,
         index: Int,
         fromUser: Boolean
     ) {
-        itemSelectListener?.third?.invoke(employer, holder, data, position, index, fromUser)
+        itemSelectListener?.third?.invoke(employer, data, position, index, fromUser)
     }
 
     //通知更新选中状态改变
-    protected open fun notifySelectAllChanges(isSelectAll: Boolean) {
-        if (selectAllChanges != null) {
-            if (oldSelectedAllStatus != isSelectAll) {
-                selectAllChanges?.invoke(employer, isSelectAll)
-                oldSelectedAllStatus = isSelectAll
-            }
+    protected open fun notifySelectedDataChanges(isSelectAll: Boolean) {
+        if (onSelectedDataChangesListener != null) {
+            oldSelectedAllStatus = isSelectAll
+            onSelectedDataChangesListener?.invoke(employer, selectedCache, isSelectAll)
         }
-    }
-
-    //通知更新选中索引变化
-    protected open fun notifySelectedStatusChanges(data: D, position: Int, index: Int) {
-        itemSelectStatusChanges?.invoke(employer, data, position, index)
     }
 
 

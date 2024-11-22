@@ -1,21 +1,16 @@
 package pw.xiaohaozi.xadapter.smart.proxy
 
 import androidx.viewbinding.ViewBinding
-import pw.xiaohaozi.xadapter.smart.holder.XHolder
 
 /**
  * 全选状态监听
  */
-typealias OnSelectAllListener<Employer> = Employer.(isSelectAll: Boolean) -> Unit
+typealias OnSelectedDataChangesListener<Employer, D> = Employer.(selectedDatas: MutableList<D>, isSelectAll: Boolean) -> Unit
 /**
  * 选择操作监听
  */
-typealias OnItemSelectListener<Employer, VB, D> = Employer.(holder: XHolder<VB>?, data: D, position: Int, index: Int, fromUser: Boolean) -> Unit
+typealias OnItemSelectListener<Employer, D> = Employer.(data: D, position: Int, index: Int, fromUser: Boolean) -> Unit
 
-/**
- * 选择状态变化监听
- */
-typealias OnItemSelectStatusChanges<Employer, D> = Employer.(data: D, position: Int, index: Int) -> Unit
 
 /**
  * item选择事件
@@ -30,13 +25,10 @@ interface SelectedProxy<Employer : XProxy<Employer>, VB : ViewBinding, D> :
     val selectedCache: MutableCollection<D>
 
     //全选状态变化
-    var selectAllChanges: OnSelectAllListener<Employer>?
-
-    //选中状态变化监听
-    var itemSelectStatusChanges: OnItemSelectStatusChanges<Employer, D>?
+    var onSelectedDataChangesListener: OnSelectedDataChangesListener<Employer, D>?
 
     //选中事件，一个item只能一个view响应选中事件
-    var itemSelectListener: Triple<Int?, String?,OnItemSelectListener<Employer, VB, D>>?
+    var itemSelectListener: Triple<Int?, String?, OnItemSelectListener<Employer, D>>?
 
     //最大可选数
     var maxSelectCount: Int?
@@ -55,21 +47,15 @@ interface SelectedProxy<Employer : XProxy<Employer>, VB : ViewBinding, D> :
     fun setOnItemSelectListener(
         id: Int? = null,
         payload: String? = null,
-        listener: OnItemSelectListener<Employer, VB, D>
+        listener: OnItemSelectListener<Employer, D>
     ): Employer
 
     /**
      * 设置全选监听
      * @param listener
      */
-    fun setOnSelectAllListener(listener: OnSelectAllListener<Employer>): Employer
+    fun setOnSelectAllListener(listener: OnSelectedDataChangesListener<Employer, D>): Employer
 
-    /**
-     * 设置item选择状态变化监听
-     *
-     * @param listener
-     */
-    fun setOnItemSelectStatusChanges(listener: OnItemSelectStatusChanges<Employer, D>): Employer
 
     /**
      * 设置最大可选数
