@@ -28,7 +28,7 @@ import java.util.*
  */
 class DragSort(
     private val threshold: Float = 0.9f,
-    private val flags: (recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder) -> Int = { _, _ -> ItemTouchHelper.UP or ItemTouchHelper.DOWN or ItemTouchHelper.START or ItemTouchHelper.END },
+    private val flags: (recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder) -> Int = { _, _ -> UP or DOWN or START or END },
     private val start: ((viewHolder: RecyclerView.ViewHolder?) -> Unit)? = null,
     private val end: ((recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder) -> Unit)? = null,
     private val onMove: ((

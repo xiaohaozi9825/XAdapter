@@ -42,7 +42,8 @@ class DragSortFragment : Fragment() {
         return createAdapter<ItemVerseBinding, VerseInfo> { (holder, data,)  ->
             holder.binding.tvContent.text = data.content
             holder.binding.tvAuthor.text = data.author
-        }.dragSort()
+        }
+            .dragSort()
     }
 
 

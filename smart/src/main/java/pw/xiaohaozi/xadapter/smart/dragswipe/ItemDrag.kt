@@ -2,7 +2,6 @@ package pw.xiaohaozi.xadapter.smart.dragswipe
 
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
-import pw.xiaohaozi.xadapter.smart.dragswipe.DragCallback
 
 
 class ItemDrag(private val drawCallback: DragCallback) : ItemTouchHelper.Callback() {

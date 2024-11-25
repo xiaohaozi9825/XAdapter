@@ -10,8 +10,8 @@ import pw.xiaohaozi.xadapter.databinding.FragmentRecyclerBinding
 import pw.xiaohaozi.xadapter.databinding.ItemVerseBinding
 import pw.xiaohaozi.xadapter.info.VerseInfo
 import pw.xiaohaozi.xadapter.smart.adapter.SmartAdapter
-import pw.xiaohaozi.xadapter.smart.dragswipe.swipeDelete
 import pw.xiaohaozi.xadapter.smart.ext.createAdapter
+import pw.xiaohaozi.xadapter.smart.ext.swipeDelete
 
 /**
  * 单布局
@@ -40,10 +40,11 @@ class SwipeDeleteFragment : Fragment() {
      */
     private fun function1(): SmartAdapter<ItemVerseBinding, VerseInfo> {
         //泛型VB 确定布局文件，泛型D确定数据类型，回调函数中绑定数据
-        return createAdapter<ItemVerseBinding, VerseInfo> { (holder, data,)  ->
+        return createAdapter<ItemVerseBinding, VerseInfo> { (holder, data) ->
             holder.binding.tvContent.text = data.content
             holder.binding.tvAuthor.text = data.author
-        }.swipeDelete()
+        }
+            .swipeDelete()
     }
 
 
