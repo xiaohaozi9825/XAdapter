@@ -40,7 +40,7 @@ open class AdapterSelectedImpl<Employer : XProxy<Employer>, VB : ViewBinding, D>
         }
     }
 
-    private fun getDatas() = adapter.getData() as MutableList<D>
+    private fun getData() = adapter.getData() as MutableList<D>
     override val selectedCache: SelectedList<D> by lazy { SelectedList() }
     override var onSelectedDataChangesListener: OnSelectedDataChangesListener<Employer, D>? = null
     override var itemSelectListener: Triple<Int?, String?, OnItemSelectListener<Employer, D>>? = null
@@ -130,7 +130,7 @@ open class AdapterSelectedImpl<Employer : XProxy<Employer>, VB : ViewBinding, D>
             curSelectedAllStatus = dpSelectAll()
 
 
-            getDatas().forEachIndexed { position, d ->
+            getData().forEachIndexed { position, d ->
                 if (filter.contains(d)) {
                     Log.i(TAG, "notifyItemChanged: position = ${position}")
                     val adapterPosition = adapter.getAdapterPosition(position)
@@ -190,8 +190,8 @@ open class AdapterSelectedImpl<Employer : XProxy<Employer>, VB : ViewBinding, D>
         val tagger: View = viewId?.let { holder.itemView.findViewById(it) } ?: holder.itemView
         tagger.setOnClickListener {
             val position = adapter.getDataPosition(holder.adapterPosition)
-            if (position < 0 || position >= getDatas().size) return@setOnClickListener
-            val data = getDatas()[position]
+            if (position < 0 || position >= getData().size) return@setOnClickListener
+            val data = getData()[position]
             val isCheck = isSelected(data)
             //如果不允许点击item取消选中状态,则不执行取消操作
             if (!isAllowCancel && isCheck) return@setOnClickListener
@@ -230,7 +230,7 @@ open class AdapterSelectedImpl<Employer : XProxy<Employer>, VB : ViewBinding, D>
     }
 
     override fun setSelectAt(position: Int, isSelect: Boolean, fromUser: Boolean): Int {
-        return setSelect(getDatas()[position], isSelect, fromUser)
+        return setSelect(getData()[position], isSelect, fromUser)
     }
 
     override fun setSelect(data: D, isSelect: Boolean, fromUser: Boolean): Int {
@@ -257,7 +257,7 @@ open class AdapterSelectedImpl<Employer : XProxy<Employer>, VB : ViewBinding, D>
         //刷新所有数据，头布局和脚布局不刷新
         adapter.notifyItemRangeChanged(
             adapter.getAdapterPosition(0),
-            adapter.getAdapterPosition(getDatas().size),
+            adapter.getAdapterPosition(getData().size),
             itemSelectListener?.second
         )
         selects.forEachIndexed { position, data ->
@@ -276,10 +276,10 @@ open class AdapterSelectedImpl<Employer : XProxy<Employer>, VB : ViewBinding, D>
         //刷新所有数据，头布局和脚布局不刷新
         adapter.notifyItemRangeChanged(
             adapter.getAdapterPosition(0),
-            adapter.getAdapterPosition(getDatas().size),
+            adapter.getAdapterPosition(getData().size),
             itemSelectListener?.second
         )
-        getDatas().forEachIndexed { position, data ->
+        getData().forEachIndexed { position, data ->
             val indexOf = selectedCache.indexOf(data)
             val adapterPosition = adapter.getAdapterPosition(position)
             notifyItemSelectedChanges(data, adapterPosition, indexOf, false)
@@ -289,9 +289,9 @@ open class AdapterSelectedImpl<Employer : XProxy<Employer>, VB : ViewBinding, D>
     }
 
     override fun getSelectedDatas(): MutableList<D> = selectedCache.toMutableList()
-    override fun isSelectedAt(position: Int) = isSelected(getDatas()[position])
+    override fun isSelectedAt(position: Int) = isSelected(getData()[position])
     override fun isSelected(data: D) = selectedCache.contains(data)
-    override fun getSelectedIndexAt(position: Int) = getSelectedIndex(getDatas()[position])
+    override fun getSelectedIndexAt(position: Int) = getSelectedIndex(getData()[position])
     override fun getSelectedIndex(data: D) = selectedCache.indexOf(data)
 
 
@@ -305,7 +305,7 @@ open class AdapterSelectedImpl<Employer : XProxy<Employer>, VB : ViewBinding, D>
         selectedCache.removeAt(indexOf)
         curSelectedAllStatus = false
         //更新被取消选中的item
-        getDatas().forEachIndexed { position, d ->
+        getData().forEachIndexed { position, d ->
             if (d == data) {
                 val adapterPosition = adapter.getAdapterPosition(position)
                 if (adapterPosition > -1 && adapterPosition < adapter.itemCount) {
@@ -316,7 +316,7 @@ open class AdapterSelectedImpl<Employer : XProxy<Employer>, VB : ViewBinding, D>
         }
         //找到被取消选中的item后面的所有item，并更新
         val filter = selectedCache.filterIndexed { index, _ -> index >= indexOf }
-        getDatas().forEachIndexed { position, d ->
+        getData().forEachIndexed { position, d ->
             if (filter.contains(d)) {
                 val adapterPosition = adapter.getAdapterPosition(position)
                 if (adapterPosition > -1 && adapterPosition < adapter.itemCount) {
@@ -349,7 +349,7 @@ open class AdapterSelectedImpl<Employer : XProxy<Employer>, VB : ViewBinding, D>
         val indexOf = selectedCache.indexOf(data)
         curSelectedAllStatus = dpSelectAll()
         //更新被选中的item
-        getDatas().forEachIndexed { position, d ->
+        getData().forEachIndexed { position, d ->
             if (d == data) {
                 val adapterPosition = adapter.getAdapterPosition(position)
                 if (adapterPosition > -1 && adapterPosition < adapter.itemCount) {
@@ -364,7 +364,7 @@ open class AdapterSelectedImpl<Employer : XProxy<Employer>, VB : ViewBinding, D>
 
     //点击事件触发选中或取消
     protected open fun clickCheck(holder: XHolder<VB>?, isCheck: Boolean, position: Int) {
-        val data = getDatas()[position] ?: return
+        val data = getData()[position] ?: return
         if (isCheck) {
             setCheck(data, true)
         } else {
@@ -384,8 +384,8 @@ open class AdapterSelectedImpl<Employer : XProxy<Employer>, VB : ViewBinding, D>
 
     //过滤出参与选择事件的数据
     private fun filterSelectTypeDatas(): List<D> {
-        return getDatas().filter { data ->
-            val adapterPosition = adapter.getAdapterPosition(getDatas().indexOf(data))
+        return getData().filter { data ->
+            val adapterPosition = adapter.getAdapterPosition(getData().indexOf(data))
             val itemType = adapter.getItemViewType(adapterPosition)
             selectItemTypes.contains(itemType)
         }
