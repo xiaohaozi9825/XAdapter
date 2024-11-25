@@ -2,18 +2,14 @@ package pw.xiaohaozi.xadapter.smart.dragswipe
 
 import android.annotation.SuppressLint
 import android.util.Log
-import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.ItemTouchHelper.Callback.makeMovementFlags
 import androidx.recyclerview.widget.ItemTouchHelper.DOWN
 import androidx.recyclerview.widget.ItemTouchHelper.END
 import androidx.recyclerview.widget.ItemTouchHelper.START
 import androidx.recyclerview.widget.ItemTouchHelper.UP
 import androidx.recyclerview.widget.RecyclerView
-import androidx.viewbinding.ViewBinding
 import pw.xiaohaozi.xadapter.smart.adapter.SmartAdapter
-import pw.xiaohaozi.xadapter.smart.adapter.XAdapter
-import pw.xiaohaozi.xadapter.smart.dragswipe.ItemDrag
-import pw.xiaohaozi.xadapter.smart.provider.SmartProvider
+import pw.xiaohaozi.xadapter.smart.holder.isXRoutineLayout
 import java.util.*
 
 /**
@@ -49,7 +45,7 @@ class DragSort(
         recyclerView: RecyclerView,
         viewHolder: RecyclerView.ViewHolder
     ): Int {
-        return if (isViewCreateByAdapter(viewHolder)) makeMovementFlags(0, 0)
+        return if (viewHolder.isXRoutineLayout()) makeMovementFlags(0, 0)
         else makeMovementFlags(flags.invoke(recyclerView, viewHolder), 0)
     }
 
@@ -61,8 +57,8 @@ class DragSort(
     ): Boolean {
         if (onMove != null) return onMove.invoke(recyclerView, source, target)
 
-        if (isViewCreateByAdapter(source)) return false
-        if (isViewCreateByAdapter(target)) return true
+        if (source.isXRoutineLayout()) return false
+        if (target.isXRoutineLayout()) return true
         val adapter = recyclerView.adapter as SmartAdapter<*, *>
         recyclerView.parent.requestDisallowInterceptTouchEvent(true)
         //得到当拖拽的viewHolder的Position
@@ -81,8 +77,8 @@ class DragSort(
             }
         }
         adapter.notifyItemMoved(
-            adapter.getHeaderProviderCount() + fromPosition,
-            adapter.getHeaderProviderCount() + toPosition
+            adapter.getAdapterPosition(fromPosition),
+            adapter.getAdapterPosition(toPosition)
         )
 
         return true
@@ -100,13 +96,5 @@ class DragSort(
         end?.invoke(recyclerView, viewHolder)
     }
 
-    //是否有用户自己创建的ViewHolder，非特殊ViewHolder，如头布局，空布局，错误布局，底部布局
-    private fun isViewCreateByAdapter(viewHolder: RecyclerView.ViewHolder?): Boolean {
-        viewHolder?.let {
-            val adapterProxy = viewHolder.bindingAdapter as? SmartAdapter<*, *>
-            return adapterProxy?.getDataPosition(viewHolder.bindingAdapterPosition) == -1
-        }
-        return false
-    }
 
 }

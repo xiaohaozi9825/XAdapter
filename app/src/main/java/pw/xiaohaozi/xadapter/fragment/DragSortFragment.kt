@@ -6,12 +6,20 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.viewbinding.ViewBinding
+import coil.load
+import pw.xiaohaozi.xadapter.R
 import pw.xiaohaozi.xadapter.databinding.FragmentRecyclerBinding
+import pw.xiaohaozi.xadapter.databinding.ItemHomeFooterBinding
+import pw.xiaohaozi.xadapter.databinding.ItemHomeHeaderBinding
+import pw.xiaohaozi.xadapter.databinding.ItemImageCardBinding
 import pw.xiaohaozi.xadapter.databinding.ItemVerseBinding
 import pw.xiaohaozi.xadapter.info.VerseInfo
 import pw.xiaohaozi.xadapter.smart.adapter.SmartAdapter
 import pw.xiaohaozi.xadapter.smart.ext.createAdapter
 import pw.xiaohaozi.xadapter.smart.ext.dragSort
+import pw.xiaohaozi.xadapter.smart.ext.toAdapter
+import pw.xiaohaozi.xadapter.smart.ext.withType
 
 /**
  * 单布局
@@ -37,19 +45,27 @@ class DragSortFragment : Fragment() {
      * 方法1
      * 使用XAdapter拓展方法创建
      */
-    private fun function1(): SmartAdapter<ItemVerseBinding, VerseInfo> {
-        //泛型VB 确定布局文件，泛型D确定数据类型，回调函数中绑定数据
-        return createAdapter<ItemVerseBinding, VerseInfo> { (holder, data,)  ->
-            holder.binding.tvContent.text = data.content
-            holder.binding.tvAuthor.text = data.author
-        }
+    private fun function1(): SmartAdapter<ViewBinding, Any?> {
+        return createAdapter()
+            .withType<ItemVerseBinding, VerseInfo> { (holder, data) ->
+                holder.binding.tvContent.text = data.content
+                holder.binding.tvAuthor.text = data.author
+            }
+            .withType<ItemImageCardBinding,Int> {
+                it.holder.binding.image.load(it.data)
+            }
+            .toAdapter()
+            .addHeader<ItemHomeHeaderBinding> { }
+            .addFooter<ItemHomeFooterBinding> { }
             .dragSort()
+
     }
 
 
     private val list = arrayListOf(
         VerseInfo("1、何时杖尔看南雪，我与梅花两白头。", "——查辛香《清稗类钞·咏罗浮藤杖所作》"),
         VerseInfo("2、晚来天欲雪，能饮一杯无？", "——白居易《问刘十九》"),
+        R.mipmap.t1,
         VerseInfo("3、昔去雪如花，今来花似雪。", "——范云《别诗》"),
         VerseInfo("4、柴门闻犬吠，风雪夜归人。", "——刘长卿《逢雪宿芙蓉山主人》"),
         VerseInfo("5、忽如一夜春风来，千树万树梨花开。", "——岑参《白雪歌送武判官归京》"),

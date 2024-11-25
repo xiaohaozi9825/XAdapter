@@ -5,7 +5,7 @@ import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.ItemTouchHelper.Callback.makeMovementFlags
 import androidx.recyclerview.widget.RecyclerView
 import pw.xiaohaozi.xadapter.smart.adapter.SmartAdapter
-import pw.xiaohaozi.xadapter.smart.adapter.XAdapter
+import pw.xiaohaozi.xadapter.smart.holder.isXRoutineLayout
 
 
 /**
@@ -33,7 +33,7 @@ class SwipeDelete(
         viewHolder: RecyclerView.ViewHolder
     ): Int {
         //是否响应多拽事件或者侧滑事件
-        return if (isViewCreateByAdapter(viewHolder)) makeMovementFlags(0, 0)
+        return if (viewHolder.isXRoutineLayout()) makeMovementFlags(0, 0)
         else makeMovementFlags(0, flags)
     }
 
@@ -62,7 +62,7 @@ class SwipeDelete(
         dX: Float, dY: Float, actionState: Int, isCurrentlyActive: Boolean
     ) {
         if (actionState == ItemTouchHelper.ACTION_STATE_SWIPE
-            && !isViewCreateByAdapter(viewHolder)
+            && !viewHolder.isXRoutineLayout()
         ) {
             val itemView = viewHolder.itemView
             canvas.save()
@@ -91,10 +91,6 @@ class SwipeDelete(
         end?.invoke(recyclerView, viewHolder)
     }
 
-    private fun isViewCreateByAdapter(viewHolder: RecyclerView.ViewHolder): Boolean {
-        val adapterProxy = viewHolder.bindingAdapter as? SmartAdapter<*, *>
-        return adapterProxy?.getDataPosition(viewHolder.bindingAdapterPosition) == -1
-    }
 
     companion object {
         private const val TAG = "SwipeDelete"
