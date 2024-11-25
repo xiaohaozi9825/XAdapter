@@ -500,7 +500,7 @@ open class XAdapter<VB : ViewBinding, D> : Adapter<XHolder<VB>>() {
         }
         if (find != null) throw XAdapterException("provider中数据类继承自MultiItemEntity，addProvider()方法中形参itemType不能为空")
 
-        return Int.MIN_VALUE - providers.size()
+        return Int.MIN_VALUE + providers.size()
     }
 
 

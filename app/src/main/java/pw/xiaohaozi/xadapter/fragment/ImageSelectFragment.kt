@@ -13,6 +13,7 @@ import coil.load
 import pw.xiaohaozi.xadapter.R
 import pw.xiaohaozi.xadapter.databinding.FragmentSelectedBinding
 import pw.xiaohaozi.xadapter.databinding.ItemCameraBinding
+import pw.xiaohaozi.xadapter.databinding.ItemHomeHeaderBinding
 import pw.xiaohaozi.xadapter.databinding.ItemImageSelectedBinding
 import pw.xiaohaozi.xadapter.smart.adapter.SmartAdapter
 import pw.xiaohaozi.xadapter.smart.ext.createAdapter
@@ -46,10 +47,7 @@ class ImageSelectFragment : Fragment() {
         adapter.reset(list2)
     }
 
-    /**
-     * 方法1
-     * 使用XAdapter拓展方法创建
-     */
+
     @SuppressLint("SetTextI18n")
     private fun function1(): SmartAdapter<ItemImageSelectedBinding, Int> {
         //泛型VB 确定布局文件，泛型D确定数据类型，回调函数中绑定数据
@@ -79,7 +77,11 @@ class ImageSelectFragment : Fragment() {
     private fun function2(): SmartAdapter<ViewBinding, Any?> {
         //泛型VB 确定布局文件，泛型D确定数据类型，回调函数中绑定数据
         val adapter = createAdapter()
-            .setOnItemSelectListener(payload = "select") { data, position, index, fromUser ->
+            .setOnItemSelectListener(
+                payload = "select",
+//                permittedTypes = arrayOf(java.lang.Integer::class.java)
+                permittedTypes = arrayOf(Int.MIN_VALUE + 1)
+            ) { data, position, index, fromUser ->
                 binding.tvSelectedCount.text = "已选${getSelectedDatas().size}张"
             }.setOnSelectAllListener { selectedCache, isSelectedAll ->
                 if (binding.ivSelectedAll.isSelected != isSelectedAll) {
@@ -92,7 +94,8 @@ class ImageSelectFragment : Fragment() {
 //            .isAllowCancel(false)
             .withType<ItemCameraBinding, Any?> {
 
-            }.setOnClickListener { holder, data, position, view ->
+            }
+            .setOnClickListener { holder, data, position, view ->
                 Toast.makeText(requireContext(), "点击拍照", Toast.LENGTH_SHORT).show()
             }
 //            .withType<ItemImageSelectedBinding, Int>(select = true) { holder, data, position, payloads ->
@@ -109,7 +112,7 @@ class ImageSelectFragment : Fragment() {
 //                }
 //
 //            }
-            .withType<ItemImageSelectedBinding, Int>(select = true) { (holder, data, position, payloads) ->
+            .withType<ItemImageSelectedBinding, Int> { (holder, data, position, payloads) ->
                 if (!payloads.contains("select")) {
                     holder.binding.ivImage.load(data)
                 }

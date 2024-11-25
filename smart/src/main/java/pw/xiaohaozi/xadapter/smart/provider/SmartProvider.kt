@@ -15,7 +15,6 @@ import pw.xiaohaozi.xadapter.smart.proxy.EventProxy
  */
 abstract class SmartProvider<VB : ViewBinding, D>(
     override val adapter: SmartAdapter<*, *>, //
-    var select: Boolean = false,
     private val listener: EventImpl<SmartProvider<VB, D>, VB, D> = EventImpl(),//
 ) : XProvider<VB, D>(adapter), EventProxy<SmartProvider<VB, D>, VB, D> by listener {
     init {

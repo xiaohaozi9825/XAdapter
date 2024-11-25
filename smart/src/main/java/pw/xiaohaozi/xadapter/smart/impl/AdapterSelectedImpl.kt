@@ -13,7 +13,6 @@ import pw.xiaohaozi.xadapter.smart.entity.EMPTY
 import pw.xiaohaozi.xadapter.smart.entity.FOOTER
 import pw.xiaohaozi.xadapter.smart.entity.HEADER
 import pw.xiaohaozi.xadapter.smart.holder.XHolder
-import pw.xiaohaozi.xadapter.smart.provider.SmartProvider
 import pw.xiaohaozi.xadapter.smart.provider.TypeProvider
 import pw.xiaohaozi.xadapter.smart.proxy.ObservableList
 import pw.xiaohaozi.xadapter.smart.proxy.OnItemSelectListener
@@ -25,6 +24,7 @@ import pw.xiaohaozi.xadapter.smart.proxy.XProxy
 import java.lang.reflect.ParameterizedType
 import kotlin.math.max
 import kotlin.math.min
+import kotlin.reflect.KClass
 
 /**
  *
@@ -48,7 +48,7 @@ open class AdapterSelectedImpl<Employer : XProxy<Employer>, VB : ViewBinding, D>
     private fun getData() = adapter.getData() as MutableList<D>
     override val selectedCache: SelectedList<D> by lazy { SelectedList() }
     override var onSelectedDataChangesListener: OnSelectedDataChangesListener<Employer, D>? = null
-    override var itemSelectListener: Triple<Int?, String?, OnItemSelectListener<Employer, D>>? = null
+    override var itemSelectListener: SelectedProxy.Selected<Employer, D>? = null
     override var maxSelectCount: Int? = null
     override var isAllowCancel: Boolean = true
     override var isAutoCancel: Boolean = true
@@ -61,9 +61,18 @@ open class AdapterSelectedImpl<Employer : XProxy<Employer>, VB : ViewBinding, D>
 
     //参与选择操作的Providers对应的itemType
     private val selectItemTypes by lazy {
-        val temp = mutableListOf<Int>()
-        adapter.providers.forEach { key, value ->
-            if ((value as? SmartProvider<*, *>)?.select == true) temp.add(key)
+        var temp = mutableListOf<Int>()
+        val permittedTypes = itemSelectListener?.permittedTypes
+        if (permittedTypes?.isArrayOf<Int>() == true) {
+            temp = permittedTypes.mapTo(mutableListOf()) { it as Int }
+        } else if (permittedTypes?.isArrayOf<Class<*>>() == true) {
+            adapter.providers.forEach { key, provide ->
+                val genericSuperclass = provide.javaClass.genericSuperclass as? ParameterizedType
+                val arguments = genericSuperclass?.actualTypeArguments
+                if (permittedTypes.any { arguments?.contains(it) == true }) {
+                    temp.add(key)
+                }
+            }
         }
         return@lazy temp
     }
@@ -163,6 +172,9 @@ open class AdapterSelectedImpl<Employer : XProxy<Employer>, VB : ViewBinding, D>
                 if (arguments?.contains(FOOTER::class.java) == true) return
                 if (arguments?.contains(EMPTY::class.java) == true) return
                 if (arguments?.contains(DEFAULT_PAGE::class.java) == true) return
+                if (selectItemTypes.isNotEmpty()) {
+                    if (!selectItemTypes.contains(provide.getItemViewType())) return
+                }
                 initListener(holder)
             }
 
@@ -198,7 +210,7 @@ open class AdapterSelectedImpl<Employer : XProxy<Employer>, VB : ViewBinding, D>
 
     private fun initListener(holder: XHolder<*>) {
         val selectedListener = this.itemSelectListener ?: return
-        val viewId = selectedListener.first
+        val viewId = selectedListener.id
         val tagger: View = viewId?.let { holder.itemView.findViewById(it) } ?: holder.itemView
         tagger.setOnClickListener {
             val position = adapter.getDataPosition(holder.adapterPosition)
@@ -212,12 +224,34 @@ open class AdapterSelectedImpl<Employer : XProxy<Employer>, VB : ViewBinding, D>
     }
 
     /*******************************************  核心方法  ******************************************************/
+
+    override fun setOnItemSelectListener(
+        id: Int?,
+        payload: String?,
+        permittedTypes: Array<Int>,
+        listener: OnItemSelectListener<Employer, D>
+    ): Employer {
+        itemSelectListener = SelectedProxy.Selected(id, payload, permittedTypes, listener)
+        return employer
+    }
+
+
+    override fun setOnItemSelectListener(
+        id: Int?,
+        payload: String?,
+        permittedTypes: Array<Class<*>>,
+        listener: OnItemSelectListener<Employer, D>
+    ): Employer {
+        itemSelectListener = SelectedProxy.Selected(id, payload, permittedTypes, listener)
+        return employer
+    }
+
     override fun setOnItemSelectListener(
         id: Int?,
         payload: String?,
         listener: OnItemSelectListener<Employer, D>
     ): Employer {
-        itemSelectListener = Triple(id, payload, listener)
+        itemSelectListener = SelectedProxy.Selected(id, payload, null, listener)
         return employer
     }
 
@@ -270,7 +304,7 @@ open class AdapterSelectedImpl<Employer : XProxy<Employer>, VB : ViewBinding, D>
         adapter.notifyItemRangeChanged(
             adapter.getAdapterPosition(0),
             adapter.getAdapterPosition(getData().size),
-            itemSelectListener?.second
+            itemSelectListener?.payload
         )
         selects.forEachIndexed { position, data ->
             val indexOf = selectedCache.indexOf(data)
@@ -289,7 +323,7 @@ open class AdapterSelectedImpl<Employer : XProxy<Employer>, VB : ViewBinding, D>
         adapter.notifyItemRangeChanged(
             adapter.getAdapterPosition(0),
             adapter.getAdapterPosition(getData().size),
-            itemSelectListener?.second
+            itemSelectListener?.payload
         )
         getData().forEachIndexed { position, data ->
             val indexOf = selectedCache.indexOf(data)
@@ -321,7 +355,7 @@ open class AdapterSelectedImpl<Employer : XProxy<Employer>, VB : ViewBinding, D>
             if (d == data) {
                 val adapterPosition = adapter.getAdapterPosition(position)
                 if (adapterPosition > -1 && adapterPosition < adapter.itemCount) {
-                    adapter.notifyItemChanged(adapterPosition, itemSelectListener?.second)
+                    adapter.notifyItemChanged(adapterPosition, itemSelectListener?.payload)
                     notifyItemSelectedChanges(d, adapterPosition, -1, fromUser)
                 }
             }
@@ -332,7 +366,7 @@ open class AdapterSelectedImpl<Employer : XProxy<Employer>, VB : ViewBinding, D>
             if (filter.contains(d)) {
                 val adapterPosition = adapter.getAdapterPosition(position)
                 if (adapterPosition > -1 && adapterPosition < adapter.itemCount) {
-                    adapter.notifyItemChanged(adapterPosition, itemSelectListener?.second)
+                    adapter.notifyItemChanged(adapterPosition, itemSelectListener?.payload)
                     notifyItemSelectedChanges(d, adapterPosition, -1, fromUser)
                 }
             }
@@ -365,7 +399,7 @@ open class AdapterSelectedImpl<Employer : XProxy<Employer>, VB : ViewBinding, D>
             if (d == data) {
                 val adapterPosition = adapter.getAdapterPosition(position)
                 if (adapterPosition > -1 && adapterPosition < adapter.itemCount) {
-                    adapter.notifyItemChanged(adapterPosition, itemSelectListener?.second)
+                    adapter.notifyItemChanged(adapterPosition, itemSelectListener?.payload)
                     notifyItemSelectedChanges(d, adapterPosition, indexOf, fromUser)
                 }
             }
@@ -396,7 +430,8 @@ open class AdapterSelectedImpl<Employer : XProxy<Employer>, VB : ViewBinding, D>
 
     //过滤出参与选择事件的数据
     private fun filterSelectTypeDatas(): List<D> {
-        return getData().filter { data ->
+        return if (selectItemTypes.isEmpty()) getData()
+        else getData().filter { data ->
             val adapterPosition = adapter.getAdapterPosition(getData().indexOf(data))
             val itemType = adapter.getItemViewType(adapterPosition)
             selectItemTypes.contains(itemType)
@@ -410,7 +445,7 @@ open class AdapterSelectedImpl<Employer : XProxy<Employer>, VB : ViewBinding, D>
         index: Int,
         fromUser: Boolean
     ) {
-        itemSelectListener?.third?.invoke(employer, data, position, index, fromUser)
+        itemSelectListener?.listener?.invoke(employer, data, position, index, fromUser)
     }
 
     //通知更新选中状态改变

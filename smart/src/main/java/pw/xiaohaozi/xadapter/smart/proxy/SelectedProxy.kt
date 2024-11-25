@@ -1,6 +1,7 @@
 package pw.xiaohaozi.xadapter.smart.proxy
 
 import androidx.viewbinding.ViewBinding
+import kotlin.reflect.KClass
 
 /**
  * 全选状态监听
@@ -22,13 +23,20 @@ typealias OnItemSelectListener<Employer, D> = Employer.(data: D, position: Int, 
  */
 interface SelectedProxy<Employer : XProxy<Employer>, VB : ViewBinding, D> :
     XProxy<Employer> {
+    class Selected<Employer, D>(
+        val id: Int?,
+        val payload: String?,
+        val permittedTypes: Array<*>?,
+        val listener: OnItemSelectListener<Employer, D>
+    )
+
     val selectedCache: MutableCollection<D>
 
     //全选状态变化
     var onSelectedDataChangesListener: OnSelectedDataChangesListener<Employer, D>?
 
     //选中事件，一个item只能一个view响应选中事件
-    var itemSelectListener: Triple<Int?, String?, OnItemSelectListener<Employer, D>>?
+    var itemSelectListener: Selected<Employer, D>?
 
     //最大可选数
     var maxSelectCount: Int?
@@ -38,10 +46,11 @@ interface SelectedProxy<Employer : XProxy<Employer>, VB : ViewBinding, D> :
 
     //是否允许取消，默认允许
     var isAllowCancel: Boolean
-
     /**
      * 设置选中事件监听
      * @param id 触发选中事件的 view，默认为item
+     * @param payload
+     * @param permittedTypes 参与选择的类型，与itemType一致
      * @param listener 选中事件回调监听
      */
     fun setOnItemSelectListener(
@@ -49,6 +58,34 @@ interface SelectedProxy<Employer : XProxy<Employer>, VB : ViewBinding, D> :
         payload: String? = null,
         listener: OnItemSelectListener<Employer, D>
     ): Employer
+    /**
+     * 设置选中事件监听
+     * @param id 触发选中事件的 view，默认为item
+     * @param payload
+     * @param permittedTypes 参与选择的类型，与itemType一致
+     * @param listener 选中事件回调监听
+     */
+    fun setOnItemSelectListener(
+        id: Int? = null,
+        payload: String? = null,
+        permittedTypes: Array<Int>,
+        listener: OnItemSelectListener<Employer, D>
+    ): Employer
+    /**
+     * 设置选中事件监听
+     * @param id 触发选中事件的 view，默认为item
+     * @param payload
+     * @param permittedTypes 参与选择的类型，data的类型，如果是基本数据类型.
+     * 需要带上包名，如int类型，应写java.lang.Integer::class.java
+     * @param listener 选中事件回调监听
+     */
+    fun setOnItemSelectListener(
+        id: Int? = null,
+        payload: String? = null,
+        permittedTypes: Array<Class<*>>,
+        listener: OnItemSelectListener<Employer, D>
+    ): Employer
+
 
     /**
      * 设置全选监听
