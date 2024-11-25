@@ -6,15 +6,24 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
+import com.scwang.smart.refresh.footer.ClassicsFooter
+import com.scwang.smart.refresh.header.ClassicsHeader
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import pw.xiaohaozi.xadapter.R
 import pw.xiaohaozi.xadapter.databinding.FragmentDataOperationBinding
 import pw.xiaohaozi.xadapter.databinding.ItemDataOperationBinding
+import pw.xiaohaozi.xadapter.databinding.ItemHomeFooterBinding
+import pw.xiaohaozi.xadapter.databinding.ItemHomeHeaderBinding
+import pw.xiaohaozi.xadapter.dialog.InputDialog
 import pw.xiaohaozi.xadapter.info.VerseInfo
 import pw.xiaohaozi.xadapter.smart.adapter.SmartAdapter
 import pw.xiaohaozi.xadapter.smart.dragswipe.swipeDelete
 import pw.xiaohaozi.xadapter.smart.ext.createAdapter
 import pw.xiaohaozi.xadapter.smart.ext.dragSort
 import pw.xiaohaozi.xadapter.smart.proxy.ObservableList
+
 
 /**
  * item选择
@@ -37,14 +46,25 @@ class DataOperationFragment : Fragment() {
                 adapter.selectAll()
         }
         binding.btnAddData.setOnClickListener {
-            val index = pos++ % list.size
-            val data = list[index]
-            adapter.add(data)
+//            val index = pos++ % list.size
+//            val data = list[index]
+//            adapter.add(0, data)
+            val datas = mutableListOf<VerseInfo>()
+            for (i in 0..2) {
+                val index = pos++ % list.size
+                datas.add(list[index])
+            }
+            adapter.add(0, datas)
         }
 
         binding.btnDeleteSelected.setOnClickListener {
-            adapter.remove(adapter.getSelectedDatas())
+//            adapter.remove(adapter.getSelectedDatas())
+//            adapter.remove(0,2)
+//            adapter.remove(adapter.datas[0])
+//            adapter.remove(adapter.datas.filterIndexed { index, verseInfo -> index < 2 })
+            adapter.remove()
         }
+
         binding.rvList.adapter = adapter
         adapter.addOnListChangedCallback(object : ObservableList.OnListChangedCallback<MutableList<VerseInfo>>() {
             override fun onChanged(sender: MutableList<VerseInfo>) {
@@ -64,23 +84,53 @@ class DataOperationFragment : Fragment() {
                 binding.tvItemCount.text = "共${sender.size}条数据"
             }
 
-            override fun onItemRangeRemoved(sender: MutableList<VerseInfo>,  changeDatas: MutableList<VerseInfo>,positionStart: Int, itemCount: Int) {
+            override fun onItemRangeRemoved(
+                sender: MutableList<VerseInfo>,
+                changeDatas: MutableList<VerseInfo>,
+                positionStart: Int,
+                itemCount: Int
+            ) {
                 binding.tvItemCount.text = "共${sender.size}条数据"
             }
-
-
         })
         return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        val refreshLayout = binding.refreshLayout
+        refreshLayout.setRefreshHeader(ClassicsHeader(requireContext()))
+        refreshLayout.setRefreshFooter(ClassicsFooter(requireContext()))
+        refreshLayout.setOnRefreshListener { refreshlayout ->
+            lifecycleScope.launch {
+                delay(1000)
+                val datas = mutableListOf<VerseInfo>()
+                for (i in 0..5) {
+                    val index = pos++ % list.size
+                    datas.add(list[index])
+                }
+                adapter.refresh(datas)
+                refreshlayout.finishRefresh()
+            }
+
+        }
+        refreshLayout.setOnLoadMoreListener { refreshlayout ->
+            lifecycleScope.launch {
+                delay(1000)
+                val datas = mutableListOf<VerseInfo>()
+                for (i in 0..5) {
+                    val index = pos++ % list.size
+                    datas.add(list[index])
+                }
+                adapter.add(datas)
+                refreshlayout.finishLoadMore()
+            }
+        }
     }
 
 
     @SuppressLint("SetTextI18n")
     private fun function(): SmartAdapter<ItemDataOperationBinding, VerseInfo> {
-        //泛型VB 确定布局文件，泛型D确定数据类型，回调函数中绑定数据
         return createAdapter<ItemDataOperationBinding, VerseInfo> { (holder, data) ->
             holder.binding.tvContent.text = data.content
             holder.binding.tvAuthor.text = data.author
@@ -92,15 +142,35 @@ class DataOperationFragment : Fragment() {
                 holder.binding.tvSelectedIndex.text = "${index + 1}"
                 holder.binding.tvSelectedIndex.setBackgroundResource(R.drawable.bg_selected_position)
             }
-        }.setOnItemSelectListener { data, position, index, fromUser ->
-
-        }.setOnSelectAllListener { selectedCache, isSelectedAll ->
-            if (binding.ivSelectedAll.isSelected != isSelectedAll) {
-                binding.ivSelectedAll.isSelected = isSelectedAll
-                binding.tvSelectedAll.text = if (isSelectedAll) "全不选" else "全选"
-            }
-            binding.tvSelectedCount.text = "已选${selectedCache.size}张"
         }
+            .addHeader<ItemHomeHeaderBinding>()
+            .addFooter<ItemHomeFooterBinding>()
+//            .setOnClickListener { holder, data, position, view ->
+//                setSelect(data, !isSelected(data))
+//            }
+            .setOnItemSelectListener { data, position, index, fromUser ->
+
+            }
+            .setOnSelectAllListener { selectedCache, isSelectedAll ->
+                if (binding.ivSelectedAll.isSelected != isSelectedAll) {
+                    binding.ivSelectedAll.isSelected = isSelectedAll
+                    binding.tvSelectedAll.text = if (isSelectedAll) "全不选" else "全选"
+                }
+                binding.tvSelectedCount.text = "已选${selectedCache.size}张"
+            }
+            .setOnClickListener(R.id.iv_edit) { holder, data, position, view ->
+                InputDialog(requireActivity())
+                    .setTitle("修改诗句")
+                    .setMsg(data.content)
+                    .onConfirm { _, content: String ->
+                        data.content = content
+//                        adapter.upDate(data)
+//                        adapter.upDate(position,data)
+                        adapter.upDateAt(getData().indexOf(data))
+                    }
+                    .onCancel {}
+                    .show()
+            }
             .swipeDelete()
             .dragSort()
 

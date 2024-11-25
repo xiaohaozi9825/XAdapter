@@ -44,16 +44,32 @@
             android:textColor="@color/theme"
             android:textSize="14sp" />
     </LinearLayout>
-
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/rv_list"
+    <com.scwang.smart.refresh.layout.SmartRefreshLayout
+        android:id="@+id/refreshLayout"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:padding="6dp"
-        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+
         app:layout_constraintBottom_toTopOf="@id/tv_selected_count"
-        app:layout_constraintTop_toBottomOf="@id/tv_item_count"
-        tools:listitem="@layout/item_image_selected" />
+        app:layout_constraintTop_toBottomOf="@id/tv_item_count">
+
+        <com.scwang.smart.refresh.header.ClassicsHeader
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rv_list"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:overScrollMode="never"
+            android:padding="6dp"
+            app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+            tools:listitem="@layout/item_data_operation" />
+
+        <com.scwang.smart.refresh.footer.ClassicsFooter
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+    </com.scwang.smart.refresh.layout.SmartRefreshLayout>
+
 
     <TextView
         android:id="@+id/tv_selected_count"
@@ -66,22 +82,22 @@
         android:textSize="14sp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/rv_list" />
+        app:layout_constraintTop_toBottomOf="@id/refreshLayout" />
 
     <TextView
         android:id="@+id/btn_add_data"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginEnd="8dp"
+        android:background="@drawable/bg_button"
         android:paddingHorizontal="12dp"
         android:paddingVertical="6dp"
         android:text="添  加"
-        android:layout_marginEnd="8dp"
         android:textColor="@color/white"
         android:textSize="14sp"
-        android:background="@drawable/bg_button"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@id/btn_delete_selected"
-        app:layout_constraintTop_toBottomOf="@id/rv_list" />
+        app:layout_constraintTop_toBottomOf="@id/refreshLayout" />
 
     <TextView
         android:id="@+id/btn_delete_selected"
@@ -94,5 +110,5 @@
         android:textSize="14sp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/rv_list" />
+        app:layout_constraintTop_toBottomOf="@id/refreshLayout" />
 </androidx.constraintlayout.widget.ConstraintLayout>

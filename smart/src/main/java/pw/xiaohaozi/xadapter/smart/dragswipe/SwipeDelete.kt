@@ -49,7 +49,7 @@ class SwipeDelete(
     override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
         if (swipe?.invoke(viewHolder, direction) != true) {
             val adapter = viewHolder.bindingAdapter as? SmartAdapter<*, *>
-            adapter?.removeAt(adapter.getCustomPosition(viewHolder.bindingAdapterPosition))
+            adapter?.removeAt(adapter.getDataPosition(viewHolder.bindingAdapterPosition))
         }
     }
 
@@ -93,7 +93,7 @@ class SwipeDelete(
 
     private fun isViewCreateByAdapter(viewHolder: RecyclerView.ViewHolder): Boolean {
         val adapterProxy = viewHolder.bindingAdapter as? SmartAdapter<*, *>
-        return adapterProxy?.getCustomPosition(viewHolder.bindingAdapterPosition) == -1
+        return adapterProxy?.getDataPosition(viewHolder.bindingAdapterPosition) == -1
     }
 
     companion object {

@@ -36,7 +36,7 @@ class EventImpl<Employer : XProxy<Employer>, VB : ViewBinding, D> : EventProxy<E
     }
 
     //adapter中的datas可以被重新赋值，所以不能用by lazy 的方式获取
-    private fun getDatas() = adapter.datas as MutableList<*>
+    private fun getDatas() = adapter.getData()
     override val clickListenerMap: HashMap<Int?, OnItemClickListener<Employer, VB, D>> = hashMapOf()
     override val longClickListenerMap: HashMap<Int?, OnItemLongClickListener<Employer, VB, D>> = hashMapOf()
     override val checkedChangeListener: HashMap<Int?, OnItemCheckedChangeListener<Employer, VB, D>> = hashMapOf()

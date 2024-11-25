@@ -34,7 +34,7 @@ open class XAdapter<VB : ViewBinding, D> : Adapter<XHolder<VB>>() {
     }
 
 
-    var datas: MutableList<D> = mutableListOf()
+    private var datas: MutableList<D> = mutableListOf()
     val providers: SparseArray<TypeProvider<*, *>> by lazy { SparseArray() }
     private var itemTypeCallback: (XAdapter<VB, D>.(data: D, position: Int) -> Int?)? = null
 
@@ -166,11 +166,13 @@ open class XAdapter<VB : ViewBinding, D> : Adapter<XHolder<VB>>() {
             provideViewHolder(provide, holder, d, dataPosition, payloads)
         }
     }
-    fun setXxxDatas(list: MutableList<*>) {
+
+    fun setData(list: MutableList<*>) {
         datas = list as MutableList<D>
     }
-    fun getCustomPosition(position: Int): Int {
-        return getHeaderProviderCount() + position
+
+    fun getData(): MutableList<D> {
+        return datas
     }
 
     private fun provideViewHolder(
@@ -379,9 +381,14 @@ open class XAdapter<VB : ViewBinding, D> : Adapter<XHolder<VB>>() {
     /**
      * 当有头布局时，回调函数中的position均为adapterPosition，如果需要对应数据的索引，这里需要做一次计算
      */
-    fun getDataPosition(position: Int): Int {
-        return if (!hasHeader) position
-        else position - getHeaderProviderCount()
+    fun getDataPosition(adapterPosition: Int): Int {
+        return if (!hasHeader) adapterPosition
+        else adapterPosition - getHeaderProviderCount()
+    }
+
+    fun getAdapterPosition(dataPosition: Int): Int {
+        return if (!hasHeader) dataPosition
+        else dataPosition + getHeaderProviderCount()
     }
 
     fun addHeaderProvider(provider: XProvider<*, *>, header: HEADER) {

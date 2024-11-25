@@ -66,18 +66,18 @@ class DragSort(
         val adapter = recyclerView.adapter as SmartAdapter<*, *>
         recyclerView.parent.requestDisallowInterceptTouchEvent(true)
         //得到当拖拽的viewHolder的Position
-        val fromPosition: Int = adapter.getCustomPosition(source.bindingAdapterPosition)
+        val fromPosition: Int = adapter.getDataPosition(source.bindingAdapterPosition)
         //拿到当前拖拽到的item的viewHolder
-        val toPosition = adapter.getCustomPosition(target.bindingAdapterPosition)
+        val toPosition = adapter.getDataPosition(target.bindingAdapterPosition)
         Log.i("交换数据", "onMove: fromPosition = $fromPosition  ==  toPosition = $toPosition")
         swap?.invoke(recyclerView, source, target, fromPosition, toPosition)
         if (fromPosition < toPosition) {
             for (i in fromPosition until toPosition) {
-                Collections.swap(adapter.datas, i, i + 1)
+                Collections.swap(adapter.getData(), i, i + 1)
             }
         } else {
             for (i in fromPosition downTo toPosition + 1) {
-                Collections.swap(adapter.datas, i, i - 1)
+                Collections.swap(adapter.getData(), i, i - 1)
             }
         }
         adapter.notifyItemMoved(
@@ -104,7 +104,7 @@ class DragSort(
     private fun isViewCreateByAdapter(viewHolder: RecyclerView.ViewHolder?): Boolean {
         viewHolder?.let {
             val adapterProxy = viewHolder.bindingAdapter as? SmartAdapter<*, *>
-            return adapterProxy?.getCustomPosition(viewHolder.bindingAdapterPosition) == -1
+            return adapterProxy?.getDataPosition(viewHolder.bindingAdapterPosition) == -1
         }
         return false
     }
