@@ -19,7 +19,7 @@ import pw.xiaohaozi.xadapter.smart.holder.isXRoutineLayout
  */
 class SwipeDelete(
     private val threshold: Float = 0.5f,
-    private val flags: Int = ItemTouchHelper.END or ItemTouchHelper.START,
+    private val flags: (recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder) -> Int = { _, _ ->  ItemTouchHelper.START or ItemTouchHelper.END },
     private val start: ((viewHolder: RecyclerView.ViewHolder?) -> Unit)? = null,
     private val end: ((recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder) -> Unit)? = null,
     private val swipe: ((viewHolder: RecyclerView.ViewHolder, direction: Int) -> Boolean)? = null,
@@ -34,7 +34,7 @@ class SwipeDelete(
     ): Int {
         //是否响应多拽事件或者侧滑事件
         return if (viewHolder.isXRoutineLayout()) makeMovementFlags(0, 0)
-        else makeMovementFlags(0, flags)
+        else makeMovementFlags(0, flags.invoke(recyclerView, viewHolder))
     }
 
     override fun onMove(

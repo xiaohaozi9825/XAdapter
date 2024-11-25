@@ -51,13 +51,14 @@ class DragSortFragment : Fragment() {
                 holder.binding.tvContent.text = data.content
                 holder.binding.tvAuthor.text = data.author
             }
-            .withType<ItemImageCardBinding,Int> {
+            .dragSort()//只对当前类型执行拖拽功能
+            .withType<ItemImageCardBinding, Int> {
                 it.holder.binding.image.load(it.data)
             }
             .toAdapter()
             .addHeader<ItemHomeHeaderBinding> { }
             .addFooter<ItemHomeFooterBinding> { }
-            .dragSort()
+//            .dragSort()//对整个adapter执行拖拽功能
 
     }
 

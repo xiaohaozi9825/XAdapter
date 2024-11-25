@@ -1,6 +1,10 @@
 package pw.xiaohaozi.xadapter.smart.ext
 
 import androidx.recyclerview.widget.ItemTouchHelper
+import androidx.recyclerview.widget.ItemTouchHelper.DOWN
+import androidx.recyclerview.widget.ItemTouchHelper.END
+import androidx.recyclerview.widget.ItemTouchHelper.START
+import androidx.recyclerview.widget.ItemTouchHelper.UP
 import androidx.recyclerview.widget.RecyclerView
 import androidx.viewbinding.ViewBinding
 import pw.xiaohaozi.xadapter.smart.adapter.SmartAdapter
@@ -177,30 +181,6 @@ fun <A : SmartAdapter<VB, D>, VB : ViewBinding, D> A.swipeMenu(): A {
     return this
 }
 
-/**
- * 侧滑删除
- *
- * @param threshold 设置用户应该移动视图的部分，将其视为已滑动。分数是根据RecyclerView的边界计算的。 如果设置0.5f，这意味着，要滑动视图，用户必须移动视图至少一半的RecyclerView的宽度或高度，这取决于滑动的方向。
- * @param flags 滑动移动方向。默认值为ItemTouchHelper.END or ItemTouchHelper.START。
- * @param start 开始滑动
- * @param end 滑动结束（手指松开，不管有没有触发侧滑事件都会调用）
- * @param swipe 触发侧滑事件，返回是否消费掉该事件
- */
-@Deprecated(
-    message = "建议在Adapter中设置侧滑删除",
-    replaceWith = ReplaceWith("(this.adapter as AdapterProxy<*,*,*,*>).swipeDelete()"),
-    level = DeprecationLevel.WARNING
-)
-fun RecyclerView.swipeDelete(
-    threshold: Float = 0.5f,
-    flags: Int = ItemTouchHelper.END or ItemTouchHelper.START,
-    start: ((viewHolder: RecyclerView.ViewHolder?) -> Unit)? = null,
-    end: ((recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder) -> Unit)? = null,
-    swipe: ((viewHolder: RecyclerView.ViewHolder, direction: Int) -> Boolean)? = null,
-) {
-    ItemTouchHelper(ItemSwipe(SwipeDelete(threshold, flags, start, end, swipe)))
-        .attachToRecyclerView(this)
-}
 
 /**
  * 侧滑删除
@@ -213,7 +193,7 @@ fun RecyclerView.swipeDelete(
  */
 fun <T : SmartAdapter<*, *>> T.swipeDelete(
     threshold: Float = 0.5f,
-    flags: Int = ItemTouchHelper.END or ItemTouchHelper.START,
+    flags: (recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder) -> Int = { _, _ -> START or END },
     start: ((viewHolder: RecyclerView.ViewHolder?) -> Unit)? = null,
     end: ((recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder) -> Unit)? = null,
     swipe: ((viewHolder: RecyclerView.ViewHolder, direction: Int) -> Boolean)? = null,
@@ -243,9 +223,39 @@ fun <T : SmartAdapter<*, *>> T.swipeDelete(
  * @param onMove 被拖拽的item多拽到其他item位置上是调用,该参数会替换掉现有的onMove逻辑
  * @param swap 当两个item交换时调用
  */
+fun <VB : ViewBinding, D> SmartProvider<VB, D>.swipeDelete(
+    threshold: Float = 0.5f,
+    flags: (recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder) -> Int = { _, holder -> if (holder.itemViewType == getItemViewType()) START or END else 0 },
+    start: ((viewHolder: RecyclerView.ViewHolder?) -> Unit)? = null,
+    end: ((recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder) -> Unit)? = null,
+    swipe: ((viewHolder: RecyclerView.ViewHolder, direction: Int) -> Boolean)? = null,
+): SmartProvider<VB, D> {
+    adapter.addOnRecyclerViewChanges(object : XAdapter.OnRecyclerViewChanges {
+        override fun onAttachedToRecyclerView(recyclerView: RecyclerView) {
+            ItemTouchHelper(ItemSwipe(SwipeDelete(threshold, flags, start, end, swipe)))
+                .attachToRecyclerView(recyclerView)
+        }
+
+        override fun onDetachedFromRecyclerView(recyclerView: RecyclerView) {
+
+        }
+    })
+    return this
+}
+
+/**
+ * 拖拽排序
+ *
+ * @param threshold 设置用户在拖拽视图时应该移动视图的比例。在视图移动到这个位置之后，ItemTouchHelper开始检查视图下方是否有可能的删除。一个浮点值，表示视图大小的百分比。缺省值为。1f。
+ * @param flags 触发方向
+ * @param start 开始拖拽
+ * @param end 结束拖拽（松开手就会调用）
+ * @param onMove 被拖拽的item多拽到其他item位置上是调用,该参数会替换掉现有的onMove逻辑
+ * @param swap 当两个item交换时调用
+ */
 fun <T : SmartAdapter<*, *>> T.dragSort(
     threshold: Float = 0.1f,
-    flags: (recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder) -> Int = { _, _ -> ItemTouchHelper.UP or ItemTouchHelper.DOWN or ItemTouchHelper.START or ItemTouchHelper.END },
+    flags: (recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder) -> Int = { _, _ -> UP or DOWN or START or END },
     start: ((viewHolder: RecyclerView.ViewHolder?) -> Unit)? = null,
     end: ((recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder) -> Unit)? = null,
     onMove: ((
