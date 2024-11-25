@@ -8,6 +8,10 @@ import androidx.recyclerview.widget.RecyclerView
 import androidx.viewbinding.ViewBinding
 import pw.xiaohaozi.smartadapter.utils.SelectedList
 import pw.xiaohaozi.xadapter.smart.adapter.XAdapter
+import pw.xiaohaozi.xadapter.smart.entity.DEFAULT_PAGE
+import pw.xiaohaozi.xadapter.smart.entity.EMPTY
+import pw.xiaohaozi.xadapter.smart.entity.FOOTER
+import pw.xiaohaozi.xadapter.smart.entity.HEADER
 import pw.xiaohaozi.xadapter.smart.holder.XHolder
 import pw.xiaohaozi.xadapter.smart.provider.SmartProvider
 import pw.xiaohaozi.xadapter.smart.provider.TypeProvider
@@ -18,6 +22,7 @@ import pw.xiaohaozi.xadapter.smart.proxy.SelectedProxy
 import pw.xiaohaozi.xadapter.smart.proxy.SmartDataProxy
 import pw.xiaohaozi.xadapter.smart.proxy.XEmployer
 import pw.xiaohaozi.xadapter.smart.proxy.XProxy
+import java.lang.reflect.ParameterizedType
 import kotlin.math.max
 import kotlin.math.min
 
@@ -151,6 +156,13 @@ open class AdapterSelectedImpl<Employer : XProxy<Employer>, VB : ViewBinding, D>
 
         adapter.addOnViewHolderChanges(object : XAdapter.OnViewHolderChanges {
             override fun onCreated(provide: TypeProvider<*, *>, holder: XHolder<*>) {
+                //不对特殊布局设置事件监听
+                val genericSuperclass = provide.javaClass.genericSuperclass as? ParameterizedType
+                val arguments = genericSuperclass?.actualTypeArguments
+                if (arguments?.contains(HEADER::class.java) == true) return
+                if (arguments?.contains(FOOTER::class.java) == true) return
+                if (arguments?.contains(EMPTY::class.java) == true) return
+                if (arguments?.contains(DEFAULT_PAGE::class.java) == true) return
                 initListener(holder)
             }
 

@@ -7,6 +7,10 @@ import androidx.core.widget.addTextChangedListener
 import androidx.viewbinding.ViewBinding
 import pw.xiaohaozi.xadapter.smart.XAdapterException
 import pw.xiaohaozi.xadapter.smart.adapter.XAdapter
+import pw.xiaohaozi.xadapter.smart.entity.DEFAULT_PAGE
+import pw.xiaohaozi.xadapter.smart.entity.EMPTY
+import pw.xiaohaozi.xadapter.smart.entity.FOOTER
+import pw.xiaohaozi.xadapter.smart.entity.HEADER
 import pw.xiaohaozi.xadapter.smart.holder.XHolder
 import pw.xiaohaozi.xadapter.smart.provider.TypeProvider
 import pw.xiaohaozi.xadapter.smart.proxy.EventProxy
@@ -16,6 +20,7 @@ import pw.xiaohaozi.xadapter.smart.proxy.OnItemLongClickListener
 import pw.xiaohaozi.xadapter.smart.proxy.OnItemTextChange
 import pw.xiaohaozi.xadapter.smart.proxy.XEmployer
 import pw.xiaohaozi.xadapter.smart.proxy.XProxy
+import java.lang.reflect.ParameterizedType
 
 
 /**
@@ -47,8 +52,21 @@ class EventImpl<Employer : XProxy<Employer>, VB : ViewBinding, D> : EventProxy<E
         super.initProxy(employer)
         adapter.addOnViewHolderChanges(object : XAdapter.OnViewHolderChanges {
             override fun onCreated(provide: TypeProvider<*, *>, holder: XHolder<*>) {
-                if (employer != adapter && provide != employer) return
-                initListener(holder)
+                if (employer == adapter) {//adapter
+                    //adapter不对特殊布局设置事件监听
+                    val genericSuperclass = provide.javaClass.genericSuperclass as? ParameterizedType
+                    val arguments = genericSuperclass?.actualTypeArguments
+                    if (arguments?.contains(HEADER::class.java) == true) return
+                    if (arguments?.contains(FOOTER::class.java) == true) return
+                    if (arguments?.contains(EMPTY::class.java) == true) return
+                    if (arguments?.contains(DEFAULT_PAGE::class.java) == true) return
+                    initListener(holder)
+                } else {//provide
+                    //provide 只为当前provide设置事件监听
+                    if (provide == employer) {
+                        initListener(holder)
+                    }
+                }
             }
 
             override fun onBinding(holder: XHolder<*>, position: Int) {
