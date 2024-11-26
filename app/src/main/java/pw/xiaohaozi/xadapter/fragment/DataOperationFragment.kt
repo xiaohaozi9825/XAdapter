@@ -19,9 +19,9 @@ import pw.xiaohaozi.xadapter.databinding.ItemHomeHeaderBinding
 import pw.xiaohaozi.xadapter.dialog.InputDialog
 import pw.xiaohaozi.xadapter.info.VerseInfo
 import pw.xiaohaozi.xadapter.smart.adapter.SmartAdapter
-import pw.xiaohaozi.xadapter.smart.dragswipe.swipeDelete
 import pw.xiaohaozi.xadapter.smart.ext.createAdapter
 import pw.xiaohaozi.xadapter.smart.ext.dragSort
+import pw.xiaohaozi.xadapter.smart.ext.swipeDelete
 import pw.xiaohaozi.xadapter.smart.proxy.ObservableList
 
 
