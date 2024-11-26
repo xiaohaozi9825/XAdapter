@@ -1,7 +1,6 @@
 package pw.xiaohaozi.xadapter.smart.proxy
 
 import androidx.annotation.IntRange
-import androidx.recyclerview.widget.RecyclerView.Adapter
 import androidx.viewbinding.ViewBinding
 
 /**
@@ -31,4 +30,7 @@ interface SmartDataProxy<Employer : XProxy<Employer>, VB : ViewBinding, D> :
     fun upDate(data: D)
     fun <L : Collection<D>> upDate(list: L)
     fun swap(fromPosition: Int, toPosition: Int)
+
+    fun submitList(list: List<D>)
+    fun submitList(list: List<D>, commitCallback: Runnable)
 }

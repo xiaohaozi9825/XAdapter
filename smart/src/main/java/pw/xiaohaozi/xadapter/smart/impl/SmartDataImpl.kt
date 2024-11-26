@@ -22,14 +22,14 @@ import kotlin.collections.ArrayList
  */
 class SmartDataImpl<Employer : XProxy<Employer>, VB : ViewBinding, D> : SmartDataProxy<Employer, VB, D> {
     override lateinit var employer: Employer
-    private val adapter: XAdapter<*, *> by lazy {
+    private val adapter: XAdapter<*, D> by lazy {
         when (val e = employer) {
-            is XEmployer -> e.getEmployerAdapter()
+            is XEmployer -> e.getEmployerAdapter() as XAdapter<*, D>
             else -> throw XAdapterException("找不到对应的Adapter对象")
         }
     }
 
-    private fun getData(): MutableList<D> = adapter.getData() as MutableList<D>
+    private fun getData(): MutableList<D> = adapter.getData()
 
 
     /**
@@ -227,6 +227,14 @@ class SmartDataImpl<Employer : XProxy<Employer>, VB : ViewBinding, D> : SmartDat
 
         adapter.notifyItemMoved(fromAdapterPosition, toAdapterPosition)
         notifyItemRangeMoved(fromAdapterPosition, toAdapterPosition, toAdapterPosition - fromAdapterPosition)
+    }
+
+    override fun submitList(list: List<D>, commitCallback: Runnable) {
+        adapter.differ.submitList(list, commitCallback)
+    }
+
+    override fun submitList(list: List<D>) {
+        adapter.differ.submitList(list)
     }
 
 

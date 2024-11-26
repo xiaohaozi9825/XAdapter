@@ -5,13 +5,19 @@ import android.util.SparseArray
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.util.forEach
+import androidx.recyclerview.widget.AdapterListUpdateCallback
+import androidx.recyclerview.widget.AsyncDifferConfig
+import androidx.recyclerview.widget.AsyncListDiffer
+import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.RecyclerView.Adapter
 import androidx.viewbinding.ViewBinding
 import pw.xiaohaozi.xadapter.smart.XAdapterException
-import pw.xiaohaozi.xadapter.smart.entity.EMPTY
+import pw.xiaohaozi.xadapter.smart.diff.XAsyncDifferConfig
+import pw.xiaohaozi.xadapter.smart.diff.XAsyncListDiffer
 import pw.xiaohaozi.xadapter.smart.entity.DEFAULT_PAGE
+import pw.xiaohaozi.xadapter.smart.entity.EMPTY
 import pw.xiaohaozi.xadapter.smart.entity.FOOTER
 import pw.xiaohaozi.xadapter.smart.entity.HEADER
 import pw.xiaohaozi.xadapter.smart.entity.XMultiItemEntity
@@ -33,6 +39,7 @@ open class XAdapter<VB : ViewBinding, D> : Adapter<XHolder<VB>>() {
         const val TAG = "XAdapter"
     }
 
+    lateinit var differ: XAsyncListDiffer<D>
 
     private var datas: MutableList<D> = mutableListOf()
     val providers: SparseArray<TypeProvider<*, *>> by lazy { SparseArray() }
@@ -75,7 +82,7 @@ open class XAdapter<VB : ViewBinding, D> : Adapter<XHolder<VB>>() {
         ?: throw NullPointerException("没有找到 itemViewType = ${holder.itemViewType} 的 Provider")
         onViewHolderChanges.tryNotify { if (payloads == null) onBinding(holder, position) else onBinding(holder, position, payloads) }
         val headerCount = if (hasHeader) getHeaderProviderCount() else 0
-        val dataSize = datas.size
+        val dataSize = getData().size
         if (defaultPageTriple != null) {
             when {
                 hasHeader && hasFooter -> {
@@ -162,17 +169,40 @@ open class XAdapter<VB : ViewBinding, D> : Adapter<XHolder<VB>>() {
             provideViewHolder(provide, holder, footers[footerPosition].third, footerPosition, payloads)
         } else {
             val dataPosition = getDataPosition(position)
-            val d = datas[dataPosition]
+            val d = getData()[dataPosition]
             provideViewHolder(provide, holder, d, dataPosition, payloads)
         }
     }
 
+
+    fun setDiffer(
+        diffCallback: DiffUtil.ItemCallback<D>,
+        listener: XAsyncListDiffer.ListListener<D> = XAsyncListDiffer.ListListener<D> { _, _ -> }
+    ): XAdapter<VB, D> {
+        differ = XAsyncListDiffer<D>(
+            AdapterListUpdateCallback(this),
+            XAsyncDifferConfig.Builder(diffCallback).build()
+        )
+        differ.addListListener(listener)
+        return this
+    }
+
+    fun setDiffer(
+        config: XAsyncDifferConfig<D>,
+        listener: XAsyncListDiffer.ListListener<D> = XAsyncListDiffer.ListListener<D> { _, _ -> }
+    ): XAdapter<VB, D> {
+        differ = XAsyncListDiffer(AdapterListUpdateCallback(this), config)
+        differ.addListListener(listener)
+        return this
+    }
+
     fun setData(list: MutableList<*>) {
+        if (this::differ.isInitialized) throw XAdapterException("由于您设置了differ，请使用submitList()方法跟新数据！")
         datas = list as MutableList<D>
     }
 
     fun getData(): MutableList<D> {
-        return datas
+        return if (this::differ.isInitialized) differ.currentList else datas
     }
 
     private fun provideViewHolder(
@@ -187,7 +217,7 @@ open class XAdapter<VB : ViewBinding, D> : Adapter<XHolder<VB>>() {
     }
 
     override fun getItemViewType(position: Int): Int {
-        val dataSize = datas.size
+        val dataSize = getData().size
         val headerCount = getHeaderProviderCount()
 
         //如果设置了缺省页，则使用缺省页
@@ -259,7 +289,7 @@ open class XAdapter<VB : ViewBinding, D> : Adapter<XHolder<VB>>() {
         //用户自定义布局
         else {
             val pos = getDataPosition(position)
-            val data = datas[pos]
+            val data = getData()[pos]
             return getCustomType(data, position)
         }
     }
@@ -342,7 +372,7 @@ open class XAdapter<VB : ViewBinding, D> : Adapter<XHolder<VB>>() {
     override fun getItemCount(): Int {
         val headerCount = if (hasHeader) getHeaderProviderCount() else 0
         val footerCount = if (hasFooter) getFooterProviderCount() else 0
-        val dataCount = datas.size
+        val dataCount = getData().size
         if (defaultPageTriple != null) return headerCount + footerCount + 1
         if (emptyTriple != null && dataCount == 0) return headerCount + footerCount + 1
         return headerCount + footerCount + dataCount
@@ -350,7 +380,7 @@ open class XAdapter<VB : ViewBinding, D> : Adapter<XHolder<VB>>() {
 
 
     /**************************************************************************/
-    /**************************  对外扩展方法    ********************************/
+    /**************************  对外扩展方法  ********************************/
     /**************************************************************************/
 
     /**
