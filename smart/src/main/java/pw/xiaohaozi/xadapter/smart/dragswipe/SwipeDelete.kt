@@ -6,6 +6,7 @@ import androidx.recyclerview.widget.ItemTouchHelper.Callback.makeMovementFlags
 import androidx.recyclerview.widget.RecyclerView
 import pw.xiaohaozi.xadapter.smart.adapter.SmartAdapter
 import pw.xiaohaozi.xadapter.smart.holder.isXRoutineLayout
+import java.util.Collections
 
 
 /**
@@ -19,7 +20,7 @@ import pw.xiaohaozi.xadapter.smart.holder.isXRoutineLayout
  */
 class SwipeDelete(
     private val threshold: Float = 0.5f,
-    private val flags: (recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder) -> Int = { _, _ ->  ItemTouchHelper.START or ItemTouchHelper.END },
+    private val flags: (recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder) -> Int = { _, _ -> ItemTouchHelper.START or ItemTouchHelper.END },
     private val start: ((viewHolder: RecyclerView.ViewHolder?) -> Unit)? = null,
     private val end: ((recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder) -> Unit)? = null,
     private val swipe: ((viewHolder: RecyclerView.ViewHolder, direction: Int) -> Boolean)? = null,
@@ -48,8 +49,16 @@ class SwipeDelete(
     //侧滑完成后会回调这里，需要在这里执行删除操作
     override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
         if (swipe?.invoke(viewHolder, direction) != true) {
-            val adapter = viewHolder.bindingAdapter as? SmartAdapter<*, *>
-            adapter?.removeAt(adapter.getDataPosition(viewHolder.bindingAdapterPosition))
+            val adapter = viewHolder.bindingAdapter as? SmartAdapter<*, Any> ?: return
+            val dataPosition = adapter.getDataPosition(viewHolder.bindingAdapterPosition)
+            if (adapter.isDifferMode()) {
+                val temp = ArrayList(adapter.getData())
+                temp.removeAt(dataPosition)
+                adapter.submitList(temp)
+            } else {
+                adapter.removeAt(dataPosition)
+            }
+
         }
     }
 

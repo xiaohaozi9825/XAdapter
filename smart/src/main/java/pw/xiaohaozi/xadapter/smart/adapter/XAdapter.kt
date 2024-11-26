@@ -5,7 +5,6 @@ import android.util.SparseArray
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.util.forEach
-import androidx.recyclerview.widget.AdapterListUpdateCallback
 import androidx.recyclerview.widget.AsyncDifferConfig
 import androidx.recyclerview.widget.AsyncListDiffer
 import androidx.recyclerview.widget.DiffUtil
@@ -14,8 +13,7 @@ import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.RecyclerView.Adapter
 import androidx.viewbinding.ViewBinding
 import pw.xiaohaozi.xadapter.smart.XAdapterException
-import pw.xiaohaozi.xadapter.smart.diff.XAsyncDifferConfig
-import pw.xiaohaozi.xadapter.smart.diff.XAsyncListDiffer
+import pw.xiaohaozi.xadapter.smart.diff.XAdapterListUpdateCallback
 import pw.xiaohaozi.xadapter.smart.entity.DEFAULT_PAGE
 import pw.xiaohaozi.xadapter.smart.entity.EMPTY
 import pw.xiaohaozi.xadapter.smart.entity.FOOTER
@@ -39,7 +37,7 @@ open class XAdapter<VB : ViewBinding, D> : Adapter<XHolder<VB>>() {
         const val TAG = "XAdapter"
     }
 
-    lateinit var differ: XAsyncListDiffer<D>
+     lateinit var differ: AsyncListDiffer<D>
 
     private var datas: MutableList<D> = mutableListOf()
     val providers: SparseArray<TypeProvider<*, *>> by lazy { SparseArray() }
@@ -67,7 +65,7 @@ open class XAdapter<VB : ViewBinding, D> : Adapter<XHolder<VB>>() {
         return holder as XHolder<VB>
     }
 
-
+    fun isDifferMode() = this::differ.isInitialized
     override fun onBindViewHolder(holder: XHolder<VB>, position: Int) {
         bindViewHolder(holder, position, null)
     }
@@ -177,21 +175,21 @@ open class XAdapter<VB : ViewBinding, D> : Adapter<XHolder<VB>>() {
 
     fun setDiffer(
         diffCallback: DiffUtil.ItemCallback<D>,
-        listener: XAsyncListDiffer.ListListener<D> = XAsyncListDiffer.ListListener<D> { _, _ -> }
+        listener: AsyncListDiffer.ListListener<D> = AsyncListDiffer.ListListener<D> { _, _ -> }
     ): XAdapter<VB, D> {
-        differ = XAsyncListDiffer<D>(
-            AdapterListUpdateCallback(this),
-            XAsyncDifferConfig.Builder(diffCallback).build()
+        differ = AsyncListDiffer<D>(
+            XAdapterListUpdateCallback(this),
+            AsyncDifferConfig.Builder(diffCallback).build()
         )
         differ.addListListener(listener)
         return this
     }
 
     fun setDiffer(
-        config: XAsyncDifferConfig<D>,
-        listener: XAsyncListDiffer.ListListener<D> = XAsyncListDiffer.ListListener<D> { _, _ -> }
+        config: AsyncDifferConfig<D>,
+        listener: AsyncListDiffer.ListListener<D> = AsyncListDiffer.ListListener<D> { _, _ -> }
     ): XAdapter<VB, D> {
-        differ = XAsyncListDiffer(AdapterListUpdateCallback(this), config)
+        differ = AsyncListDiffer(XAdapterListUpdateCallback(this), config)
         differ.addListListener(listener)
         return this
     }

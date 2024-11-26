@@ -11,6 +11,7 @@ import androidx.recyclerview.widget.RecyclerView
 import pw.xiaohaozi.xadapter.smart.adapter.SmartAdapter
 import pw.xiaohaozi.xadapter.smart.holder.isXRoutineLayout
 import java.util.*
+import kotlin.collections.ArrayList
 
 /**
  * 拖拽排序
@@ -59,7 +60,7 @@ class DragSort(
 
         if (source.isXRoutineLayout()) return false
         if (target.isXRoutineLayout()) return true
-        val adapter = recyclerView.adapter as SmartAdapter<*, *>
+        val adapter = recyclerView.adapter as SmartAdapter<*, Any>
         recyclerView.parent.requestDisallowInterceptTouchEvent(true)
         //得到当拖拽的viewHolder的Position
         val fromPosition: Int = adapter.getDataPosition(source.bindingAdapterPosition)
@@ -67,20 +68,29 @@ class DragSort(
         val toPosition = adapter.getDataPosition(target.bindingAdapterPosition)
         Log.i("交换数据", "onMove: fromPosition = $fromPosition  ==  toPosition = $toPosition")
         swap?.invoke(recyclerView, source, target, fromPosition, toPosition)
-        if (fromPosition < toPosition) {
-            for (i in fromPosition until toPosition) {
-                Collections.swap(adapter.getData(), i, i + 1)
+        if (adapter.isDifferMode()) {
+            val temp = ArrayList(adapter.getData())
+            if (fromPosition < toPosition) {
+                for (i in fromPosition until toPosition) {
+                    Collections.swap(temp, i, i + 1)
+                }
+            } else {
+                for (i in fromPosition downTo toPosition + 1) {
+                    Collections.swap(temp, i, i - 1)
+                }
             }
+            adapter.submitList(temp)
         } else {
-            for (i in fromPosition downTo toPosition + 1) {
-                Collections.swap(adapter.getData(), i, i - 1)
+            if (fromPosition < toPosition) {
+                for (i in fromPosition until toPosition) {
+                    adapter.swap(i, i + 1)
+                }
+            } else {
+                for (i in fromPosition downTo toPosition + 1) {
+                    adapter.swap(i, i - 1)
+                }
             }
         }
-        adapter.notifyItemMoved(
-            adapter.getAdapterPosition(fromPosition),
-            adapter.getAdapterPosition(toPosition)
-        )
-
         return true
     }
 

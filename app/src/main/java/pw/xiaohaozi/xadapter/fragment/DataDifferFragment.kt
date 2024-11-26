@@ -149,8 +149,8 @@ class DataDifferFragment : Fragment() {
                 holder.binding.tvSelectedIndex.setBackgroundResource(R.drawable.bg_selected_position)
             }
         }
-//            .addHeader<ItemHomeHeaderBinding>()
-//            .addFooter<ItemHomeFooterBinding>()
+            .addHeader<ItemHomeHeaderBinding>()
+            .addFooter<ItemHomeFooterBinding>()
 //            .setOnClickListener { holder, data, position, view ->
 //                setSelect(data, !isSelected(data))
 //            }
