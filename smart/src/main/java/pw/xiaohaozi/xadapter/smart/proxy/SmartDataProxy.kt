@@ -1,7 +1,13 @@
 package pw.xiaohaozi.xadapter.smart.proxy
 
 import androidx.annotation.IntRange
+import androidx.recyclerview.widget.AsyncDifferConfig
+import androidx.recyclerview.widget.AsyncListDiffer
+import androidx.recyclerview.widget.DiffUtil
 import androidx.viewbinding.ViewBinding
+import pw.xiaohaozi.xadapter.smart.adapter.XAdapter
+import pw.xiaohaozi.xadapter.smart.impl.SmartDataImpl
+import java.util.LinkedList
 
 /**
  * 数据代理接口
@@ -14,6 +20,8 @@ import androidx.viewbinding.ViewBinding
  */
 interface SmartDataProxy<Employer : XProxy<Employer>, VB : ViewBinding, D> :
     XProxy<Employer>, ObservableList<D> {
+    val callbacks: LinkedList<ObservableList.OnListChangedCallback<MutableList<D>>?>
+
     fun <L : MutableList<D>> refresh(list: L)
     fun <L : Collection<D>> reset(list: L)
     fun <L : Collection<D>> add(list: L)
@@ -30,6 +38,15 @@ interface SmartDataProxy<Employer : XProxy<Employer>, VB : ViewBinding, D> :
     fun upDate(data: D)
     fun <L : Collection<D>> upDate(list: L)
     fun swap(fromPosition: Int, toPosition: Int)
+    fun setDiffer(
+        diffCallback: DiffUtil.ItemCallback<D>,
+        listener: AsyncListDiffer.ListListener<D>? = AsyncListDiffer.ListListener<D> { _, _ -> }
+    ): Employer
+
+    fun setDiffer(
+        config: AsyncDifferConfig<D>,
+        listener: AsyncListDiffer.ListListener<D>? = AsyncListDiffer.ListListener<D> { _, _ -> }
+    ): Employer
 
     fun submitList(list: List<D>)
     fun submitList(list: List<D>, commitCallback: Runnable)

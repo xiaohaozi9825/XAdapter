@@ -13,13 +13,13 @@ import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.RecyclerView.Adapter
 import androidx.viewbinding.ViewBinding
 import pw.xiaohaozi.xadapter.smart.XAdapterException
-import pw.xiaohaozi.xadapter.smart.diff.XAdapterListUpdateCallback
 import pw.xiaohaozi.xadapter.smart.entity.DEFAULT_PAGE
 import pw.xiaohaozi.xadapter.smart.entity.EMPTY
 import pw.xiaohaozi.xadapter.smart.entity.FOOTER
 import pw.xiaohaozi.xadapter.smart.entity.HEADER
 import pw.xiaohaozi.xadapter.smart.entity.XMultiItemEntity
 import pw.xiaohaozi.xadapter.smart.holder.XHolder
+import pw.xiaohaozi.xadapter.smart.impl.SmartDataImpl
 import pw.xiaohaozi.xadapter.smart.provider.TypeProvider
 import pw.xiaohaozi.xadapter.smart.provider.XProvider
 import java.lang.reflect.ParameterizedType
@@ -37,7 +37,6 @@ open class XAdapter<VB : ViewBinding, D> : Adapter<XHolder<VB>>() {
         const val TAG = "XAdapter"
     }
 
-     lateinit var differ: AsyncListDiffer<D>
 
     private var datas: MutableList<D> = mutableListOf()
     val providers: SparseArray<TypeProvider<*, *>> by lazy { SparseArray() }
@@ -65,7 +64,6 @@ open class XAdapter<VB : ViewBinding, D> : Adapter<XHolder<VB>>() {
         return holder as XHolder<VB>
     }
 
-    fun isDifferMode() = this::differ.isInitialized
     override fun onBindViewHolder(holder: XHolder<VB>, position: Int) {
         bindViewHolder(holder, position, null)
     }
@@ -172,27 +170,8 @@ open class XAdapter<VB : ViewBinding, D> : Adapter<XHolder<VB>>() {
         }
     }
 
-
-    fun setDiffer(
-        diffCallback: DiffUtil.ItemCallback<D>,
-        listener: AsyncListDiffer.ListListener<D> = AsyncListDiffer.ListListener<D> { _, _ -> }
-    ): XAdapter<VB, D> {
-        differ = AsyncListDiffer<D>(
-            XAdapterListUpdateCallback(this),
-            AsyncDifferConfig.Builder(diffCallback).build()
-        )
-        differ.addListListener(listener)
-        return this
-    }
-
-    fun setDiffer(
-        config: AsyncDifferConfig<D>,
-        listener: AsyncListDiffer.ListListener<D> = AsyncListDiffer.ListListener<D> { _, _ -> }
-    ): XAdapter<VB, D> {
-        differ = AsyncListDiffer(XAdapterListUpdateCallback(this), config)
-        differ.addListListener(listener)
-        return this
-    }
+    lateinit var differ: AsyncListDiffer<D>
+    fun isDifferMode() = this::differ.isInitialized
 
     fun setData(list: MutableList<*>) {
         if (this::differ.isInitialized) throw XAdapterException("由于您设置了differ，请使用submitList()方法跟新数据！")

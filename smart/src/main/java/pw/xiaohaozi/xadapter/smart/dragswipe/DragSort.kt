@@ -57,10 +57,9 @@ class DragSort(
         target: RecyclerView.ViewHolder
     ): Boolean {
         if (onMove != null) return onMove.invoke(recyclerView, source, target)
-
+        val adapter = recyclerView.adapter as? SmartAdapter<*, Any> ?: return false
         if (source.isXRoutineLayout()) return false
-        if (target.isXRoutineLayout()) return true
-        val adapter = recyclerView.adapter as SmartAdapter<*, Any>
+        if (target.isXRoutineLayout()) return false
         recyclerView.parent.requestDisallowInterceptTouchEvent(true)
         //得到当拖拽的viewHolder的Position
         val fromPosition: Int = adapter.getDataPosition(source.bindingAdapterPosition)

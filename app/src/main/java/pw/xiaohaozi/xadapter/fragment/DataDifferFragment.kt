@@ -2,6 +2,7 @@ package pw.xiaohaozi.xadapter.fragment
 
 import android.annotation.SuppressLint
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -34,7 +35,6 @@ class DataDifferFragment : Fragment() {
     val TAG = "DataDifferFragment"
     private lateinit var binding: FragmentDataOperationBinding
     private val adapter = function()
-    private val dataList = mutableListOf<VerseInfo>()
     var pos = 0
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -50,6 +50,7 @@ class DataDifferFragment : Fragment() {
         binding.btnAddData.setOnClickListener {
             val index = pos++ % list.size
             val data = list[index]
+            val dataList = ArrayList(adapter.getData())
             dataList.add(data)
             adapter.submitList(ArrayList(dataList))
         }
@@ -64,10 +65,9 @@ class DataDifferFragment : Fragment() {
 //                dataList.clear()
 //                adapter.submitList(dataList)
 //            }
-            lifecycleScope.launch(Default) {
-                dataList.clear()
-                adapter.submitList(ArrayList(dataList))
-            }
+            val dataList = ArrayList(adapter.getData())
+            dataList.removeAll(adapter.getSelectedDatas().toSet())
+            adapter.submitList(ArrayList(dataList))
 
         }
         adapter.setDiffer(differ)
@@ -92,7 +92,7 @@ class DataDifferFragment : Fragment() {
 
             override fun onItemRangeRemoved(
                 sender: MutableList<VerseInfo>,
-                changeDatas: MutableList<VerseInfo>,
+                changeDatas: MutableList<VerseInfo>?,
                 positionStart: Int,
                 itemCount: Int
             ) {
@@ -110,6 +110,7 @@ class DataDifferFragment : Fragment() {
         refreshLayout.setOnRefreshListener { refreshlayout ->
             lifecycleScope.launch {
                 delay(1000)
+                val dataList = ArrayList(adapter.getData())
                 dataList.clear()
                 for (i in 0..5) {
                     val index = pos++ % list.size
@@ -124,6 +125,7 @@ class DataDifferFragment : Fragment() {
         refreshLayout.setOnLoadMoreListener { refreshlayout ->
             lifecycleScope.launch {
                 delay(1000)
+                val dataList = ArrayList(adapter.getData())
                 for (i in 0..5) {
                     val index = pos++ % list.size
                     dataList.add(list[index])
@@ -133,7 +135,6 @@ class DataDifferFragment : Fragment() {
             }
         }
     }
-
 
     @SuppressLint("SetTextI18n")
     private fun function(): SmartAdapter<ItemDataOperationBinding, VerseInfo> {

@@ -1,16 +1,19 @@
 package pw.xiaohaozi.xadapter.smart.impl
 
 import androidx.annotation.IntRange
+import androidx.recyclerview.widget.AsyncDifferConfig
+import androidx.recyclerview.widget.AsyncListDiffer
+import androidx.recyclerview.widget.DiffUtil
+import androidx.recyclerview.widget.ListUpdateCallback
 import androidx.viewbinding.ViewBinding
 import pw.xiaohaozi.xadapter.smart.XAdapterException
 import pw.xiaohaozi.xadapter.smart.adapter.XAdapter
+import pw.xiaohaozi.xadapter.smart.ext.removeRange
 import pw.xiaohaozi.xadapter.smart.proxy.ObservableList
 import pw.xiaohaozi.xadapter.smart.proxy.SmartDataProxy
 import pw.xiaohaozi.xadapter.smart.proxy.XEmployer
 import pw.xiaohaozi.xadapter.smart.proxy.XProxy
-import pw.xiaohaozi.xadapter.smart.ext.removeRange
 import java.util.*
-import kotlin.collections.ArrayList
 
 /**
  *
@@ -30,6 +33,7 @@ class SmartDataImpl<Employer : XProxy<Employer>, VB : ViewBinding, D> : SmartDat
     }
 
     private fun getData(): MutableList<D> = adapter.getData()
+    override val callbacks: LinkedList<ObservableList.OnListChangedCallback<MutableList<D>>?> = LinkedList()
 
 
     /**
@@ -229,6 +233,7 @@ class SmartDataImpl<Employer : XProxy<Employer>, VB : ViewBinding, D> : SmartDat
         notifyItemRangeMoved(fromAdapterPosition, toAdapterPosition, toAdapterPosition - fromAdapterPosition)
     }
 
+
     override fun submitList(list: List<D>, commitCallback: Runnable) {
         adapter.differ.submitList(list, commitCallback)
     }
@@ -238,7 +243,26 @@ class SmartDataImpl<Employer : XProxy<Employer>, VB : ViewBinding, D> : SmartDat
     }
 
 
-    private val callbacks: LinkedList<ObservableList.OnListChangedCallback<MutableList<D>>?> = LinkedList()
+    override fun setDiffer(
+        diffCallback: DiffUtil.ItemCallback<D>,
+        listener: AsyncListDiffer.ListListener<D>?
+    ): Employer {
+        adapter.differ = AsyncListDiffer<D>(
+            XAdapterListUpdateCallback(adapter, callbacks),
+            AsyncDifferConfig.Builder(diffCallback).build()
+        )
+        listener?.let { adapter.differ.addListListener(it) }
+        return employer
+    }
+
+    override fun setDiffer(
+        config: AsyncDifferConfig<D>,
+        listener: AsyncListDiffer.ListListener<D>?
+    ): Employer {
+        adapter.differ = AsyncListDiffer(XAdapterListUpdateCallback(adapter, callbacks), config)
+        listener?.let { adapter.differ.addListListener(it) }
+        return employer
+    }
 
     override fun addOnListChangedCallback(callback: ObservableList.OnListChangedCallback<MutableList<D>>) {
         callbacks.add(callback)
@@ -275,6 +299,42 @@ class SmartDataImpl<Employer : XProxy<Employer>, VB : ViewBinding, D> : SmartDat
     private fun notifyItemRangeRemoved(changeDatas: MutableList<D>, positionStart: Int, itemCount: Int) {
         callbacks.forEach {
             it?.onItemRangeRemoved(getData(), changeDatas, positionStart, itemCount)
+        }
+    }
+
+
+    class XAdapterListUpdateCallback<D>(
+        private val adapter: XAdapter<*, D>,
+        private val callbacks: LinkedList<ObservableList.OnListChangedCallback<MutableList<D>>?>
+    ) : ListUpdateCallback {
+
+        override fun onInserted(position: Int, count: Int) {
+            adapter.notifyItemRangeInserted(adapter.getAdapterPosition(position), count)
+            callbacks.forEach {
+                it?.onItemRangeInserted(adapter.getData(), adapter.getAdapterPosition(position), count)
+            }
+        }
+
+        override fun onRemoved(position: Int, count: Int) {
+            adapter.notifyItemRangeRemoved(adapter.getAdapterPosition(position), count)
+            callbacks.forEach {
+                it?.onItemRangeRemoved(adapter.getData(), null, adapter.getAdapterPosition(position), count)
+            }
+        }
+
+        override fun onMoved(fromPosition: Int, toPosition: Int) {
+            adapter.notifyItemMoved(adapter.getAdapterPosition(fromPosition), adapter.getAdapterPosition(toPosition))
+            callbacks.forEach {
+                it?.onItemRangeMoved(adapter.getData(), adapter.getAdapterPosition(fromPosition), adapter.getAdapterPosition(toPosition), 1)
+            }
+        }
+
+
+        override fun onChanged(position: Int, count: Int, payload: Any?) {
+            adapter.notifyItemRangeChanged(adapter.getAdapterPosition(position), count, payload)
+            callbacks.forEach {
+                it?.onItemRangeChanged(adapter.getData(), adapter.getAdapterPosition(position), count)
+            }
         }
     }
 

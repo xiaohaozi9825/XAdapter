@@ -86,7 +86,7 @@ class DataOperationFragment : Fragment() {
 
             override fun onItemRangeRemoved(
                 sender: MutableList<VerseInfo>,
-                changeDatas: MutableList<VerseInfo>,
+                changeDatas: MutableList<VerseInfo>?,
                 positionStart: Int,
                 itemCount: Int
             ) {
