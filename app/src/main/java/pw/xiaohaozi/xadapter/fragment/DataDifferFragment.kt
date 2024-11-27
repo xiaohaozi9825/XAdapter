@@ -2,7 +2,6 @@ package pw.xiaohaozi.xadapter.fragment
 
 import android.annotation.SuppressLint
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -11,7 +10,6 @@ import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.DiffUtil.ItemCallback
 import com.scwang.smart.refresh.footer.ClassicsFooter
 import com.scwang.smart.refresh.header.ClassicsHeader
-import kotlinx.coroutines.Dispatchers.Default
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import pw.xiaohaozi.xadapter.R
@@ -56,21 +54,11 @@ class DataDifferFragment : Fragment() {
         }
 
         binding.btnDeleteSelected.setOnClickListener {
-//            adapter.remove(adapter.getSelectedDatas())
-//            adapter.remove(0,2)
-//            adapter.remove(adapter.datas[0])
-//            adapter.remove(adapter.datas.filterIndexed { index, verseInfo -> index < 2 })
-//            lifecycleScope.launch {
-//                delay(1000)
-//                dataList.clear()
-//                adapter.submitList(dataList)
-//            }
             val dataList = ArrayList(adapter.getData())
             dataList.removeAll(adapter.getSelectedDatas().toSet())
             adapter.submitList(ArrayList(dataList))
 
         }
-        adapter.setDiffer(differ)
         binding.rvList.adapter = adapter
         adapter.addOnListChangedCallback(object : ObservableList.OnListChangedCallback<MutableList<VerseInfo>>() {
             override fun onChanged(sender: MutableList<VerseInfo>) {
@@ -116,7 +104,6 @@ class DataDifferFragment : Fragment() {
                     val index = pos++ % list.size
                     dataList.add(list[index])
                 }
-//                adapter.refresh(datas)
                 adapter.submitList(ArrayList(dataList))
                 refreshlayout.finishRefresh()
             }
@@ -178,11 +165,12 @@ class DataDifferFragment : Fragment() {
                     .onCancel {}
                     .show()
             }
+            .setDiffer(itemCallback)
             .swipeDelete()
             .dragSort()
     }
 
-    private val differ: ItemCallback<VerseInfo> = object : ItemCallback<VerseInfo>() {
+    private val itemCallback: ItemCallback<VerseInfo> = object : ItemCallback<VerseInfo>() {
         override fun areItemsTheSame(oldItem: VerseInfo, newItem: VerseInfo): Boolean {
             return oldItem == newItem
         }

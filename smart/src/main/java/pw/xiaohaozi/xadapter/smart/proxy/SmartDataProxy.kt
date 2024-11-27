@@ -40,12 +40,12 @@ interface SmartDataProxy<Employer : XProxy<Employer>, VB : ViewBinding, D> :
     fun swap(fromPosition: Int, toPosition: Int)
     fun setDiffer(
         diffCallback: DiffUtil.ItemCallback<D>,
-        listener: AsyncListDiffer.ListListener<D>? = AsyncListDiffer.ListListener<D> { _, _ -> }
+        listener: AsyncListDiffer.ListListener<D> = AsyncListDiffer.ListListener<D> { _, _ -> }
     ): Employer
 
     fun setDiffer(
         config: AsyncDifferConfig<D>,
-        listener: AsyncListDiffer.ListListener<D>? = AsyncListDiffer.ListListener<D> { _, _ -> }
+        listener: AsyncListDiffer.ListListener<D> = AsyncListDiffer.ListListener<D> { _, _ -> }
     ): Employer
 
     fun submitList(list: List<D>)

@@ -46,15 +46,15 @@ class DataOperationFragment : Fragment() {
                 adapter.selectAll()
         }
         binding.btnAddData.setOnClickListener {
-//            val index = pos++ % list.size
-//            val data = list[index]
-//            adapter.add(0, data)
-            val datas = mutableListOf<VerseInfo>()
-            for (i in 0..2) {
-                val index = pos++ % list.size
-                datas.add(list[index])
-            }
-            adapter.add(0, datas)
+            val index = pos++ % list.size
+            val data = list[index]
+            adapter.add( data)
+//            val datas = mutableListOf<VerseInfo>()
+//            for (i in 0..2) {
+//                val index = pos++ % list.size
+//                datas.add(list[index])
+//            }
+//            adapter.add(0, datas)
         }
 
         binding.btnDeleteSelected.setOnClickListener {

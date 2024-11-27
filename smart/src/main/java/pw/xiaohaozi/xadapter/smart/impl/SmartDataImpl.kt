@@ -245,22 +245,22 @@ class SmartDataImpl<Employer : XProxy<Employer>, VB : ViewBinding, D> : SmartDat
 
     override fun setDiffer(
         diffCallback: DiffUtil.ItemCallback<D>,
-        listener: AsyncListDiffer.ListListener<D>?
+        listener: AsyncListDiffer.ListListener<D>
     ): Employer {
         adapter.differ = AsyncListDiffer<D>(
             XAdapterListUpdateCallback(adapter, callbacks),
             AsyncDifferConfig.Builder(diffCallback).build()
         )
-        listener?.let { adapter.differ.addListListener(it) }
+        adapter.differ.addListListener(listener)
         return employer
     }
 
     override fun setDiffer(
         config: AsyncDifferConfig<D>,
-        listener: AsyncListDiffer.ListListener<D>?
+        listener: AsyncListDiffer.ListListener<D>
     ): Employer {
         adapter.differ = AsyncListDiffer(XAdapterListUpdateCallback(adapter, callbacks), config)
-        listener?.let { adapter.differ.addListListener(it) }
+        adapter.differ.addListListener(listener)
         return employer
     }
 
