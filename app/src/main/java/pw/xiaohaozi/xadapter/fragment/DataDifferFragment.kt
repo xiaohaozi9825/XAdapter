@@ -125,6 +125,16 @@ class DataDifferFragment : Fragment() {
 
     @SuppressLint("SetTextI18n")
     private fun function(): SmartAdapter<ItemDataOperationBinding, VerseInfo> {
+        val itemCallback: ItemCallback<VerseInfo> = object : ItemCallback<VerseInfo>() {
+            override fun areItemsTheSame(oldItem: VerseInfo, newItem: VerseInfo): Boolean {
+                return oldItem == newItem
+            }
+
+            @SuppressLint("DiffUtilEquals")
+            override fun areContentsTheSame(oldItem: VerseInfo, newItem: VerseInfo): Boolean {
+                return oldItem == newItem
+            }
+        }
         return createAdapter<ItemDataOperationBinding, VerseInfo> { (holder, data) ->
             holder.binding.tvContent.text = data.content
             holder.binding.tvAuthor.text = data.author
@@ -170,16 +180,7 @@ class DataDifferFragment : Fragment() {
             .dragSort()
     }
 
-    private val itemCallback: ItemCallback<VerseInfo> = object : ItemCallback<VerseInfo>() {
-        override fun areItemsTheSame(oldItem: VerseInfo, newItem: VerseInfo): Boolean {
-            return oldItem == newItem
-        }
 
-        @SuppressLint("DiffUtilEquals")
-        override fun areContentsTheSame(oldItem: VerseInfo, newItem: VerseInfo): Boolean {
-            return oldItem == newItem
-        }
-    }
 
     private val list = arrayListOf(
         VerseInfo("1、何时杖尔看南雪，我与梅花两白头。", "——查辛香《清稗类钞·咏罗浮藤杖所作》"),

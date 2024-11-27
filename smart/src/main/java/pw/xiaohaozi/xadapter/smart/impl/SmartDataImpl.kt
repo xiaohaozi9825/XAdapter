@@ -42,6 +42,7 @@ class SmartDataImpl<Employer : XProxy<Employer>, VB : ViewBinding, D> : SmartDat
      * @param list
      */
     override fun <L : Collection<D>> add(list: L) {
+        if (adapter.isDifferMode()) throw XAdapterException("Differ模式不能使用改方法操作数据，更新数据请使用submitList()方法")
         if (list.isEmpty()) return
         getData().addAll(list)
         val startPosition = adapter.itemCount - list.size - adapter.getFooterProviderCount()
@@ -55,6 +56,7 @@ class SmartDataImpl<Employer : XProxy<Employer>, VB : ViewBinding, D> : SmartDat
      * @param data
      */
     override fun add(data: D) {
+        if (adapter.isDifferMode()) throw XAdapterException("Differ模式不能使用改方法操作数据，更新数据请使用submitList()方法")
         getData().add(data)
         val startPosition = adapter.itemCount - 1 - adapter.getFooterProviderCount()
         adapter.notifyItemInserted(startPosition)
@@ -68,6 +70,7 @@ class SmartDataImpl<Employer : XProxy<Employer>, VB : ViewBinding, D> : SmartDat
      * @param data
      */
     override fun add(index: Int, data: D) {
+        if (adapter.isDifferMode()) throw XAdapterException("Differ模式不能使用改方法操作数据，更新数据请使用submitList()方法")
         getData().add(index, data)
         val adapterPosition = adapter.getAdapterPosition(index)
         adapter.notifyItemInserted(adapterPosition)
@@ -81,6 +84,7 @@ class SmartDataImpl<Employer : XProxy<Employer>, VB : ViewBinding, D> : SmartDat
      * @param data
      */
     override fun <L : Collection<D>> add(index: Int, list: L) {
+        if (adapter.isDifferMode()) throw XAdapterException("Differ模式不能使用改方法操作数据，更新数据请使用submitList()方法")
         getData().addAll(index, list)
         val adapterPosition = adapter.getAdapterPosition(index)
         adapter.notifyItemRangeInserted(adapterPosition, list.size)
@@ -93,6 +97,7 @@ class SmartDataImpl<Employer : XProxy<Employer>, VB : ViewBinding, D> : SmartDat
      * @param index 相对于datas的索引
      */
     override fun removeAt(index: Int) {
+        if (adapter.isDifferMode()) throw XAdapterException("Differ模式不能使用改方法操作数据，更新数据请使用submitList()方法")
         val data = getData().removeAt(index)
         val adapterPosition = adapter.getAdapterPosition(index)
         adapter.notifyItemRemoved(adapterPosition)
@@ -106,6 +111,7 @@ class SmartDataImpl<Employer : XProxy<Employer>, VB : ViewBinding, D> : SmartDat
      * @param count 移除多少个元素
      */
     override fun remove(start: Int, count: Int) {
+        if (adapter.isDifferMode()) throw XAdapterException("Differ模式不能使用改方法操作数据，更新数据请使用submitList()方法")
         val list = getData().removeRange(start, count)
         val adapterPosition = adapter.getAdapterPosition(start)
         adapter.notifyItemRangeRemoved(adapterPosition, count)
@@ -118,6 +124,7 @@ class SmartDataImpl<Employer : XProxy<Employer>, VB : ViewBinding, D> : SmartDat
      * @param data
      */
     override fun remove(data: D) {
+        if (adapter.isDifferMode()) throw XAdapterException("Differ模式不能使用改方法操作数据，更新数据请使用submitList()方法")
         val indexOf: Int = getData().indexOf(data)
         if (indexOf >= 0) {
             getData().remove(data)
@@ -132,6 +139,7 @@ class SmartDataImpl<Employer : XProxy<Employer>, VB : ViewBinding, D> : SmartDat
      * @param list 这些数据必须是 datas 中存在的
      */
     override fun <L : Collection<D>> remove(list: L) {
+        if (adapter.isDifferMode()) throw XAdapterException("Differ模式不能使用改方法操作数据，更新数据请使用submitList()方法")
         if (list.isEmpty()) return
         getData().removeAll(list)
         adapter.notifyDataSetChanged()//list 在 datas 中的位置可能是不连续的，所以需要刷新全部数据
@@ -142,6 +150,7 @@ class SmartDataImpl<Employer : XProxy<Employer>, VB : ViewBinding, D> : SmartDat
      * 移除所有数据
      */
     override fun remove() {
+        if (adapter.isDifferMode()) throw XAdapterException("Differ模式不能使用改方法操作数据，更新数据请使用submitList()方法")
         val datas = getData()
         if (datas.isEmpty()) return
         val temp: MutableList<D> = ArrayList(datas)
@@ -157,12 +166,14 @@ class SmartDataImpl<Employer : XProxy<Employer>, VB : ViewBinding, D> : SmartDat
      * @param list 如果list是MutableList类型，则data==list；否则data！=list
      */
     override fun <L : MutableList<D>> refresh(list: L) {
+        if (adapter.isDifferMode()) throw XAdapterException("Differ模式不能使用改方法操作数据，更新数据请使用submitList()方法")
         adapter.setData(list)
         adapter.notifyDataSetChanged()
         notifyChanged()
     }
 
     override fun <L : Collection<D>> reset(list: L) {
+        if (adapter.isDifferMode()) throw XAdapterException("Differ模式不能使用改方法操作数据，更新数据请使用submitList()方法")
         getData().clear()
         getData().addAll(list)
         adapter.notifyDataSetChanged()
@@ -225,6 +236,7 @@ class SmartDataImpl<Employer : XProxy<Employer>, VB : ViewBinding, D> : SmartDat
     }
 
     override fun swap(fromPosition: Int, toPosition: Int) {
+        if (adapter.isDifferMode()) throw XAdapterException("Differ模式不能使用改方法操作数据，更新数据请使用submitList()方法")
         Collections.swap(getData(), fromPosition, toPosition)
         val fromAdapterPosition = adapter.getAdapterPosition(fromPosition)
         val toAdapterPosition = adapter.getAdapterPosition(toPosition)
@@ -325,7 +337,12 @@ class SmartDataImpl<Employer : XProxy<Employer>, VB : ViewBinding, D> : SmartDat
         override fun onMoved(fromPosition: Int, toPosition: Int) {
             adapter.notifyItemMoved(adapter.getAdapterPosition(fromPosition), adapter.getAdapterPosition(toPosition))
             callbacks.forEach {
-                it?.onItemRangeMoved(adapter.getData(), adapter.getAdapterPosition(fromPosition), adapter.getAdapterPosition(toPosition), 1)
+                it?.onItemRangeMoved(
+                    adapter.getData(),
+                    adapter.getAdapterPosition(fromPosition),
+                    adapter.getAdapterPosition(toPosition),
+                    1
+                )
             }
         }
 
