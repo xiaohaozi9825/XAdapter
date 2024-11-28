@@ -42,30 +42,6 @@ class CoroutineScopeFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-//        lifecycleScope.launch {
-//            var index = 0
-//            while (isActive) {
-//                Log.i(TAG, "onCreateView: ${index++}")
-//                delay(1000)
-//                if (index == 5) {
-//                    lifecycleScope.cancel()
-//                }else if (index==10){
-////                    binding.rvList.adapter = adapter
-//                }
-//            }
-//        }
-//        viewLifecycleOwner.lifecycleScope.launch {
-//            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-//                var index = 0
-//                while (isActive) {
-//                    Log.i(TAG, "onCreateView: ${index++}")
-//                    delay(1000)
-//                    if (index == 5) {
-//                        binding.rvList.adapter = null
-//                    }
-//                }
-//            }
-//        }
         binding = FragmentSelectedBinding.inflate(inflater)
         binding.llSelectedAll.setOnClickListener {
             if (adapter.isSelectAll())
@@ -115,19 +91,11 @@ class CoroutineScopeFragment : Fragment() {
                     //使用协程，将耗时操作切换到其他线程
                     holder.launch(IO) {
                         val bitmap = BitmapFactory.decodeResource(resources, data)
-                        delay(1000)
                         withContext(Main) {
                             holder.binding.ivImage.setImageBitmap(bitmap)
                         }
                     }
-//                    launch(IO) {
-//                        val bitmap = BitmapFactory.decodeResource(resources, data)
-//                        withContext(Main) {
-//                            holder.binding.ivImage.setImageBitmap(bitmap)
-//                        }
-//                    }
                 }
-
 
                 val index = this.adapter.getSelectedIndexAt(position)
                 if (index < 0) {

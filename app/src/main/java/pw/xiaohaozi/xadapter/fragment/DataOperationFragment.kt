@@ -58,11 +58,11 @@ class DataOperationFragment : Fragment() {
         }
 
         binding.btnDeleteSelected.setOnClickListener {
-//            adapter.remove(adapter.getSelectedDatas())
+            adapter.remove(adapter.getSelectedDatas())
 //            adapter.remove(0,2)
 //            adapter.remove(adapter.datas[0])
 //            adapter.remove(adapter.datas.filterIndexed { index, verseInfo -> index < 2 })
-            adapter.remove()
+//            adapter.remove()
         }
 
         binding.rvList.adapter = adapter
