@@ -101,7 +101,7 @@ open class AdapterSelectedImpl<Employer : XProxy<Employer>, VB : ViewBinding, D>
         }
 
         //更新部分数据时回调
-        override fun onItemRangeChanged(sender: MutableList<D>, positionStart: Int, itemCount: Int) {
+        override fun onItemRangeChanged(sender: MutableList<D>, positionStart: Int, itemCount: Int, payload: Any?) {
             Log.i(TAG, "onItemRangeChanged: ")
             notifySelectedDataChanges(curSelectedAllStatus)
         }

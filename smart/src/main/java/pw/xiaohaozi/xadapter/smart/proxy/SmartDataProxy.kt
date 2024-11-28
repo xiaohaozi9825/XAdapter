@@ -1,12 +1,9 @@
 package pw.xiaohaozi.xadapter.smart.proxy
 
-import androidx.annotation.IntRange
 import androidx.recyclerview.widget.AsyncDifferConfig
 import androidx.recyclerview.widget.AsyncListDiffer
 import androidx.recyclerview.widget.DiffUtil
 import androidx.viewbinding.ViewBinding
-import pw.xiaohaozi.xadapter.smart.adapter.XAdapter
-import pw.xiaohaozi.xadapter.smart.impl.SmartDataImpl
 import java.util.LinkedList
 
 /**
@@ -22,32 +19,124 @@ interface SmartDataProxy<Employer : XProxy<Employer>, VB : ViewBinding, D> :
     XProxy<Employer>, ObservableList<D> {
     val callbacks: LinkedList<ObservableList.OnListChangedCallback<MutableList<D>>?>
 
+    /**
+     * 刷新数据
+     * 会替换原来的数组对象
+     * Differ模式下不可用
+     */
     fun <L : MutableList<D>> refresh(list: L)
+
+    /**
+     * 重置数据
+     * 会保留原数组对象
+     * Differ模式下不可用
+     */
     fun <L : Collection<D>> reset(list: L)
+
+    /**
+     * 添加数据
+     * Differ模式下不可用
+     */
     fun <L : Collection<D>> add(list: L)
+
+    /**
+     * 添加数据
+     * Differ模式下不可用
+     */
     fun add(data: D)
-    fun add(@IntRange(from = 0.toLong()) index: Int, data: D)
-    fun <L : Collection<D>> add(@IntRange(from = 0.toLong()) index: Int, list: L)
-    fun removeAt(@IntRange(from = 0.toLong()) index: Int)
-    fun remove(@IntRange(from = 0.toLong()) start: Int, @IntRange(from = 1.toLong()) count: Int)
+
+    /**
+     * 添加数据
+     * Differ模式下不可用
+     */
+    fun add(index: Int, data: D)
+
+    /**
+     * 添加数据
+     * Differ模式下不可用
+     */
+    fun <L : Collection<D>> add(index: Int, list: L)
+
+    /**
+     * 删除数据
+     * Differ模式下不可用
+     */
+    fun removeAt(index: Int)
+
+    /**
+     * 删除数据
+     * Differ模式下不可用
+     */
+    fun remove(start: Int, count: Int)
+
+    /**
+     * 删除数据
+     * Differ模式下不可用
+     */
     fun remove(data: D)
+
+    /**
+     * 删除数据
+     * 改方法会刷新整个列表
+     * Differ模式下不可用
+     */
     fun <L : Collection<D>> remove(list: L)
+
+    /**
+     * 删除数据
+     * Differ模式下不可用
+     */
     fun remove()
-    fun upDate(@IntRange(from = 0.toLong()) index: Int, data: D)
-    fun upDateAt(@IntRange(from = 0.toLong()) index: Int)
-    fun upDate(data: D)
-    fun <L : Collection<D>> upDate(list: L)
+
+    /**
+     * 修改数据
+     */
+    fun update(index: Int, data: D, payload: Any? = null)
+
+    /**
+     * 修改数据
+     */
+    fun updateAt(index: Int, payload: Any? = null)
+
+    /**
+     * 修改数据
+     */
+    fun update(data: D, payload: Any? = null)
+
+    /**
+     * 修改数据
+     */
+    fun <L : Collection<D>> update(list: L, payload: Any? = null)
+
+    /**
+     * 交换数据
+     * Differ模式下不可用
+     */
     fun swap(fromPosition: Int, toPosition: Int)
+
+    /**
+     * 使用Differ算法迭代数据
+     */
     fun setDiffer(
         diffCallback: DiffUtil.ItemCallback<D>,
         listener: AsyncListDiffer.ListListener<D> = AsyncListDiffer.ListListener<D> { _, _ -> }
     ): Employer
 
+    /**
+     * 使用Differ算法迭代数据
+     */
     fun setDiffer(
         config: AsyncDifferConfig<D>,
         listener: AsyncListDiffer.ListListener<D> = AsyncListDiffer.ListListener<D> { _, _ -> }
     ): Employer
 
+    /**
+     * 在Differ模式下更新数据
+     */
     fun submitList(list: List<D>)
+
+    /**
+     * 在Differ模式下更新数据
+     */
     fun submitList(list: List<D>, commitCallback: Runnable)
 }

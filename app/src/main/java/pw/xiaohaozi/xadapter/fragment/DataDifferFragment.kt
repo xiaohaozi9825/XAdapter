@@ -65,7 +65,7 @@ class DataDifferFragment : Fragment() {
                 binding.tvItemCount.text = "共${sender.size}条数据"
             }
 
-            override fun onItemRangeChanged(sender: MutableList<VerseInfo>, positionStart: Int, itemCount: Int) {
+            override fun onItemRangeChanged(sender: MutableList<VerseInfo>, positionStart: Int, itemCount: Int, payload: Any?) {
                 binding.tvItemCount.text = "共${sender.size}条数据"
 
             }
@@ -169,7 +169,7 @@ class DataDifferFragment : Fragment() {
                         data.content = content
 //                        adapter.upDate(data)
 //                        adapter.upDate(position,data)
-                        adapter.upDateAt(getData().indexOf(data))
+                        adapter.updateAt(getData().indexOf(data))
                     }
                     .onCancel {}
                     .show()

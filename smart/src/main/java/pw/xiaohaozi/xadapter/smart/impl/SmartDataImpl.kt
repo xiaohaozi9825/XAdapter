@@ -186,11 +186,11 @@ class SmartDataImpl<Employer : XProxy<Employer>, VB : ViewBinding, D> : SmartDat
      * @param index
      * @param data
      */
-    override fun upDate(@IntRange(from = 0) index: Int, data: D) {
+    override fun update(@IntRange(from = 0) index: Int, data: D, payload: Any?) {
         getData()[index] = data
         val adapterPosition = adapter.getAdapterPosition(index)
-        adapter.notifyItemChanged(adapterPosition)
-        notifyItemRangeChanged(adapterPosition, 1)
+        adapter.notifyItemChanged(adapterPosition, payload)
+        notifyItemRangeChanged(adapterPosition, 1, payload)
     }
 
     /**
@@ -198,10 +198,10 @@ class SmartDataImpl<Employer : XProxy<Employer>, VB : ViewBinding, D> : SmartDat
      *
      * @param index 数据所在索引
      */
-    override fun upDateAt(@IntRange(from = 0) index: Int) {
+    override fun updateAt(@IntRange(from = 0) index: Int, payload: Any?) {
         val adapterPosition = adapter.getAdapterPosition(index)
-        adapter.notifyItemChanged(adapterPosition)
-        notifyItemRangeChanged(adapterPosition, 1)
+        adapter.notifyItemChanged(adapterPosition, payload)
+        notifyItemRangeChanged(adapterPosition, 1, payload)
     }
 
     /**
@@ -209,12 +209,12 @@ class SmartDataImpl<Employer : XProxy<Employer>, VB : ViewBinding, D> : SmartDat
      *
      * @param data 需要更新的数据，该数据必须是 datas 中存在的
      */
-    override fun upDate(data: D) {
+    override fun update(data: D, payload: Any?) {
         val indexOf = getData().indexOf(data)
         if (indexOf > -1) {
             val adapterPosition = adapter.getAdapterPosition(indexOf)
-            adapter.notifyItemChanged(adapterPosition)
-            notifyItemRangeChanged(adapterPosition, 1)
+            adapter.notifyItemChanged(adapterPosition, payload)
+            notifyItemRangeChanged(adapterPosition, 1, payload)
         }
     }
 
@@ -223,14 +223,14 @@ class SmartDataImpl<Employer : XProxy<Employer>, VB : ViewBinding, D> : SmartDat
      *
      * @param list 需要更新的数据，这些数据必须是 datas 中存在的
      */
-    override fun <L : Collection<D>> upDate(list: L) {
+    override fun <L : Collection<D>> update(list: L, payload: Any?) {
         if (list.isEmpty()) return
         list.forEach {
             val indexOf = getData().indexOf(it)
             if (indexOf > -1) {
                 val adapterPosition = adapter.getAdapterPosition(indexOf)
-                adapter.notifyItemChanged(adapterPosition)
-                notifyItemRangeChanged(adapterPosition, 1)
+                adapter.notifyItemChanged(adapterPosition, payload)
+                notifyItemRangeChanged(adapterPosition, 1, payload)
             }
         }
     }
@@ -290,9 +290,9 @@ class SmartDataImpl<Employer : XProxy<Employer>, VB : ViewBinding, D> : SmartDat
         }
     }
 
-    private fun notifyItemRangeChanged(positionStart: Int, itemCount: Int) {
+    private fun notifyItemRangeChanged(positionStart: Int, itemCount: Int, payload: Any? = null) {
         callbacks.forEach {
-            it?.onItemRangeChanged(getData(), positionStart, itemCount)
+            it?.onItemRangeChanged(getData(), positionStart, itemCount, payload)
         }
     }
 
@@ -356,7 +356,7 @@ class SmartDataImpl<Employer : XProxy<Employer>, VB : ViewBinding, D> : SmartDat
         override fun onChanged(position: Int, count: Int, payload: Any?) {
             adapter.notifyItemRangeChanged(adapter.getAdapterPosition(position), count, payload)
             callbacks.forEach {
-                it?.onItemRangeChanged(adapter.getData(), adapter.getAdapterPosition(position), count)
+                it?.onItemRangeChanged(adapter.getData(), adapter.getAdapterPosition(position), count, payload)
             }
         }
     }
