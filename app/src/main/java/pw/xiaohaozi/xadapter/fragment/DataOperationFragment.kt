@@ -2,6 +2,7 @@ package pw.xiaohaozi.xadapter.fragment
 
 import android.annotation.SuppressLint
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -131,24 +132,37 @@ class DataOperationFragment : Fragment() {
 
     @SuppressLint("SetTextI18n")
     private fun function(): SmartAdapter<ItemDataOperationBinding, VerseInfo> {
-        return createAdapter<ItemDataOperationBinding, VerseInfo> { (holder, data) ->
-            holder.binding.tvContent.text = data.content
-            holder.binding.tvAuthor.text = data.author
-            val index = this.getSelectedIndex(data)
-            if (index < 0) {
-                holder.binding.tvSelectedIndex.text = ""
-                holder.binding.tvSelectedIndex.setBackgroundResource(R.drawable.bg_not_selected)
-            } else {
-                holder.binding.tvSelectedIndex.text = "${index + 1}"
-                holder.binding.tvSelectedIndex.setBackgroundResource(R.drawable.bg_selected_position)
+        return createAdapter<ItemDataOperationBinding, VerseInfo> { (holder, data,_,payloads) ->
+            Log.i(TAG, "function: ${payloads.joinToString()}")
+            if (payloads.isEmpty()){
+                holder.binding.tvContent.text = data.content
+                holder.binding.tvAuthor.text = data.author
+                val index = this.getSelectedIndex(data)
+                if (index < 0) {
+                    holder.binding.tvSelectedIndex.text = ""
+                    holder.binding.tvSelectedIndex.setBackgroundResource(R.drawable.bg_not_selected)
+                } else {
+                    holder.binding.tvSelectedIndex.text = "${index + 1}"
+                    holder.binding.tvSelectedIndex.setBackgroundResource(R.drawable.bg_selected_position)
+                }
+            }else if (payloads.contains("SELECT_STATES")){
+                val index = this.getSelectedIndex(data)
+                if (index < 0) {
+                    holder.binding.tvSelectedIndex.text = ""
+                    holder.binding.tvSelectedIndex.setBackgroundResource(R.drawable.bg_not_selected)
+                } else {
+                    holder.binding.tvSelectedIndex.text = "${index + 1}"
+                    holder.binding.tvSelectedIndex.setBackgroundResource(R.drawable.bg_selected_position)
+                }
             }
+
         }
             .addHeader<ItemHomeHeaderBinding>()
             .addFooter<ItemHomeFooterBinding>()
 //            .setOnClickListener { holder, data, position, view ->
 //                setSelect(data, !isSelected(data))
 //            }
-            .setOnItemSelectListener { data, position, index, fromUser ->
+            .setOnItemSelectListener(payload = "SELECT_STATES") { data, position, index, fromUser ->
 
             }
             .setOnSelectAllListener { selectedCache, isSelectedAll ->

@@ -145,7 +145,7 @@ open class AdapterSelectedImpl<Employer : XProxy<Employer>, VB : ViewBinding, D>
                     Log.i(TAG, "notifyItemChanged: position = ${position}")
                     val adapterPosition = adapter.getAdapterPosition(position)
                     if (adapterPosition > -1 && adapterPosition < adapter.itemCount) {
-                        adapter.notifyItemChanged(adapterPosition)
+                        adapter.notifyItemChanged(adapterPosition, itemSelectListener?.payload)
                         notifyItemSelectedChanges(d, adapterPosition, -1, false)
                     }
                 }
@@ -176,7 +176,7 @@ open class AdapterSelectedImpl<Employer : XProxy<Employer>, VB : ViewBinding, D>
                     Log.i(TAG, "notifyItemChanged: position = ${position}")
                     val adapterPosition = adapter.getAdapterPosition(position)
                     if (adapterPosition > -1 && adapterPosition < adapter.itemCount) {
-                        adapter.notifyItemChanged(adapterPosition)
+                        adapter.notifyItemChanged(adapterPosition, itemSelectListener?.payload)
                         notifyItemSelectedChanges(d, adapterPosition, -1, false)
                     }
                 }
@@ -254,7 +254,7 @@ open class AdapterSelectedImpl<Employer : XProxy<Employer>, VB : ViewBinding, D>
 
     override fun setOnItemSelectListener(
         id: Int?,
-        payload: String?,
+        payload: Any?,
         permittedTypes: Array<Int>,
         listener: OnItemSelectListener<Employer, D>
     ): Employer {
@@ -265,7 +265,7 @@ open class AdapterSelectedImpl<Employer : XProxy<Employer>, VB : ViewBinding, D>
 
     override fun setOnItemSelectListener(
         id: Int?,
-        payload: String?,
+        payload: Any?,
         permittedTypes: Array<Class<*>>,
         listener: OnItemSelectListener<Employer, D>
     ): Employer {
@@ -275,7 +275,7 @@ open class AdapterSelectedImpl<Employer : XProxy<Employer>, VB : ViewBinding, D>
 
     override fun setOnItemSelectListener(
         id: Int?,
-        payload: String?,
+        payload: Any?,
         listener: OnItemSelectListener<Employer, D>
     ): Employer {
         itemSelectListener = SelectedProxy.Selected(id, payload, null, listener)

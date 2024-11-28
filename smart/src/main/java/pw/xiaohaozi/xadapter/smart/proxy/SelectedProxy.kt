@@ -25,7 +25,7 @@ interface SelectedProxy<Employer : XProxy<Employer>, VB : ViewBinding, D> :
     XProxy<Employer> {
     class Selected<Employer, D>(
         val id: Int?,
-        val payload: String?,
+        val payload: Any?,
         val permittedTypes: Array<*>?,
         val listener: OnItemSelectListener<Employer, D>
     )
@@ -55,7 +55,7 @@ interface SelectedProxy<Employer : XProxy<Employer>, VB : ViewBinding, D> :
      */
     fun setOnItemSelectListener(
         id: Int? = null,
-        payload: String? = null,
+        payload: Any? = null,
         listener: OnItemSelectListener<Employer, D>
     ): Employer
     /**
@@ -67,7 +67,7 @@ interface SelectedProxy<Employer : XProxy<Employer>, VB : ViewBinding, D> :
      */
     fun setOnItemSelectListener(
         id: Int? = null,
-        payload: String? = null,
+        payload: Any? = null,
         permittedTypes: Array<Int>,
         listener: OnItemSelectListener<Employer, D>
     ): Employer
@@ -81,7 +81,7 @@ interface SelectedProxy<Employer : XProxy<Employer>, VB : ViewBinding, D> :
      */
     fun setOnItemSelectListener(
         id: Int? = null,
-        payload: String? = null,
+        payload: Any? = null,
         permittedTypes: Array<Class<*>>,
         listener: OnItemSelectListener<Employer, D>
     ): Employer
