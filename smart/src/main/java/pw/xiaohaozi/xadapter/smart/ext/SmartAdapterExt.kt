@@ -1,5 +1,6 @@
 package pw.xiaohaozi.xadapter.smart.ext
 
+import androidx.lifecycle.LifecycleOwner
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.ItemTouchHelper.DOWN
 import androidx.recyclerview.widget.ItemTouchHelper.END
@@ -63,6 +64,19 @@ inline fun <VB : ViewBinding, D> createAdapter(
 }
 
 /**
+ * 创建单布局Adapter
+ */
+inline fun <VB : ViewBinding, D> LifecycleOwner.createLifecycleAdapter(
+    crossinline init: (SmartProvider<VB, D>.() -> Unit) = {},
+    crossinline create: OnAdapterInitHolder<VB, D> = {},
+    crossinline bind: OnAdapterBindHolder<VB, D>,
+): SmartAdapter<VB, D> {
+    val adapter = createAdapter(init, create, bind)
+    adapter.bindLifecycle(this)
+    return adapter
+}
+
+/**
  * 创建通用Adapter，单布局和多布局都可以使用，建议创建多布局时使用。
  * 后续需要使用.withType()方法实现数据绑定； 最后调用toAdapter()方法还原回Adapter。
  *
@@ -78,6 +92,11 @@ fun createAdapter(custom: OnCustomType? = null): SmartAdapter<ViewBinding, Any?>
     return adapter
 }
 
+fun LifecycleOwner.createLifecycleAdapter(custom: OnCustomType? = null): SmartAdapter<ViewBinding, Any?> {
+    val adapter = createAdapter(custom)
+    adapter.bindLifecycle(this)
+    return adapter
+}
 
 /**
  * 多布局切换

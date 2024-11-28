@@ -5,13 +5,22 @@ import android.util.SparseArray
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.util.forEach
-import androidx.recyclerview.widget.AsyncDifferConfig
+import androidx.lifecycle.DefaultLifecycleObserver
+import androidx.lifecycle.LifecycleObserver
+import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.AsyncListDiffer
-import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.RecyclerView.Adapter
 import androidx.viewbinding.ViewBinding
+import kotlinx.coroutines.CoroutineName
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.cancelChildren
+import kotlinx.coroutines.job
 import pw.xiaohaozi.xadapter.smart.XAdapterException
 import pw.xiaohaozi.xadapter.smart.entity.DEFAULT_PAGE
 import pw.xiaohaozi.xadapter.smart.entity.EMPTY
@@ -19,10 +28,10 @@ import pw.xiaohaozi.xadapter.smart.entity.FOOTER
 import pw.xiaohaozi.xadapter.smart.entity.HEADER
 import pw.xiaohaozi.xadapter.smart.entity.XMultiItemEntity
 import pw.xiaohaozi.xadapter.smart.holder.XHolder
-import pw.xiaohaozi.xadapter.smart.impl.SmartDataImpl
 import pw.xiaohaozi.xadapter.smart.provider.TypeProvider
 import pw.xiaohaozi.xadapter.smart.provider.XProvider
 import java.lang.reflect.ParameterizedType
+import kotlin.coroutines.CoroutineContext
 
 /**
  * Adapter基类，提供Adapter基础功能
@@ -32,12 +41,23 @@ import java.lang.reflect.ParameterizedType
  * github：https://github.com/xiaohaozi9825
  * 创建时间：2024/6/8 14:59
  */
-open class XAdapter<VB : ViewBinding, D> : Adapter<XHolder<VB>>() {
+open class XAdapter<VB : ViewBinding, D> : Adapter<XHolder<VB>>(), CoroutineScope {
     companion object {
         const val TAG = "XAdapter"
     }
 
+    var recyclerView: RecyclerView? = null
+    private var lifecycleOwner: LifecycleOwner? = null
+    private val defaultLifecycleObserver = object : DefaultLifecycleObserver {
+        override fun onDestroy(owner: LifecycleOwner) {
+            super.onDestroy(owner)
+            this@XAdapter.recyclerView?.adapter = null
+        }
+    }
 
+    override val coroutineContext: CoroutineContext
+            by lazy { SupervisorJob(lifecycleOwner?.lifecycleScope?.coroutineContext?.job) + Dispatchers.Main + CoroutineName("XAdapterCoroutine") }
+    internal lateinit var asyncListDiffer: AsyncListDiffer<D>
     private var datas: MutableList<D> = mutableListOf()
     val providers: SparseArray<TypeProvider<*, *>> by lazy { SparseArray() }
     private var itemTypeCallback: (XAdapter<VB, D>.(data: D, position: Int) -> Int?)? = null
@@ -170,16 +190,19 @@ open class XAdapter<VB : ViewBinding, D> : Adapter<XHolder<VB>>() {
         }
     }
 
-    lateinit var differ: AsyncListDiffer<D>
-    fun isDifferMode() = this::differ.isInitialized
+    fun isDifferMode() = this::asyncListDiffer.isInitialized
+
+    fun bindLifecycle(lifecycle: LifecycleOwner) {
+        lifecycleOwner = lifecycle
+    }
 
     fun setData(list: MutableList<*>) {
-        if (this::differ.isInitialized) throw XAdapterException("由于您设置了differ，请使用submitList()方法跟新数据！")
+        if (this::asyncListDiffer.isInitialized) throw XAdapterException("由于您设置了differ，请使用submitList()方法跟新数据！")
         datas = list as MutableList<D>
     }
 
     fun getData(): MutableList<D> {
-        return if (this::differ.isInitialized) differ.currentList else datas
+        return if (this::asyncListDiffer.isInitialized) asyncListDiffer.currentList else datas
     }
 
     private fun provideViewHolder(
@@ -288,14 +311,6 @@ open class XAdapter<VB : ViewBinding, D> : Adapter<XHolder<VB>>() {
             if (providers.get(0) != null) return 0
             providers.forEach { key, value ->
                 Log.i(TAG, "getItemViewType: key = $key")
-//                val kClass = value::class
-//                kClass.supertypes.forEach {
-//                    Log.i(TAG, "getItemViewType: supertype = ${it}")
-//                    it.arguments.forEach {
-//                        Log.i(TAG, "getItemViewType: arguments = ${it}")
-//                        Log.i(TAG, "getItemViewType: arguments = ${it.type?.isMarkedNullable}")//泛型是否可空
-//                    }
-//                }
                 try {
                     //使用kotlin 反射获取第一个泛型类型为可空类型的provider 对应的key
                     //需要用到implementation "org.jetbrains.kotlin:kotlin-reflect:1.7.10"库
@@ -314,7 +329,7 @@ open class XAdapter<VB : ViewBinding, D> : Adapter<XHolder<VB>>() {
             val clazz = data!!::class.java
             providers.forEach { key, value ->
                 val genericSuperclass = value.javaClass.genericSuperclass as? ParameterizedType
-                    ?: throw RuntimeException("必须明确指定 D 泛型类型")
+                    ?: throw XAdapterException("必须明确指定 D 泛型类型")
                 if (genericSuperclass.actualTypeArguments.any { it == clazz }) {
                     return key
                 }
@@ -515,6 +530,7 @@ open class XAdapter<VB : ViewBinding, D> : Adapter<XHolder<VB>>() {
     /**************************   生命周期同步   ******************************/
     /**************************************************************************/
     override fun onViewRecycled(holder: XHolder<VB>) {
+        Log.i(TAG, "onViewRecycled: $holder")
         tryNotifyProvider { onViewRecycled(holder) }
     }
 
@@ -523,7 +539,10 @@ open class XAdapter<VB : ViewBinding, D> : Adapter<XHolder<VB>>() {
         return super.onFailedToRecycleView(holder)
     }
 
+
     override fun onAttachedToRecyclerView(recyclerView: RecyclerView) {
+        this.recyclerView = recyclerView
+        lifecycleOwner?.lifecycle?.addObserver(defaultLifecycleObserver)
         val manager = recyclerView.layoutManager
         if (manager is GridLayoutManager) {
             val defSpanSizeLookup = manager.spanSizeLookup
@@ -541,9 +560,13 @@ open class XAdapter<VB : ViewBinding, D> : Adapter<XHolder<VB>>() {
     }
 
     override fun onDetachedFromRecyclerView(recyclerView: RecyclerView) {
+        Log.i(TAG, "onDetachedFromRecyclerView: ")
+        coroutineContext.cancel()
         recyclerView.removeOnAttachStateChangeListener(rvOnAttachStateChangeListener)
         onRecyclerViewChanges.tryNotify { onDetachedFromRecyclerView(recyclerView) }
         tryNotifyProvider { onAdapterDetachedFromRecyclerView(recyclerView) }
+        lifecycleOwner?.lifecycle?.removeObserver(defaultLifecycleObserver)
+        this.recyclerView = null
     }
 
     override fun onViewAttachedToWindow(holder: XHolder<VB>) {
@@ -553,7 +576,10 @@ open class XAdapter<VB : ViewBinding, D> : Adapter<XHolder<VB>>() {
     }
 
     override fun onViewDetachedFromWindow(holder: XHolder<VB>) {
-        Log.i(TAG, "onViewDetachedFromWindow: ")
+        //该方法比onViewRecycled先调
+        Log.i(TAG, "onViewDetachedFromWindow: $holder")
+        holder.coroutineContext.cancelChildren()//取消holder中的所有子协程
+//        holder.coroutineContext.cancel()//取消holder中的所有子协程
         onViewChanges.tryNotify { onViewDetachedFromWindow(holder) }
         tryNotifyProvider { onHolderDetachedFromWindow(holder) }
     }

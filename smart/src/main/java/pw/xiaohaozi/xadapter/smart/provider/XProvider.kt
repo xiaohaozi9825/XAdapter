@@ -7,10 +7,16 @@ import androidx.core.util.forEach
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import androidx.viewbinding.ViewBinding
+import kotlinx.coroutines.CoroutineName
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.job
 import pw.xiaohaozi.xadapter.smart.adapter.XAdapter
 import pw.xiaohaozi.xadapter.smart.holder.XHolder
 import java.lang.reflect.Method
 import java.lang.reflect.ParameterizedType
+import kotlin.coroutines.CoroutineContext
 
 /**
  * 类型提供者
@@ -20,8 +26,11 @@ import java.lang.reflect.ParameterizedType
  * github：https://github.com/xiaohaozi9825
  * 创建时间：2024/6/8 14:29
  */
-abstract class XProvider<VB : ViewBinding, D>(override val adapter: XAdapter<*, *>) : TypeProvider<VB, D> {
+abstract class XProvider<VB : ViewBinding, D>(override val adapter: XAdapter<*, *>) : TypeProvider<VB, D>, CoroutineScope {
     val TAG = "XProvider"
+    override val coroutineContext: CoroutineContext
+        get() = adapter.coroutineContext
+
     abstract fun onCreated(holder: XHolder<VB>)
     abstract fun onBind(holder: XHolder<VB>, data: D, position: Int)
     open fun onBind(holder: XHolder<VB>, data: D, position: Int, payloads: List<Any?>) {
@@ -80,11 +89,13 @@ abstract class XProvider<VB : ViewBinding, D>(override val adapter: XAdapter<*, 
     override fun onViewRecyclerDetachedFromWindow(recyclerView: RecyclerView) {
 
     }
+
     //反射创建ViewBinding实例
     //A : Adapter<*>, VH : Holder<VB>, VB : ViewBinding, D
     @Suppress("UNCHECKED_CAST")
     private fun smartCreateViewBinding(parent: ViewGroup): VB {
-        val genericSuperclass = this.javaClass.genericSuperclass as? ParameterizedType ?: throw RuntimeException("必须明确指定VB泛型类型")
+        val genericSuperclass =
+            this.javaClass.genericSuperclass as? ParameterizedType ?: throw RuntimeException("必须明确指定VB泛型类型")
         val find = genericSuperclass.actualTypeArguments.find {
             (it as? Class<*>)?.run { ViewBinding::class.java.isAssignableFrom(this) } ?: false
         }

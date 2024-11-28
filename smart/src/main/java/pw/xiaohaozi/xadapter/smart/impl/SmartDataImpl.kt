@@ -247,11 +247,11 @@ class SmartDataImpl<Employer : XProxy<Employer>, VB : ViewBinding, D> : SmartDat
 
 
     override fun submitList(list: List<D>, commitCallback: Runnable) {
-        adapter.differ.submitList(list, commitCallback)
+        adapter.asyncListDiffer.submitList(list, commitCallback)
     }
 
     override fun submitList(list: List<D>) {
-        adapter.differ.submitList(list)
+        adapter.asyncListDiffer.submitList(list)
     }
 
 
@@ -259,11 +259,11 @@ class SmartDataImpl<Employer : XProxy<Employer>, VB : ViewBinding, D> : SmartDat
         diffCallback: DiffUtil.ItemCallback<D>,
         listener: AsyncListDiffer.ListListener<D>
     ): Employer {
-        adapter.differ = AsyncListDiffer<D>(
+        adapter.asyncListDiffer = AsyncListDiffer<D>(
             XAdapterListUpdateCallback(adapter, callbacks),
             AsyncDifferConfig.Builder(diffCallback).build()
         )
-        adapter.differ.addListListener(listener)
+        adapter.asyncListDiffer.addListListener(listener)
         return employer
     }
 
@@ -271,8 +271,8 @@ class SmartDataImpl<Employer : XProxy<Employer>, VB : ViewBinding, D> : SmartDat
         config: AsyncDifferConfig<D>,
         listener: AsyncListDiffer.ListListener<D>
     ): Employer {
-        adapter.differ = AsyncListDiffer(XAdapterListUpdateCallback(adapter, callbacks), config)
-        adapter.differ.addListListener(listener)
+        adapter.asyncListDiffer = AsyncListDiffer(XAdapterListUpdateCallback(adapter, callbacks), config)
+        adapter.asyncListDiffer.addListListener(listener)
         return employer
     }
 

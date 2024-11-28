@@ -34,7 +34,6 @@ open class SmartAdapter<VB : ViewBinding, D>(
     private val eventImpl: EventImpl<SmartAdapter<VB, D>, VB, D> = EventImpl(),//
     private val selectedImpl: AdapterSelectedImpl<SmartAdapter<VB, D>, VB, D> = AdapterSelectedImpl()//
 ) : XAdapter<VB, D>(),//继承Adapter
-    CoroutineScope, //协成
     XEmployer, //宿主
     SmartDataProxy<SmartAdapter<VB, D>, VB, D> by dataImpl,//数据
     EventProxy<SmartAdapter<VB, D>, VB, D> by eventImpl,//
@@ -62,8 +61,7 @@ open class SmartAdapter<VB : ViewBinding, D>(
         return this
     }
 
-    override val coroutineContext: CoroutineContext
-        get() = SupervisorJob() + Dispatchers.Main + CoroutineName("XAdapterCoroutine")
+
 
     override operator fun plus(provider: TypeProvider<*, *>): SmartAdapter<VB, D> {
         addProvider(provider)

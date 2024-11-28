@@ -3,8 +3,13 @@ package pw.xiaohaozi.xadapter.smart.holder
 
 import androidx.recyclerview.widget.RecyclerView
 import androidx.viewbinding.ViewBinding
+import kotlinx.coroutines.CoroutineName
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.job
 import pw.xiaohaozi.xadapter.smart.adapter.SmartAdapter
 import pw.xiaohaozi.xadapter.smart.adapter.XAdapter
+import kotlin.coroutines.CoroutineContext
 
 /**
  *
@@ -14,7 +19,11 @@ import pw.xiaohaozi.xadapter.smart.adapter.XAdapter
  * github：https://github.com/xiaohaozi9825
  * 创建时间：2022/8/10 20:09
  */
-open class XHolder<VB : ViewBinding>(val binding: VB) : RecyclerView.ViewHolder(binding.root) {
+open class XHolder<VB : ViewBinding>(val binding: VB) : RecyclerView.ViewHolder(binding.root), CoroutineScope {
+
+    override val coroutineContext: CoroutineContext
+            by lazy { SupervisorJob(getXAdapter().coroutineContext.job) + CoroutineName("XHolderCoroutine") }
+
     fun getXAdapter(): XAdapter<*, *> {
         return bindingAdapter as XAdapter<*, *>
     }

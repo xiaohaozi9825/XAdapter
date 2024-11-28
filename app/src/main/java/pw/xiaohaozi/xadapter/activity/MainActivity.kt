@@ -13,6 +13,7 @@ import pw.xiaohaozi.xadapter.databinding.ItemHomeTitleBinding
 import pw.xiaohaozi.xadapter.enableEdgeToEdge
 import pw.xiaohaozi.xadapter.fragment.CheckFragment
 import pw.xiaohaozi.xadapter.fragment.ClickFragment
+import pw.xiaohaozi.xadapter.fragment.CoroutineScopeFragment
 import pw.xiaohaozi.xadapter.fragment.DataDifferFragment
 import pw.xiaohaozi.xadapter.fragment.DataOperationFragment
 import pw.xiaohaozi.xadapter.fragment.DragSortFragment
@@ -87,8 +88,9 @@ class MainActivity : AppCompatActivity() {
         HomeInfo("侧滑菜单", "类似QQ侧滑效果", R.mipmap.ic_launcher, SwipeMenuFragment::class.java),
         "数据操作",
         HomeInfo("数据操作", "数据增删改查", R.mipmap.ic_launcher, DataOperationFragment::class.java),
-        HomeInfo("Differ", "数据增删改查", R.mipmap.ic_launcher, DataDifferFragment::class.java),
-
-        )
+        HomeInfo("Differ", "使用Differ算法更新数据", R.mipmap.ic_launcher, DataDifferFragment::class.java),
+        "其他",
+        HomeInfo("协程测试", "", R.mipmap.ic_launcher, CoroutineScopeFragment::class.java),
+    )
 
 }
