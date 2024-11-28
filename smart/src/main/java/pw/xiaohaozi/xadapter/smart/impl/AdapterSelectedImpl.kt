@@ -125,12 +125,38 @@ open class AdapterSelectedImpl<Employer : XProxy<Employer>, VB : ViewBinding, D>
         }
 
         //删除数据时回调
-        override fun onItemRangeRemoved(sender: MutableList<D>, changeDatas: MutableList<D>?, positionStart: Int, itemCount: Int) {
-            Log.i(TAG, "onItemRangeRemoved: ${changeDatas?.size}")
+        override fun onItemRangeRemoved(sender: MutableList<D>, positionStart: Int, itemCount: Int) {
             //被删除的元素在selectedCache中的起始索引
-            val startIndex = if (positionStart > -1) adapter.getDataPosition(positionStart)
-            else selectedCache.indexOfFirst { changeDatas?.contains(it) ?: false }
+            val startIndex = adapter.getDataPosition(positionStart)
+            Log.i(TAG, "onItemRangeRemoved: startIndex = ${startIndex}")
+            //找到被取消选中的item后面的所有item，并更新
+            val filter = selectedCache.filterIndexed { index, _ -> index >= startIndex }
+            Log.i(TAG, "onItemRangeRemoved: filter = ${filter.size}")
+            //被删除掉的数据
+            val removedData = selectedCache.subtract(sender.toSet())
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                selectedCache.removeIf { removedData.contains(it) }
+            } else {
+                selectedCache.removeAll(selectedCache.filter { removedData.contains(it) }.toSet())
+            }
+            curSelectedAllStatus = dpSelectAll()
+            getData().forEachIndexed { position, d ->
+                if (filter.contains(d)) {
+                    Log.i(TAG, "notifyItemChanged: position = ${position}")
+                    val adapterPosition = adapter.getAdapterPosition(position)
+                    if (adapterPosition > -1 && adapterPosition < adapter.itemCount) {
+                        adapter.notifyItemChanged(adapterPosition)
+                        notifyItemSelectedChanges(d, adapterPosition, -1, false)
+                    }
+                }
+            }
+            notifySelectedDataChanges(curSelectedAllStatus)
+        }
 
+        //删除数据时回调
+        override fun onItemRangeRemoved(sender: MutableList<D>, changeDatas: MutableList<D>?) {
+            //被删除的元素在selectedCache中的起始索引
+            val startIndex = selectedCache.indexOfFirst { changeDatas?.contains(it) ?: false }
             Log.i(TAG, "onItemRangeRemoved: startIndex = ${startIndex}")
             //找到被取消选中的item后面的所有item，并更新
             val filter = selectedCache.filterIndexed { index, _ -> index >= startIndex }
@@ -145,8 +171,6 @@ open class AdapterSelectedImpl<Employer : XProxy<Employer>, VB : ViewBinding, D>
                 selectedCache.removeAll(selectedCache.filter { removedData?.contains(it) ?: false }.toSet())
             }
             curSelectedAllStatus = dpSelectAll()
-
-
             getData().forEachIndexed { position, d ->
                 if (filter.contains(d)) {
                     Log.i(TAG, "notifyItemChanged: position = ${position}")

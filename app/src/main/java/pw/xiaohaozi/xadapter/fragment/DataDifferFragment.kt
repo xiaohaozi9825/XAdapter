@@ -78,12 +78,11 @@ class DataDifferFragment : Fragment() {
                 binding.tvItemCount.text = "共${sender.size}条数据"
             }
 
-            override fun onItemRangeRemoved(
-                sender: MutableList<VerseInfo>,
-                changeDatas: MutableList<VerseInfo>?,
-                positionStart: Int,
-                itemCount: Int
-            ) {
+            override fun onItemRangeRemoved(sender: MutableList<VerseInfo>, positionStart: Int, itemCount: Int) {
+                binding.tvItemCount.text = "共${sender.size}条数据"
+            }
+
+            override fun onItemRangeRemoved(sender: MutableList<VerseInfo>, changeDatas: MutableList<VerseInfo>?) {
                 binding.tvItemCount.text = "共${sender.size}条数据"
             }
         })
