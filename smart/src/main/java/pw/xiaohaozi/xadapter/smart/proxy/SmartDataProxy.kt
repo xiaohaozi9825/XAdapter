@@ -83,7 +83,7 @@ interface SmartDataProxy<Employer : XProxy<Employer>, VB : ViewBinding, D> :
     fun <L : Collection<D>> remove(list: L)
 
     /**
-     * 删除数据
+     * 删除所有数据
      * Differ模式下不可用
      */
     fun remove()
@@ -91,10 +91,10 @@ interface SmartDataProxy<Employer : XProxy<Employer>, VB : ViewBinding, D> :
     /**
      * 修改数据
      */
-    fun update(index: Int, data: D, payload: Any? = null)
+    fun updateAt(index: Int, data: D, payload: Any? = null)
 
     /**
-     * 修改数据
+     * 按索引修改数据
      */
     fun updateAt(index: Int, payload: Any? = null)
 

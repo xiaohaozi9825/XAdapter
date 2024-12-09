@@ -186,7 +186,7 @@ class SmartDataImpl<Employer : XProxy<Employer>, VB : ViewBinding, D> : SmartDat
      * @param index
      * @param data
      */
-    override fun update(@IntRange(from = 0) index: Int, data: D, payload: Any?) {
+    override fun updateAt(@IntRange(from = 0) index: Int, data: D, payload: Any?) {
         getData()[index] = data
         val adapterPosition = adapter.getAdapterPosition(index)
         adapter.notifyItemChanged(adapterPosition, payload)
