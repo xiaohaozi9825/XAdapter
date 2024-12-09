@@ -110,7 +110,7 @@ class DataOperationFragment : Fragment() {
                     val index = pos++ % list.size
                     datas.add(list[index])
                 }
-                adapter.refresh(datas)
+                adapter.setList(datas)
                 refreshlayout.finishRefresh()
             }
 

@@ -14,12 +14,9 @@ import pw.xiaohaozi.xadapter.databinding.ItemImageCardBinding
 import pw.xiaohaozi.xadapter.databinding.ItemVerseBinding
 import pw.xiaohaozi.xadapter.info.VerseInfo
 import pw.xiaohaozi.xadapter.smart.adapter.SmartAdapter
-import pw.xiaohaozi.xadapter.smart.entity.XMultiItemEntity
 import pw.xiaohaozi.xadapter.smart.ext.createAdapter
 import pw.xiaohaozi.xadapter.smart.ext.toAdapter
 import pw.xiaohaozi.xadapter.smart.ext.withType
-import pw.xiaohaozi.xadapter.smart.holder.XHolder
-import pw.xiaohaozi.xadapter.smart.provider.SmartProvider
 
 
 class LongClickFragment : Fragment() {
@@ -57,7 +54,7 @@ class LongClickFragment : Fragment() {
         // 同时设置，provider会覆盖adapter；未设置长按事件的provider会执行adapter的长按事件
         val adapter4 = function4()
         binding.recycleView.adapter = adapter4
-        adapter4.reset(list2)
+        adapter4.refresh(list2)
     }
 
 

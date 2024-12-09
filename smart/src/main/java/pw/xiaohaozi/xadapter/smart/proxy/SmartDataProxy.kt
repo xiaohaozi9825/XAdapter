@@ -20,18 +20,18 @@ interface SmartDataProxy<Employer : XProxy<Employer>, VB : ViewBinding, D> :
     val callbacks: LinkedList<ObservableList.OnListChangedCallback<MutableList<D>>?>
 
     /**
-     * 刷新数据
+     * 设置数据
      * 会替换原来的数组对象
      * Differ模式下不可用
      */
-    fun <L : MutableList<D>> refresh(list: L)
+    fun <L : MutableList<D>> setList(list: L)
 
     /**
-     * 重置数据
+     * 刷新数据
      * 会保留原数组对象
      * Differ模式下不可用
      */
-    fun <L : Collection<D>> reset(list: L)
+    fun <L : Collection<D>> refresh(list: L)
 
     /**
      * 添加数据

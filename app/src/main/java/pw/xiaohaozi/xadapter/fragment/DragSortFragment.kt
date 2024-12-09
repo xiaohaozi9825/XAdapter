@@ -37,7 +37,7 @@ class DragSortFragment : Fragment() {
         binding = FragmentRecyclerBinding.inflate(inflater)
         binding.recycleView.layoutManager = LinearLayoutManager(requireContext())
         binding.recycleView.adapter = adapter
-        adapter.reset(list)
+        adapter.refresh(list)
         return binding.root
     }
 

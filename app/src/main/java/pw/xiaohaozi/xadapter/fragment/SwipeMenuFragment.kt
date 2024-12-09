@@ -14,15 +14,12 @@ import pw.xiaohaozi.xadapter.databinding.ItemHomeFooterBinding
 import pw.xiaohaozi.xadapter.databinding.ItemHomeHeaderBinding
 import pw.xiaohaozi.xadapter.databinding.ItemImageCardBinding
 import pw.xiaohaozi.xadapter.databinding.ItemSwipeMenuBinding
-import pw.xiaohaozi.xadapter.databinding.ItemVerseBinding
 import pw.xiaohaozi.xadapter.info.VerseInfo
 import pw.xiaohaozi.xadapter.smart.adapter.SmartAdapter
 import pw.xiaohaozi.xadapter.smart.ext.createAdapter
-import pw.xiaohaozi.xadapter.smart.ext.dragSort
 import pw.xiaohaozi.xadapter.smart.ext.swipeMenu
 import pw.xiaohaozi.xadapter.smart.ext.toAdapter
 import pw.xiaohaozi.xadapter.smart.ext.withType
-import pw.xiaohaozi.xadapter.smart.widgets.SwipeItemLayout.OnSwipeItemTouchListener
 
 
 /**
@@ -42,7 +39,7 @@ class SwipeMenuFragment : Fragment() {
         binding = FragmentRecyclerBinding.inflate(inflater)
         binding.recycleView.layoutManager = LinearLayoutManager(requireContext())
         binding.recycleView.adapter = adapter
-        adapter.reset(list)
+        adapter.refresh(list)
         return binding.root
     }
 

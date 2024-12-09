@@ -36,7 +36,7 @@ class CheckFragment : Fragment() {
 
         val adapter2 = function2()
         binding.recycleView.adapter = adapter2
-        adapter2.reset(list2)
+        adapter2.refresh(list2)
 
     }
 

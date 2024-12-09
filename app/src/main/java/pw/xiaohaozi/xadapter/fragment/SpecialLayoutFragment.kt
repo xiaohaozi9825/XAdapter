@@ -43,7 +43,7 @@ class SpecialLayoutFragment : Fragment() {
             lifecycleScope.launch {
                 loading()
                 adapter.hintDefaultPage()//隐藏加载中缺省页
-                adapter.reset(listOf())//刷新数据
+                adapter.refresh(listOf())//刷新数据
             }
         }
         //模拟加载成功
@@ -54,7 +54,7 @@ class SpecialLayoutFragment : Fragment() {
 //                adapter.addHeader<ItemHomeHeaderBinding> { }
                 adapter.addFooter<ItemHomeFooterBinding>()
                 adapter.hintDefaultPage()//隐藏加载中缺省页
-                adapter.reset(list)//刷新数据
+                adapter.refresh(list)//刷新数据
             }
 
         }
@@ -86,7 +86,7 @@ class SpecialLayoutFragment : Fragment() {
         lifecycleScope.launch {
             loading()
             adapter.hintDefaultPage()
-            adapter.reset(list)
+            adapter.refresh(list)
         }
     }
 

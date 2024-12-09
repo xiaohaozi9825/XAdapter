@@ -165,14 +165,14 @@ class SmartDataImpl<Employer : XProxy<Employer>, VB : ViewBinding, D> : SmartDat
      *
      * @param list 如果list是MutableList类型，则data==list；否则data！=list
      */
-    override fun <L : MutableList<D>> refresh(list: L) {
+    override fun <L : MutableList<D>> setList(list: L) {
         if (adapter.isDifferMode()) throw XAdapterException("Differ模式不能使用改方法操作数据，更新数据请使用submitList()方法")
         adapter.setData(list)
         adapter.notifyDataSetChanged()
         notifyChanged()
     }
 
-    override fun <L : Collection<D>> reset(list: L) {
+    override fun <L : Collection<D>> refresh(list: L) {
         if (adapter.isDifferMode()) throw XAdapterException("Differ模式不能使用改方法操作数据，更新数据请使用submitList()方法")
         getData().clear()
         getData().addAll(list)

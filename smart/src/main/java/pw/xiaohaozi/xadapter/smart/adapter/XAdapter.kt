@@ -46,8 +46,24 @@ open class XAdapter<VB : ViewBinding, D> : Adapter<XHolder<VB>>(), CoroutineScop
         const val TAG = "XAdapter"
     }
 
+
     var recyclerView: RecyclerView? = null
-    private var lifecycleOwner: LifecycleOwner? = null
+    var lifecycleOwner: LifecycleOwner? = null
+
+    //协程
+    override val coroutineContext: CoroutineContext
+            by lazy { SupervisorJob(lifecycleOwner?.lifecycleScope?.coroutineContext?.job) + Dispatchers.Main + CoroutineName("XAdapterCoroutine") }
+
+    //diff
+    internal lateinit var asyncListDiffer: AsyncListDiffer<D>
+
+    //数据集
+    private var datas: MutableList<D> = mutableListOf()
+
+    //viewHolder 提供者
+    val providers: SparseArray<TypeProvider<*, *>> by lazy { SparseArray() }
+
+    //activity生命周期回调
     private val defaultLifecycleObserver = object : DefaultLifecycleObserver {
         override fun onDestroy(owner: LifecycleOwner) {
             super.onDestroy(owner)
@@ -55,19 +71,17 @@ open class XAdapter<VB : ViewBinding, D> : Adapter<XHolder<VB>>(), CoroutineScop
         }
     }
 
-    override val coroutineContext: CoroutineContext
-            by lazy { SupervisorJob(lifecycleOwner?.lifecycleScope?.coroutineContext?.job) + Dispatchers.Main + CoroutineName("XAdapterCoroutine") }
-    internal lateinit var asyncListDiffer: AsyncListDiffer<D>
-    private var datas: MutableList<D> = mutableListOf()
-    val providers: SparseArray<TypeProvider<*, *>> by lazy { SparseArray() }
+    //item类型回调
     private var itemTypeCallback: (XAdapter<VB, D>.(data: D, position: Int) -> Int?)? = null
 
+    /************Adapter生命周期相关回调******************/
     private val onViewHolderChanges: ArrayList<OnViewHolderChanges> = arrayListOf()
     private val onRecyclerViewChanges: ArrayList<OnRecyclerViewChanges> = arrayListOf()
     private val onViewChanges: ArrayList<OnViewChanges<VB>> = arrayListOf()
     private val onRecyclerViewAttachStateChanges: ArrayList<OnRecyclerViewAttachStateChanges> = arrayListOf()
     private val rvOnAttachStateChangeListener = RVOnAttachStateChangeListener()
 
+    /************特殊布局******************/
     val headers = arrayListOf<Triple<XProvider<*, *>, Int, HEADER>>()
     val footers = arrayListOf<Triple<XProvider<*, *>, Int, FOOTER>>()
     val defaultPages = arrayListOf<Triple<XProvider<*, *>, Int, DEFAULT_PAGE>>()
@@ -95,7 +109,7 @@ open class XAdapter<VB : ViewBinding, D> : Adapter<XHolder<VB>>(), CoroutineScop
     private fun bindViewHolder(holder: XHolder<VB>, position: Int, payloads: MutableList<Any>?) {
         if (position < 0) return
         val provide = providers[holder.itemViewType] ?: providers[getItemViewType(position)]
-        ?: throw NullPointerException("没有找到 itemViewType = ${holder.itemViewType} 的 Provider")
+        ?: throw XAdapterException("没有找到 itemViewType = ${holder.itemViewType} 的 Provider")
         onViewHolderChanges.tryNotify { if (payloads == null) onBinding(holder, position) else onBinding(holder, position, payloads) }
         val headerCount = if (hasHeader) getHeaderProviderCount() else 0
         val dataSize = getData().size
@@ -190,17 +204,31 @@ open class XAdapter<VB : ViewBinding, D> : Adapter<XHolder<VB>>(), CoroutineScop
         }
     }
 
+    /**
+     * 是否启用了Differ模式
+     */
     fun isDifferMode() = this::asyncListDiffer.isInitialized
 
+    /**
+     * 绑定Activity或Fragment生命周期
+     * @param lifecycle
+     */
     fun bindLifecycle(lifecycle: LifecycleOwner) {
         lifecycleOwner = lifecycle
     }
 
+    /**
+     * 修改数据
+     * 框架内使用，只对datas赋值，不更新列表
+     */
     fun setData(list: MutableList<*>) {
         if (this::asyncListDiffer.isInitialized) throw XAdapterException("由于您设置了differ，请使用submitList()方法跟新数据！")
         datas = list as MutableList<D>
     }
 
+    /**
+     * 获取数据
+     */
     fun getData(): MutableList<D> {
         return if (this::asyncListDiffer.isInitialized) asyncListDiffer.currentList else datas
     }
@@ -216,6 +244,11 @@ open class XAdapter<VB : ViewBinding, D> : Adapter<XHolder<VB>>(), CoroutineScop
         else provide.onBindViewHolder(holder, data, position, payloads)
     }
 
+    /**
+     * 获取item类型
+     * @param position 相对adapter
+     * @return
+     */
     override fun getItemViewType(position: Int): Int {
         val dataSize = getData().size
         val headerCount = getHeaderProviderCount()
@@ -387,20 +420,34 @@ open class XAdapter<VB : ViewBinding, D> : Adapter<XHolder<VB>>(), CoroutineScop
         return this
     }
 
+    /**
+     * 自定义类型
+     */
     fun customItemType(call: XAdapter<VB, D>.(data: D, position: Int) -> Int?): XAdapter<VB, D> {
         itemTypeCallback = call
         return this
     }
 
+    /**
+     * 追加Provider
+     */
     open operator fun plus(provider: TypeProvider<*, *>): XAdapter<VB, D> {
         addProvider(provider)
         return this
     }
 
+    /**
+     * 获取头布局数量
+     */
     fun getHeaderProviderCount() = headers.size
+
+    /**
+     * 获取脚布局数量
+     */
     fun getFooterProviderCount() = footers.size
 
     /**
+     * adapterPosition转换为dataPosition
      * 当有头布局时，回调函数中的position均为adapterPosition，如果需要对应数据的索引，这里需要做一次计算
      */
     fun getDataPosition(adapterPosition: Int): Int {
@@ -408,11 +455,17 @@ open class XAdapter<VB : ViewBinding, D> : Adapter<XHolder<VB>>(), CoroutineScop
         else adapterPosition - getHeaderProviderCount()
     }
 
+    /**
+     * dataPosition转换为adapterPosition
+     */
     fun getAdapterPosition(dataPosition: Int): Int {
         return if (!hasHeader) dataPosition
         else dataPosition + getHeaderProviderCount()
     }
 
+    /**
+     * 添加头布局
+     */
     fun addHeaderProvider(provider: XProvider<*, *>, header: HEADER) {
         val type = automaticallyItemType(provider)
         providers[type] = provider
@@ -420,6 +473,9 @@ open class XAdapter<VB : ViewBinding, D> : Adapter<XHolder<VB>>(), CoroutineScop
         if (hasHeader) notifyItemInserted(0)
     }
 
+    /**
+     * 移除头布局
+     */
     inline fun <reified T : ViewBinding> removeHeaderProvider() {
         headers.find {
             val genericSuperclass = it.first.javaClass.genericSuperclass as? ParameterizedType
@@ -432,7 +488,9 @@ open class XAdapter<VB : ViewBinding, D> : Adapter<XHolder<VB>>(), CoroutineScop
         }
     }
 
-
+    /**
+     * 添加脚布局
+     */
     fun addFooterProvider(provider: XProvider<*, *>, footer: FOOTER) {
         val type = automaticallyItemType(provider)
         providers[type] = provider
@@ -440,7 +498,9 @@ open class XAdapter<VB : ViewBinding, D> : Adapter<XHolder<VB>>(), CoroutineScop
         if (hasFooter) notifyItemInserted(itemCount - 1)
     }
 
-
+    /**
+     * 移除脚布局
+     */
     inline fun <reified T : ViewBinding> removeFooterProvider() {
         footers.find {
             val genericSuperclass = it.first.javaClass.genericSuperclass as? ParameterizedType
@@ -453,6 +513,10 @@ open class XAdapter<VB : ViewBinding, D> : Adapter<XHolder<VB>>(), CoroutineScop
         }
     }
 
+    /**
+     * 设置空布局
+     * 初始化时设置，当数据为空时自动展示
+     */
     fun setEmptyProvider(provider: XProvider<*, *>, footer: EMPTY) {
         val type = automaticallyItemType(provider)
         emptyTriple = Triple(provider, type, footer)
@@ -460,6 +524,10 @@ open class XAdapter<VB : ViewBinding, D> : Adapter<XHolder<VB>>(), CoroutineScop
     }
 
 
+    /**
+     * 设置缺省页
+     * 初始化时设置，调用showDefaultPage()与hintDefaultPage()方法展示和隐藏
+     */
     fun setDefaultPageProvider(provider: XProvider<*, *>, page: DEFAULT_PAGE) {
         val itemType = -providers.size() - 1
         defaultPages.add(Triple(provider, itemType, page))
@@ -482,6 +550,9 @@ open class XAdapter<VB : ViewBinding, D> : Adapter<XHolder<VB>>(), CoroutineScop
         }
     }
 
+    /**
+     * 显示缺省页
+     */
     fun showDefaultPage(tag: Any) {
         val defaultPageTriple = defaultPages.find { it.third.tag == tag }
         //找到了对应的缺省页，且与上次展示的不一样时，才刷新
@@ -495,6 +566,9 @@ open class XAdapter<VB : ViewBinding, D> : Adapter<XHolder<VB>>(), CoroutineScop
         }
     }
 
+    /**
+     * 隐藏缺省页
+     */
     fun hintDefaultPage() {
         defaultPageTriple = null
         val headerCount = if (hasHeader) getHeaderProviderCount() else 0
@@ -579,7 +653,6 @@ open class XAdapter<VB : ViewBinding, D> : Adapter<XHolder<VB>>(), CoroutineScop
         //该方法比onViewRecycled先调
         Log.i(TAG, "onViewDetachedFromWindow: $holder")
         holder.coroutineContext.cancelChildren()//取消holder中的所有子协程
-//        holder.coroutineContext.cancel()//取消holder中的所有子协程
         onViewChanges.tryNotify { onViewDetachedFromWindow(holder) }
         tryNotifyProvider { onHolderDetachedFromWindow(holder) }
     }

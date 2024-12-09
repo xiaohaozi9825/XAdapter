@@ -31,7 +31,7 @@ class TextChangeFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         val adapter = function()
         binding.recycleView.adapter = adapter
-        adapter.reset(list)
+        adapter.refresh(list)
     }
 
 
