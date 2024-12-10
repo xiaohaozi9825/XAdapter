@@ -6,11 +6,14 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
+import androidx.recyclerview.widget.DividerItemDecoration.VERTICAL
 import androidx.recyclerview.widget.GridLayoutManager
+import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import coil.load
 import pw.xiaohaozi.xadapter.R
 import pw.xiaohaozi.xadapter.databinding.FragmentRecyclerBinding
 import pw.xiaohaozi.xadapter.databinding.ItemHomeTitleBinding
+import pw.xiaohaozi.xadapter.databinding.ItemImageAutoHeightBinding
 import pw.xiaohaozi.xadapter.databinding.ItemImageSelectedBinding
 import pw.xiaohaozi.xadapter.smart.ext.createAdapter
 import pw.xiaohaozi.xadapter.smart.ext.toAdapter
@@ -26,9 +29,8 @@ class GroupFragment : Fragment() {
         .withType<ItemHomeTitleBinding, String>(isFixed = true) {
             it.holder.binding.tvTitle.text = it.data
         }
-        .withType<ItemImageSelectedBinding, Int> {
-            it.holder.binding.ivImage.load(it.data)
-            it.holder.binding.tvSelectedIndex.isVisible = false
+        .withType<ItemImageAutoHeightBinding, Int> {
+            it.holder.binding.ivImage.setImageResource(it.data)
         }
         .toAdapter()
 
@@ -37,7 +39,7 @@ class GroupFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View {
         binding = FragmentRecyclerBinding.inflate(inflater)
-        binding.recycleView.layoutManager = GridLayoutManager(requireContext(), 3)
+        binding.recycleView.layoutManager = StaggeredGridLayoutManager(2, VERTICAL)
         binding.recycleView.adapter = adapter
         return binding.root
     }
@@ -51,12 +53,13 @@ class GroupFragment : Fragment() {
     private val list = arrayListOf(
         "2024-03-24",
         R.mipmap.snow1,
+        R.mipmap.t3,
+        R.mipmap.y5,
         R.mipmap.snow2,
         R.mipmap.snow3,
         "2024-05-18",
         R.mipmap.t1,
         R.mipmap.t2,
-        R.mipmap.t3,
         R.mipmap.t4,
         R.mipmap.t5,
         R.mipmap.t6,
@@ -69,7 +72,6 @@ class GroupFragment : Fragment() {
         R.mipmap.y2,
         R.mipmap.y3,
         R.mipmap.y4,
-        R.mipmap.y5,
         R.mipmap.y6,
         R.mipmap.y7,
         R.mipmap.y8,

@@ -13,6 +13,7 @@ import androidx.recyclerview.widget.AsyncListDiffer
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.RecyclerView.Adapter
+import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import androidx.viewbinding.ViewBinding
 import kotlinx.coroutines.CoroutineName
 import kotlinx.coroutines.CoroutineScope
@@ -649,6 +650,11 @@ open class XAdapter<VB : ViewBinding, D> : Adapter<XHolder<VB>>(), CoroutineScop
 
     override fun onViewAttachedToWindow(holder: XHolder<VB>) {
         Log.i(TAG, "onViewAttachedToWindow: ")
+        val layoutParams = holder.itemView.layoutParams
+        if (layoutParams is StaggeredGridLayoutManager.LayoutParams) {
+            val isFixed = providers[getItemViewType(holder.bindingAdapterPosition)]?.isFixedViewType() ?: false
+            layoutParams.isFullSpan = isFixed
+        }
         onViewChanges.tryNotify { onViewAttachedToWindow(holder) }
         tryNotifyProvider { onHolderAttachedToWindow(holder) }
     }

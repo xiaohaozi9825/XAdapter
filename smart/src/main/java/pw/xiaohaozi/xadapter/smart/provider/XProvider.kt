@@ -63,7 +63,6 @@ abstract class XProvider<VB : ViewBinding, D>(override val adapter: XAdapter<*, 
     }
 
     override fun onHolderAttachedToWindow(holder: XHolder<VB>) {
-        if (isFixedViewType()) setFullSpan(holder)
     }
 
     override fun onHolderDetachedFromWindow(holder: XHolder<VB>) {
@@ -114,13 +113,6 @@ abstract class XProvider<VB : ViewBinding, D>(override val adapter: XAdapter<*, 
             if (value == this) return key
         }
         return null
-    }
-
-    protected open fun setFullSpan(holder: RecyclerView.ViewHolder) {
-        val layoutParams = holder.itemView.layoutParams
-        if (layoutParams is StaggeredGridLayoutManager.LayoutParams) {
-            layoutParams.isFullSpan = true
-        }
     }
 }
 
