@@ -106,6 +106,10 @@ open class XAdapter<VB : ViewBinding, D> : Adapter<XHolder<VB>>(), CoroutineScop
         bindViewHolder(holder, position, payloads)
     }
 
+    override fun getItemId(position: Int): Long {
+        return super.getItemId(position)
+    }
+
     private fun bindViewHolder(holder: XHolder<VB>, position: Int, payloads: MutableList<Any>?) {
         if (position < 0) return
         val provide = providers[holder.itemViewType] ?: providers[getItemViewType(position)]

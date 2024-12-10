@@ -17,6 +17,7 @@ import pw.xiaohaozi.xadapter.fragment.CoroutineScopeFragment
 import pw.xiaohaozi.xadapter.fragment.DataDifferFragment
 import pw.xiaohaozi.xadapter.fragment.DataOperationFragment
 import pw.xiaohaozi.xadapter.fragment.DragSortFragment
+import pw.xiaohaozi.xadapter.fragment.ConcatAdapterFragment
 import pw.xiaohaozi.xadapter.fragment.GroupFragment
 import pw.xiaohaozi.xadapter.fragment.ImageSelectFragment
 import pw.xiaohaozi.xadapter.fragment.LongClickFragment
@@ -96,6 +97,7 @@ class MainActivity : AppCompatActivity() {
         HomeInfo("Differ", "使用Differ更新数据", R.mipmap.ic_launcher, DataDifferFragment::class.java),
         "其他",
         HomeInfo("协程测试", "", R.mipmap.ic_launcher, CoroutineScopeFragment::class.java),
+        HomeInfo("ConcatAdapter", "结合ConcatAdapter使用", R.mipmap.ic_launcher, ConcatAdapterFragment::class.java),
     )
 
 }

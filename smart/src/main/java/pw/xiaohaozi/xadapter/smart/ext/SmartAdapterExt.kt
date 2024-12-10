@@ -7,6 +7,7 @@ import androidx.recyclerview.widget.ItemTouchHelper.END
 import androidx.recyclerview.widget.ItemTouchHelper.START
 import androidx.recyclerview.widget.ItemTouchHelper.UP
 import androidx.recyclerview.widget.RecyclerView
+import androidx.recyclerview.widget.RecyclerView.NO_ID
 import androidx.viewbinding.ViewBinding
 import pw.xiaohaozi.xadapter.smart.adapter.SmartAdapter
 import pw.xiaohaozi.xadapter.smart.adapter.XAdapter
@@ -27,6 +28,7 @@ typealias OnProviderInitHolder<VB, D> = SmartProvider<VB, D>.(holder: XHolder<VB
 typealias OnAdapterBindHolder<VB, D> = SmartAdapter<VB, D>.(params: OnBindParams<VB, D>) -> Unit
 typealias OnProviderBindHolder<VB, D> = SmartProvider<VB, D>.(params: OnBindParams<VB, D>) -> Unit
 typealias OnCustomType = (SmartAdapter<ViewBinding, Any?>.(data: Any?, position: Int) -> Int?)
+typealias OnItemId<VB, D> = (SmartAdapter<VB, D>.(position: Int) -> Long)
 
 data class OnBindParams<VB : ViewBinding, D>(
     val holder: XHolder<VB>,
@@ -40,11 +42,18 @@ data class OnBindParams<VB : ViewBinding, D>(
  * 创建单布局Adapter
  */
 inline fun <VB : ViewBinding, D> createAdapter(
+    itemType: Int = 0,
+    crossinline onItemId: OnItemId<VB, D> = { NO_ID },
     crossinline init: (SmartProvider<VB, D>.() -> Unit) = {},
     crossinline create: OnAdapterInitHolder<VB, D> = {},
     crossinline bind: OnAdapterBindHolder<VB, D>,
 ): SmartAdapter<VB, D> {
-    val adapter = SmartAdapter<VB, D>()
+//    val adapter = SmartAdapter<VB, D>()
+    val adapter = object : SmartAdapter<VB, D>() {
+        override fun getItemId(position: Int): Long {
+            return onItemId.invoke(this, position)
+        }
+    }
     val provider = object : SmartProvider<VB, D>(adapter) {
 
         override fun onCreated(holder: XHolder<VB>) {
@@ -58,7 +67,7 @@ inline fun <VB : ViewBinding, D> createAdapter(
             bind.invoke(adapter, OnBindParams(holder, data, position, payloads))
         }
     }
-    adapter.addProvider(provider, 0)
+    adapter.addProvider(provider, itemType)
     init.invoke(provider)
     return adapter
 }
@@ -67,11 +76,13 @@ inline fun <VB : ViewBinding, D> createAdapter(
  * 创建单布局Adapter
  */
 inline fun <VB : ViewBinding, D> LifecycleOwner.createLifecycleAdapter(
+    itemType: Int = 0,
+    crossinline onItemId: OnItemId<VB, D> = { NO_ID },
     crossinline init: (SmartProvider<VB, D>.() -> Unit) = {},
     crossinline create: OnAdapterInitHolder<VB, D> = {},
     crossinline bind: OnAdapterBindHolder<VB, D>,
 ): SmartAdapter<VB, D> {
-    val adapter = createAdapter(init, create, bind)
+    val adapter = createAdapter(itemType, onItemId, init, create, bind)
     adapter.bindLifecycle(this)
     return adapter
 }
@@ -82,8 +93,15 @@ inline fun <VB : ViewBinding, D> LifecycleOwner.createLifecycleAdapter(
  *
  * @param custom 动态生成 itemType
  */
-fun createAdapter(custom: OnCustomType? = null): SmartAdapter<ViewBinding, Any?> {
-    val adapter = SmartAdapter<ViewBinding, Any?>()
+fun createAdapter(
+    onItemId: OnItemId<ViewBinding, Any?>? = null,
+    custom: OnCustomType? = null,
+): SmartAdapter<ViewBinding, Any?> {
+    val adapter = object : SmartAdapter<ViewBinding, Any?>() {
+        override fun getItemId(position: Int): Long {
+            return onItemId?.invoke(this, position) ?: super.getItemId(position)
+        }
+    }
     if (custom != null) {
         adapter.customItemType { data, position ->
             return@customItemType custom.invoke(adapter, data, position)
@@ -92,8 +110,11 @@ fun createAdapter(custom: OnCustomType? = null): SmartAdapter<ViewBinding, Any?>
     return adapter
 }
 
-fun LifecycleOwner.createLifecycleAdapter(custom: OnCustomType? = null): SmartAdapter<ViewBinding, Any?> {
-    val adapter = createAdapter(custom)
+fun LifecycleOwner.createLifecycleAdapter(
+    custom: OnCustomType? = null,
+    onItemId: OnItemId<ViewBinding, Any?> = { NO_ID }
+): SmartAdapter<ViewBinding, Any?> {
+    val adapter = createAdapter(onItemId, custom)
     adapter.bindLifecycle(this)
     return adapter
 }
