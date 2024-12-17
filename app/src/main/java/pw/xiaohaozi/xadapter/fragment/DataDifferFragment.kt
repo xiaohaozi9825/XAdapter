@@ -55,7 +55,7 @@ class DataDifferFragment : Fragment() {
 
         binding.btnDeleteSelected.setOnClickListener {
             val dataList = ArrayList(adapter.getData())
-            dataList.removeAll(adapter.getSelectedDatas().toSet())
+            dataList.removeAll(adapter.getSelectedList().toSet())
             adapter.submitList(ArrayList(dataList))
 
         }

@@ -37,6 +37,7 @@ import kotlin.reflect.KClass
 open class AdapterSelectedImpl<Employer : XProxy<Employer>, VB : ViewBinding, D> :
     SelectedProxy<Employer, VB, D> {
     override lateinit var employer: Employer
+    private val selectedCache: SelectedList<D> by lazy { SelectedList() }
 
     private val adapter: XAdapter<*, *> by lazy {
         when (val e = employer) {
@@ -46,7 +47,6 @@ open class AdapterSelectedImpl<Employer : XProxy<Employer>, VB : ViewBinding, D>
     }
 
     private fun getData() = adapter.getData() as MutableList<D>
-    override val selectedCache: SelectedList<D> by lazy { SelectedList() }
     override var onSelectedDataChangesListener: OnSelectedDataChangesListener<Employer, D>? = null
     override var itemSelectListener: SelectedProxy.Selected<Employer, D>? = null
     override var maxSelectCount: Int? = null
@@ -361,7 +361,7 @@ open class AdapterSelectedImpl<Employer : XProxy<Employer>, VB : ViewBinding, D>
         return 0
     }
 
-    override fun getSelectedDatas(): MutableList<D> = selectedCache.toMutableList()
+    override fun getSelectedList(): MutableList<D> = selectedCache.toMutableList()
     override fun isSelectedAt(position: Int) = isSelected(getData()[position])
     override fun isSelected(data: D) = selectedCache.contains(data)
     override fun getSelectedIndexAt(position: Int) = getSelectedIndex(getData()[position])

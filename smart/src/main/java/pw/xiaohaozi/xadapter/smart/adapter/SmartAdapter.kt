@@ -1,6 +1,7 @@
 package pw.xiaohaozi.xadapter.smart.adapter
 
 import androidx.viewbinding.ViewBinding
+import pw.xiaohaozi.xadapter.smart.XAdapterException
 import pw.xiaohaozi.xadapter.smart.entity.DEFAULT_PAGE
 import pw.xiaohaozi.xadapter.smart.entity.EMPTY
 import pw.xiaohaozi.xadapter.smart.entity.FOOTER
@@ -25,14 +26,14 @@ import pw.xiaohaozi.xadapter.smart.proxy.XEmployer
  * 创建时间：2024/6/9 9:10
  */
 open class SmartAdapter<VB : ViewBinding, D>(
-    private val dataImpl: SmartDataImpl<SmartAdapter<VB, D>, VB, D> = SmartDataImpl(), //
-    private val eventImpl: EventImpl<SmartAdapter<VB, D>, VB, D> = EventImpl(),//
-    private val selectedImpl: AdapterSelectedImpl<SmartAdapter<VB, D>, VB, D> = AdapterSelectedImpl()//
+    val dataProxy: SmartDataProxy<SmartAdapter<VB, D>, VB, D> = SmartDataImpl(), //
+    val eventProxy: EventProxy<SmartAdapter<VB, D>, VB, D> = EventImpl(),//
+    val selectedProxy: SelectedProxy<SmartAdapter<VB, D>, VB, D> = AdapterSelectedImpl()//
 ) : XAdapter<VB, D>(),//继承Adapter
     XEmployer, //宿主
-    SmartDataProxy<SmartAdapter<VB, D>, VB, D> by dataImpl,//数据
-    EventProxy<SmartAdapter<VB, D>, VB, D> by eventImpl,//
-    SelectedProxy<SmartAdapter<VB, D>, VB, D> by selectedImpl //
+    SmartDataProxy<SmartAdapter<VB, D>, VB, D> by dataProxy,//数据
+    EventProxy<SmartAdapter<VB, D>, VB, D> by eventProxy,//
+    SelectedProxy<SmartAdapter<VB, D>, VB, D> by selectedProxy //
 {
     init {
         initProxy()
@@ -44,18 +45,19 @@ open class SmartAdapter<VB : ViewBinding, D>(
 
     override var employer: SmartAdapter<VB, D>
         get() = this
-        set(value) {}
+        set(value) {
+            throw XAdapterException("employer不允许设置")
+        }
 
     final override fun initProxy(employer: SmartAdapter<VB, D>) {
-        dataImpl.initProxy(employer)
-        eventImpl.initProxy(employer)
-        selectedImpl.initProxy(employer)
+        dataProxy.initProxy(employer)
+        eventProxy.initProxy(employer)
+        selectedProxy.initProxy(employer)
     }
 
     override fun getEmployerAdapter(): XAdapter<VB, D> {
         return this
     }
-
 
 
     override operator fun plus(provider: TypeProvider<*, *>): SmartAdapter<VB, D> {

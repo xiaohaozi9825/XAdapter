@@ -60,7 +60,7 @@ class CoroutineScopeFragment : Fragment() {
 //                permittedTypes = arrayOf(java.lang.Integer::class.java)
                 permittedTypes = arrayOf(Int.MIN_VALUE + 1)
             ) { data, position, index, fromUser ->
-                binding.tvSelectedCount.text = "已选${getSelectedDatas().size}张"
+                binding.tvSelectedCount.text = "已选${getSelectedList().size}张"
             }.setOnSelectAllListener { selectedCache, isSelectedAll ->
                 if (binding.ivSelectedAll.isSelected != isSelectedAll) {
                     binding.ivSelectedAll.isSelected = isSelectedAll

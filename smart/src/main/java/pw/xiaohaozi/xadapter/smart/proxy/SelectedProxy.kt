@@ -1,7 +1,6 @@
 package pw.xiaohaozi.xadapter.smart.proxy
 
 import androidx.viewbinding.ViewBinding
-import kotlin.reflect.KClass
 
 /**
  * 全选状态监听
@@ -29,8 +28,6 @@ interface SelectedProxy<Employer : XProxy<Employer>, VB : ViewBinding, D> :
         val permittedTypes: Array<*>?,
         val listener: OnItemSelectListener<Employer, D>
     )
-
-    val selectedCache: MutableCollection<D>
 
     //全选状态变化
     var onSelectedDataChangesListener: OnSelectedDataChangesListener<Employer, D>?
@@ -151,7 +148,7 @@ interface SelectedProxy<Employer : XProxy<Employer>, VB : ViewBinding, D> :
      * 获取选中的数据
      * @return 被选中的数据集合
      */
-    fun getSelectedDatas(): MutableList<D>
+    fun getSelectedList(): MutableList<D>
 
     /**
      * 指定索引下的item是否被选中
