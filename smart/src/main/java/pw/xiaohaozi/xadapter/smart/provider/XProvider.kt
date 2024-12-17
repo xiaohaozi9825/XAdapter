@@ -5,7 +5,6 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.core.util.forEach
 import androidx.recyclerview.widget.RecyclerView
-import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import androidx.viewbinding.ViewBinding
 import kotlinx.coroutines.CoroutineScope
 import pw.xiaohaozi.xadapter.smart.adapter.XAdapter

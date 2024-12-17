@@ -4,17 +4,13 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.DividerItemDecoration.VERTICAL
-import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
-import coil.load
 import pw.xiaohaozi.xadapter.R
 import pw.xiaohaozi.xadapter.databinding.FragmentRecyclerBinding
 import pw.xiaohaozi.xadapter.databinding.ItemHomeTitleBinding
 import pw.xiaohaozi.xadapter.databinding.ItemImageAutoHeightBinding
-import pw.xiaohaozi.xadapter.databinding.ItemImageSelectedBinding
 import pw.xiaohaozi.xadapter.smart.ext.createAdapter
 import pw.xiaohaozi.xadapter.smart.ext.toAdapter
 import pw.xiaohaozi.xadapter.smart.ext.withType
