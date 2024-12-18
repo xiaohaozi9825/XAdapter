@@ -21,9 +21,7 @@ import pw.xiaohaozi.xadapter.smart.ext.dragSort
 import pw.xiaohaozi.xadapter.smart.ext.toAdapter
 import pw.xiaohaozi.xadapter.smart.ext.withType
 
-/**
- * 单布局
- */
+
 class DragSortFragment : Fragment() {
     private lateinit var binding: FragmentRecyclerBinding
 

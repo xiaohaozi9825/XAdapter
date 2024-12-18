@@ -33,7 +33,7 @@ interface EventProxy<Employer : XProxy<Employer>, VB : ViewBinding, D> : XProxy<
      * @param listener 点击事件回调
      */
     fun setOnClickListener(
-        @IdRes id: Int? = null,
+        id: Int? = null,
         listener: OnItemClickListener<Employer, VB, D>
     ): Employer
 
@@ -42,11 +42,12 @@ interface EventProxy<Employer : XProxy<Employer>, VB : ViewBinding, D> : XProxy<
      * @param id 需要被长按的 view id ，如果为空，则给 item 设置长按事件
      * @param listener 长按事件回调
      */
-    fun setOnLongClickListener(@IdRes id: Int? = null, listener: OnItemLongClickListener<Employer, VB, D>): Employer
+    fun setOnLongClickListener(id: Int? = null, listener: OnItemLongClickListener<Employer, VB, D>): Employer
 
     /**
      * 设置选中事件监听
      * @param id 被监听的控件id，必须是CompoundButton的子组件，如RadioButton、CheckBox
+     * @param listener 状态改变回调
      */
     fun setOnCheckedChangeListener(id: Int?, listener: OnItemCheckedChangeListener<Employer, VB, D>): Employer
 

@@ -2,12 +2,11 @@ package pw.xiaohaozi.xadapter.activity
 
 import android.app.Activity
 import android.content.Intent
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.lifecycleScope
 import pw.xiaohaozi.xadapter.R
 import pw.xiaohaozi.xadapter.databinding.ActivityEmptyBinding
 import pw.xiaohaozi.xadapter.enableEdgeToEdge
@@ -31,7 +30,6 @@ class EmptyActivity : AppCompatActivity() {
                 .putExtra("fileName", intent.getStringExtra("name"))
             startActivity(intent)
         }
-        lifecycleScope
         supportFragmentManager.beginTransaction().replace(
             R.id.fl_fragment,
             Class.forName(intent.getStringExtra("fragmentClassName")) as Class<out Fragment>, null

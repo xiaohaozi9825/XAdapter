@@ -1,5 +1,5 @@
 <!DOCTYPE html><html><head>
-      <title>SingleFragment</title>
+      <title>ImageSelectFragment</title>
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
       
@@ -24,90 +24,141 @@
     
       <div class="crossnote markdown-preview  ">
       
-<h2 id="单布局创建adapter">单布局创建Adapter </h2>
-<h4 id="一-创建adapter并绑定数据">一、创建Adapter，并绑定数据 </h4>
-<p>一般在初始化时调用</p>
-<h5 id="方法1">方法1 </h5>
-<p>使用XAdapter扩展函数创建</p>
-<pre data-role="codeBlock" data-info="kotlin" class="language-kotlin kotlin"><code> <span class="token comment">/**
- * 方法1
- * 使用XAdapter拓展方法创建
- */</span>
-<span class="token keyword keyword-private">private</span> <span class="token keyword keyword-fun">fun</span> <span class="token function">function1</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">:</span> XAdapter<span class="token operator">&lt;</span>ItemSingleTypeViewBindingBinding<span class="token punctuation">,</span> Verse<span class="token operator">&gt;</span> <span class="token punctuation">{</span>
-    <span class="token comment">//泛型VB 确定布局文件，泛型D确定数据类型，回调函数中绑定数据</span>
-    <span class="token keyword keyword-return">return</span> createAdapter<span class="token operator">&lt;</span>ItemSingleTypeViewBindingBinding<span class="token punctuation">,</span> Verse<span class="token operator">&gt;</span> <span class="token punctuation">{</span> holder<span class="token punctuation">,</span> <span class="token keyword keyword-data">data</span><span class="token punctuation">,</span> position <span class="token operator">-&gt;</span>
-        holder<span class="token punctuation">.</span>binding<span class="token punctuation">.</span>tvContent<span class="token punctuation">.</span>text <span class="token operator">=</span> <span class="token keyword keyword-data">data</span><span class="token punctuation">.</span>content
-        holder<span class="token punctuation">.</span>binding<span class="token punctuation">.</span>tvAuthor<span class="token punctuation">.</span>text <span class="token operator">=</span> <span class="token keyword keyword-data">data</span><span class="token punctuation">.</span>author
-    <span class="token punctuation">}</span>
-<span class="token punctuation">}</span>
-</code></pre><h5 id="方法2">方法2 </h5>
-<p>使用Adapter+Provider的方式创建</p>
-<pre data-role="codeBlock" data-info="kotlin" class="language-kotlin kotlin"><code> <span class="token comment">/**
- * 方法2
- * 使用Adapter+Provider的方式创建
- *
- * 比较：
- * 方法1实际上是对方法2的封装，使用更方便；
- * 方法2步骤繁琐，但是暴露的方法较多，而且可以添加多个Provider，灵活度更高
- *
- * 推荐：
- * 如果逻辑较为简单，推荐使用方法1；
- * 如果逻辑复杂，推荐使用方法2.
- */</span>
-<span class="token keyword keyword-private">private</span> <span class="token keyword keyword-fun">fun</span> <span class="token function">function2</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">:</span> XAdapter<span class="token operator">&lt;</span>ItemSingleTypeViewBindingBinding<span class="token punctuation">,</span> Verse<span class="token operator">&gt;</span> <span class="token punctuation">{</span>
-    <span class="token comment">//①创建Adapter</span>
-    <span class="token keyword keyword-val">val</span> xAdapter <span class="token operator">=</span> XAdapter<span class="token operator">&lt;</span>ItemSingleTypeViewBindingBinding<span class="token punctuation">,</span> Verse<span class="token operator">&gt;</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
-    <span class="token comment">//②创建Provider</span>
-    <span class="token keyword keyword-val">val</span> provider <span class="token operator">=</span> <span class="token keyword keyword-object">object</span> <span class="token operator">:</span> XProvider<span class="token operator">&lt;</span>ItemSingleTypeViewBindingBinding<span class="token punctuation">,</span> Verse<span class="token operator">&gt;</span><span class="token punctuation">(</span>xAdapter<span class="token punctuation">)</span> <span class="token punctuation">{</span>
-        <span class="token keyword keyword-override">override</span> <span class="token keyword keyword-fun">fun</span> <span class="token function">onCreated</span><span class="token punctuation">(</span>holder<span class="token operator">:</span> SmartHolder<span class="token operator">&lt;</span>ItemSingleTypeViewBindingBinding<span class="token operator">&gt;</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+<h2 id="item选择事件监听">Item选择事件监听 </h2>
+<blockquote>
+<p>设置item选择事件，可实现单选、多选、限制选择数量、全选、全不选等功能</p>
+</blockquote>
+<h4 id="核心方法">核心方法 </h4>
+<pre data-role="codeBlock" data-info="kotlin" class="language-kotlin kotlin"><code>    <span class="token comment">/**
+     * 设置选中事件监听
+     * @param id 触发选中事件的 view，默认为item
+     * @param payload
+     * @param permittedTypes 参与选择的类型，与itemType一致
+     * @param listener 选中事件回调监听
+     */</span>
+    <span class="token keyword keyword-fun">fun</span> <span class="token function">setOnItemSelectListener</span><span class="token punctuation">(</span>
+        id<span class="token operator">:</span> Int<span class="token operator">?</span> <span class="token operator">=</span> <span class="token keyword keyword-null">null</span><span class="token punctuation">,</span>
+        payload<span class="token operator">:</span> Any<span class="token operator">?</span> <span class="token operator">=</span> <span class="token keyword keyword-null">null</span><span class="token punctuation">,</span>
+        listener<span class="token operator">:</span> OnItemSelectListener<span class="token operator">&lt;</span>Employer<span class="token punctuation">,</span> D<span class="token operator">&gt;</span>
+    <span class="token punctuation">)</span><span class="token operator">:</span> Employer
+    <span class="token comment">/**
+     * 设置选中事件监听
+     * @param id 触发选中事件的 view，默认为item
+     * @param payload
+     * @param permittedTypes 参与选择的类型，与itemType一致
+     * @param listener 选中事件回调监听
+     */</span>
+    <span class="token keyword keyword-fun">fun</span> <span class="token function">setOnItemSelectListener</span><span class="token punctuation">(</span>
+        id<span class="token operator">:</span> Int<span class="token operator">?</span> <span class="token operator">=</span> <span class="token keyword keyword-null">null</span><span class="token punctuation">,</span>
+        payload<span class="token operator">:</span> Any<span class="token operator">?</span> <span class="token operator">=</span> <span class="token keyword keyword-null">null</span><span class="token punctuation">,</span>
+        permittedTypes<span class="token operator">:</span> Array<span class="token operator">&lt;</span>Int<span class="token operator">&gt;</span><span class="token punctuation">,</span>
+        listener<span class="token operator">:</span> OnItemSelectListener<span class="token operator">&lt;</span>Employer<span class="token punctuation">,</span> D<span class="token operator">&gt;</span>
+    <span class="token punctuation">)</span><span class="token operator">:</span> Employer
+    <span class="token comment">/**
+     * 设置选中事件监听
+     * @param id 触发选中事件的 view，默认为item
+     * @param payload
+     * @param permittedTypes 参与选择的类型，data的类型，如果是基本数据类型.
+     * 需要带上包名，如int类型，应写java.lang.Integer::class.java
+     * @param listener 选中事件回调监听
+     */</span>
+    <span class="token keyword keyword-fun">fun</span> <span class="token function">setOnItemSelectListener</span><span class="token punctuation">(</span>
+        id<span class="token operator">:</span> Int<span class="token operator">?</span> <span class="token operator">=</span> <span class="token keyword keyword-null">null</span><span class="token punctuation">,</span>
+        payload<span class="token operator">:</span> Any<span class="token operator">?</span> <span class="token operator">=</span> <span class="token keyword keyword-null">null</span><span class="token punctuation">,</span>
+        permittedTypes<span class="token operator">:</span> Array<span class="token operator">&lt;</span>Class<span class="token operator">&lt;</span><span class="token operator">*</span><span class="token operator">&gt;</span><span class="token operator">&gt;</span><span class="token punctuation">,</span>
+        listener<span class="token operator">:</span> OnItemSelectListener<span class="token operator">&lt;</span>Employer<span class="token punctuation">,</span> D<span class="token operator">&gt;</span>
+    <span class="token punctuation">)</span><span class="token operator">:</span> Employer
 
-        <span class="token punctuation">}</span>
 
-        <span class="token keyword keyword-override">override</span> <span class="token keyword keyword-fun">fun</span> <span class="token function">onBind</span><span class="token punctuation">(</span>
-            holder<span class="token operator">:</span> SmartHolder<span class="token operator">&lt;</span>ItemSingleTypeViewBindingBinding<span class="token operator">&gt;</span><span class="token punctuation">,</span>
-            <span class="token keyword keyword-data">data</span><span class="token operator">:</span> Verse<span class="token punctuation">,</span>
-            position<span class="token operator">:</span> Int
-        <span class="token punctuation">)</span> <span class="token punctuation">{</span>
-            holder<span class="token punctuation">.</span>binding<span class="token punctuation">.</span>tvContent<span class="token punctuation">.</span>text <span class="token operator">=</span> <span class="token keyword keyword-data">data</span><span class="token punctuation">.</span>content
-            holder<span class="token punctuation">.</span>binding<span class="token punctuation">.</span>tvAuthor<span class="token punctuation">.</span>text <span class="token operator">=</span> <span class="token keyword keyword-data">data</span><span class="token punctuation">.</span>author
-        <span class="token punctuation">}</span>
+    <span class="token comment">/**
+     * 设置全选监听
+     * @param listener
+     */</span>
+    <span class="token keyword keyword-fun">fun</span> <span class="token function">setOnSelectAllListener</span><span class="token punctuation">(</span>listener<span class="token operator">:</span> OnSelectedDataChangesListener<span class="token operator">&lt;</span>Employer<span class="token punctuation">,</span> D<span class="token operator">&gt;</span><span class="token punctuation">)</span><span class="token operator">:</span> Employer
 
-    <span class="token punctuation">}</span>
-    <span class="token comment">//③将Provider 添加到 Adapter中</span>
-    <span class="token comment">//方式一：使用方法添加，viewType可不填</span>
-<span class="token comment">//        xAdapter.addProvider(provider, 0)</span>
-<span class="token comment">//        return xAdapter</span>
-    <span class="token comment">//方式一二：使用➕链接，viewType为空</span>
-    <span class="token keyword keyword-return">return</span> xAdapter <span class="token operator">+</span> provider
 
-<span class="token punctuation">}</span>
-</code></pre><h5 id="结合-databinding-绑定数据">结合 dataBinding 绑定数据 </h5>
-<p>一行代码实现Adapter的创建和数据绑定</p>
-<pre data-role="codeBlock" data-info="kotlin" class="language-kotlin kotlin"><code>  <span class="token comment">/**
- * 结合 dataBinding 绑定数据，可以一行代码实现Adapter的创建和数据绑定
- *
- * 注意和function1() 中的布局文件不是同一个，
- * function3()的 ItemSingleTypeDataBindingBinding 是使用了dataBinding 的，
- * 而function1()的 ItemSingleTypeViewBindingBinding 没有使用dataBinding的。
- *
- * 此处代码简化前如下,如果单独写，需要注意指定泛型：
- *
- * return createAdapter&lt;ItemSingleTypeDataBindingBinding, Verse&gt; { holder, data, position -&gt;
- *     holder.binding.data = data
- * }
- *
- */</span>
-<span class="token keyword keyword-private">private</span> <span class="token keyword keyword-fun">fun</span> <span class="token function">function3</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">:</span> XAdapter<span class="token operator">&lt;</span>ItemSingleTypeDataBindingBinding<span class="token punctuation">,</span> Verse<span class="token operator">&gt;</span> <span class="token punctuation">{</span>
-    <span class="token comment">//一行代码实现Adapter的创建和数据绑定</span>
-    <span class="token keyword keyword-return">return</span> createAdapter <span class="token punctuation">{</span> holder<span class="token punctuation">,</span> <span class="token keyword keyword-data">data</span><span class="token punctuation">,</span> _ <span class="token operator">-&gt;</span> holder<span class="token punctuation">.</span>binding<span class="token punctuation">.</span>data <span class="token operator">=</span> <span class="token keyword keyword-data">data</span> <span class="token punctuation">}</span>
-<span class="token punctuation">}</span>
-</code></pre><h4 id="二-为recyclerview设置布局管理器和adapter">二、为RecyclerView设置布局管理器和Adapter </h4>
-<p>一般在初始化时调用</p>
-<pre data-role="codeBlock" data-info="kotlin" class="language-kotlin kotlin"><code>binding<span class="token punctuation">.</span>recycleView<span class="token punctuation">.</span>layoutManager <span class="token operator">=</span> <span class="token function">LinearLayoutManager</span><span class="token punctuation">(</span><span class="token function">requireContext</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
-binding<span class="token punctuation">.</span>recycleView<span class="token punctuation">.</span>adapter <span class="token operator">=</span> adapter
-</code></pre><h4 id="三-给adapter填充数据">三、给Adapter填充数据 </h4>
-<p>一般在请求数据回调中调用</p>
-<pre data-role="codeBlock" data-info="kotlin" class="language-kotlin kotlin"><code>adapter<span class="token punctuation">.</span><span class="token function">reset</span><span class="token punctuation">(</span>list<span class="token punctuation">)</span>
+    <span class="token comment">/**
+     * 设置最大可选数
+     * @param count 最大可选数
+     */</span>
+    <span class="token keyword keyword-fun">fun</span> <span class="token function">setMaxSelectCount</span><span class="token punctuation">(</span>count<span class="token operator">:</span> Int<span class="token punctuation">)</span><span class="token operator">:</span> Employer
+
+    <span class="token comment">/**
+     * 超出最大可选数时，是否自动取消
+     * @param isAutoCancel
+     */</span>
+    <span class="token keyword keyword-fun">fun</span> <span class="token function">isAutoCancel</span><span class="token punctuation">(</span>isAutoCancel<span class="token operator">:</span> Boolean <span class="token operator">=</span> <span class="token boolean">true</span><span class="token punctuation">)</span><span class="token operator">:</span> Employer
+
+    <span class="token comment">/**
+     * 设置是否允许点击取消选中，设置后无法取消选中
+     * @param isAllowCancel 如果该值为 true，则点击后可以取消选择。否则点击无法取消选择
+     */</span>
+    <span class="token keyword keyword-fun">fun</span> <span class="token function">isAllowCancel</span><span class="token punctuation">(</span>isAllowCancel<span class="token operator">:</span> Boolean <span class="token operator">=</span> <span class="token boolean">true</span><span class="token punctuation">)</span><span class="token operator">:</span> Employer
+
+    <span class="token comment">/**
+     * 修改item选择状态
+     * @param position
+     * @param isSelect 是否选择
+     * @param fromUser 选择事件是否由用户发起的
+     * @return 选中索引
+     */</span>
+    <span class="token keyword keyword-fun">fun</span> <span class="token function">setSelectAt</span><span class="token punctuation">(</span>position<span class="token operator">:</span> Int<span class="token punctuation">,</span> isSelect<span class="token operator">:</span> Boolean<span class="token punctuation">,</span> fromUser<span class="token operator">:</span> Boolean <span class="token operator">=</span> <span class="token boolean">false</span><span class="token punctuation">)</span><span class="token operator">:</span> Int
+
+    <span class="token comment">/**
+     * 设置指定 item 为选中状态
+     * @param data
+     * @param isSelect 是否选择
+     * @param fromUser 选择事件是否由用户发起的
+     * @return 选中索引
+     */</span>
+    <span class="token keyword keyword-fun">fun</span> <span class="token function">setSelect</span><span class="token punctuation">(</span><span class="token keyword keyword-data">data</span><span class="token operator">:</span> D<span class="token punctuation">,</span> isSelect<span class="token operator">:</span> Boolean<span class="token punctuation">,</span> fromUser<span class="token operator">:</span> Boolean <span class="token operator">=</span> <span class="token boolean">false</span><span class="token punctuation">)</span><span class="token operator">:</span> Int
+
+
+    <span class="token comment">/**
+     * 是否已经全选
+     * @return 所有item都选中返回 true ,否则返回 false
+     */</span>
+    <span class="token keyword keyword-fun">fun</span> <span class="token function">isSelectAll</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">:</span> Boolean
+
+    <span class="token comment">/**
+     *  全选
+     */</span>
+    <span class="token keyword keyword-fun">fun</span> <span class="token function">selectAll</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">:</span> Int
+
+    <span class="token comment">/**
+     * 取消全选
+     */</span>
+    <span class="token keyword keyword-fun">fun</span> <span class="token function">deselectAll</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">:</span> Int
+
+    <span class="token comment">/**
+     * 获取选中的数据
+     * @return 被选中的数据集合
+     */</span>
+    <span class="token keyword keyword-fun">fun</span> <span class="token function">getSelectedList</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">:</span> MutableList<span class="token operator">&lt;</span>D<span class="token operator">&gt;</span>
+
+    <span class="token comment">/**
+     * 指定索引下的item是否被选中
+     * @param position
+     * @return
+     */</span>
+    <span class="token keyword keyword-fun">fun</span> <span class="token function">isSelectedAt</span><span class="token punctuation">(</span>position<span class="token operator">:</span> Int<span class="token punctuation">)</span><span class="token operator">:</span> Boolean
+
+    <span class="token comment">/**
+     * 指定数据是否被选中
+     * @param data
+     * @return
+     */</span>
+    <span class="token keyword keyword-fun">fun</span> <span class="token function">isSelected</span><span class="token punctuation">(</span><span class="token keyword keyword-data">data</span><span class="token operator">:</span> D<span class="token punctuation">)</span><span class="token operator">:</span> Boolean
+
+    <span class="token comment">/**
+     * 获取选中的序号，从0开始，-1表示未选中
+     */</span>
+    <span class="token keyword keyword-fun">fun</span> <span class="token function">getSelectedIndexAt</span><span class="token punctuation">(</span>position<span class="token operator">:</span> Int<span class="token punctuation">)</span><span class="token operator">:</span> Int
+
+    <span class="token comment">/**
+     * 获取选中的序号，从0开始，-1表示未选中
+     */</span>
+    <span class="token keyword keyword-fun">fun</span> <span class="token function">getSelectedIndex</span><span class="token punctuation">(</span><span class="token keyword keyword-data">data</span><span class="token operator">:</span> D<span class="token punctuation">)</span><span class="token operator">:</span> Int
 </code></pre>
       </div>
       
