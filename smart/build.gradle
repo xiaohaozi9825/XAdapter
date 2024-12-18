@@ -1,6 +1,23 @@
+//https://blog.csdn.net/qq_39671251/article/details/137211837
 plugins {
     id 'com.android.library'
     id 'org.jetbrains.kotlin.android'
+    id 'maven-publish'
+}
+
+group='com.github.xiaohaozi9825'
+version ='1.0.0'
+afterEvaluate {
+    publishing {
+        publications {
+            release(MavenPublication) {
+                from components.release
+                groupId 'pw.xiaohaozi.xadapter'
+                artifactId 'smart'
+                version '1.0.0'
+            }
+        }
+    }
 }
 
 android {
@@ -33,6 +50,7 @@ android {
 //        dataBinding = true
         viewBinding = true
     }
+
 }
 
 dependencies {
