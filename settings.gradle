@@ -4,7 +4,7 @@ pluginManagement {
         google()
         mavenCentral()
 //        maven { url 'https://jitpack.io' }//旧版本，会下载失败！
-        maven { url 'https://docs.jitpack.io' }//新版本
+        maven { url 'https://www.jitpack.io' }//新版本
 
     }
 }
@@ -14,7 +14,7 @@ dependencyResolutionManagement {
         google()
         mavenCentral()
 //        maven { url 'https://jitpack.io' }//旧版本，会下载失败！
-        maven { url 'https://docs.jitpack.io' }//新版本
+        maven { url 'https://www.jitpack.io' }//新版本
 
     }
 }
