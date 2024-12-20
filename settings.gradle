@@ -3,7 +3,8 @@ pluginManagement {
         gradlePluginPortal()
         google()
         mavenCentral()
-        maven { url "https://jitpack.io" }
+        //maven { url 'https://jitpack.io' }//旧版本，会下载失败！
+        maven { url 'https://www.jitpack.io' }//新版本
 
     }
 }
@@ -12,7 +13,8 @@ dependencyResolutionManagement {
     repositories {
         google()
         mavenCentral()
-        maven { url "https://jitpack.io" }
+        //maven { url 'https://jitpack.io' }//旧版本，会下载失败！
+        maven { url 'https://www.jitpack.io' }//新版本
 
     }
 }
