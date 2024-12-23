@@ -99,7 +99,7 @@ buildFeatures {
 - setSelect：设置指定数据item选中状态
 - isSelectAll：是否全选
 - selectAll：全选
-- deselectAll：全部选
+- deselectAll：全不选
 - getSelectedList：获取已选列表
 - isSelectedAt：指定位置item是否选择
 - isSelected：指定数据是否选择
