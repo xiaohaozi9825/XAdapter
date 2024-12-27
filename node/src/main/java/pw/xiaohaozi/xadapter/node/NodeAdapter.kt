@@ -16,8 +16,45 @@ open class NodeAdapter<VB : ViewBinding> : XAdapter<VB, NodeEntity<*, *>>() {
     var source: Collection<NodeEntity<*, *>>? = null
     fun <L : Collection<NodeEntity<*, *>>> refresh(list: L) {
         source = list
-        val temp = list.flatten()
+        refresh()
+    }
+
+    fun refresh() {
+        val temp = source?.flatten() ?: return
+        getData().clear()
         getData().addAll(temp)
+        notifyDataSetChanged()
+    }
+
+    /**
+     * 展开
+     * @param node 需要展开的节点
+     * @param isChangeChildExpand 是否更改所有子节点的展开状态
+     */
+    fun expand(isChangeChildExpand: Boolean = false) {
+        source?.forEach { node ->
+            node.setNodeExpandedStatus(true)
+            if (isChangeChildExpand) {
+                node.changeChildExpand()
+            }
+        }
+
+        refresh()
+    }
+
+    /**
+     * 收起
+     * @param node 需要收起的节点
+     * @param isChangeChildExpand 是否更改所有子节点展开状态
+     */
+    fun collapse(isChangeChildExpand: Boolean = false) {
+        source?.forEach { node ->
+            node.setNodeExpandedStatus(false)
+            if (isChangeChildExpand) {
+                node.changeChildExpand()
+            }
+        }
+        refresh()
     }
 
     /**
@@ -30,11 +67,9 @@ open class NodeAdapter<VB : ViewBinding> : XAdapter<VB, NodeEntity<*, *>>() {
         if (isChangeChildExpand) {
             node.changeChildExpand()
         }
-        val temp = source?.flatten() ?: return
-        getData().clear()
-        getData().addAll(temp)
-        notifyDataSetChanged()
+        refresh()
     }
+
     /**
      * 收起
      * @param node 需要收起的节点
@@ -45,10 +80,7 @@ open class NodeAdapter<VB : ViewBinding> : XAdapter<VB, NodeEntity<*, *>>() {
         if (isChangeChildExpand) {
             node.changeChildExpand()
         }
-        val temp = source?.flatten() ?: return
-        getData().clear()
-        getData().addAll(temp)
-        notifyDataSetChanged()
+        refresh()
     }
 
     //更改所有子节点的展开状态

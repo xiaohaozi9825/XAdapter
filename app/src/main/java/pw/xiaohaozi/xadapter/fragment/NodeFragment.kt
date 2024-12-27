@@ -47,7 +47,7 @@ class NodeFragment : Fragment() {
                 holder.binding.tvContent.setOnClickListener {
                     val nodeEntity = adapter.getData().get(holder.bindingAdapterPosition)
                     if (nodeEntity.isNodeExpandedStatus()) adapter.collapse(nodeEntity, true)
-                    else adapter.expand(nodeEntity, true)
+                    else adapter.expand(nodeEntity, )
                 }
             }
 
@@ -65,7 +65,7 @@ class NodeFragment : Fragment() {
                 holder.binding.tvContent.setOnClickListener {
                     val nodeEntity = adapter.getData().get(holder.bindingAdapterPosition)
                     if (nodeEntity.isNodeExpandedStatus()) adapter.collapse(nodeEntity, true)
-                    else adapter.expand(nodeEntity, true)
+                    else adapter.expand(nodeEntity, )
                 }
             }
 
