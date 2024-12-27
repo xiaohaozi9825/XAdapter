@@ -9,6 +9,8 @@ package pw.xiaohaozi.xadapter.node
  * 创建时间：2024/12/25 11:22
  */
 interface NodeEntity<Parent, Child> {
+
+
     /**
      * 获取父节点
      * 如果该节点不是根节点，需要重新该方法。
@@ -42,4 +44,19 @@ interface NodeEntity<Parent, Child> {
     fun getNodeEntityGrade(): Int {
         return -1
     }
+
+    /**
+     * 是否为展开状态
+     */
+    fun isNodeExpandedStatus(): Boolean {
+        return true
+    }
+
+    /**
+     * 设置为展开状态
+     * @param isExpanded 是否为展开状态 true 展开，false 收起
+     */
+    fun setNodeExpandedStatus(isExpanded: Boolean) {
+    }
+
 }

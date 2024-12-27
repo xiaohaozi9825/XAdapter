@@ -44,7 +44,11 @@ class NodeFragment : Fragment() {
         val adapter = NodeAdapter<ItemNodeBinding>()
         val province = object : XProvider<ItemNodeBinding, ProvinceNode>(adapter) {
             override fun onCreated(holder: XHolder<ItemNodeBinding>) {
-
+                holder.binding.tvContent.setOnClickListener {
+                    val nodeEntity = adapter.getData().get(holder.bindingAdapterPosition)
+                    if (nodeEntity.isNodeExpandedStatus()) adapter.collapse(nodeEntity, true)
+                    else adapter.expand(nodeEntity, true)
+                }
             }
 
             override fun onBind(holder: XHolder<ItemNodeBinding>, data: ProvinceNode, position: Int) {
@@ -58,7 +62,11 @@ class NodeFragment : Fragment() {
         }
         val city = object : XProvider<ItemNodeBinding, CityNode>(adapter) {
             override fun onCreated(holder: XHolder<ItemNodeBinding>) {
-
+                holder.binding.tvContent.setOnClickListener {
+                    val nodeEntity = adapter.getData().get(holder.bindingAdapterPosition)
+                    if (nodeEntity.isNodeExpandedStatus()) adapter.collapse(nodeEntity, true)
+                    else adapter.expand(nodeEntity, true)
+                }
             }
 
             override fun onBind(holder: XHolder<ItemNodeBinding>, data: CityNode, position: Int) {
@@ -112,17 +120,34 @@ internal class AreaNodeDeserializer : JsonDeserializer<AreaNode> {
 }
 
 data class ProvinceNode(val name: String, val city: MutableList<CityNode>) : NodeEntity<Unit, CityNode> {
+    private var isExpanded = false
+
     override fun getChildNodeEntityList(): List<CityNode> {
         return city
     }
 
+    override fun isNodeExpandedStatus(): Boolean {
+        return isExpanded
+    }
+
+    override fun setNodeExpandedStatus(isExpanded: Boolean) {
+        this.isExpanded = isExpanded
+    }
 }
 
 data class CityNode(val name: String, val area: ArrayList<AreaNode>) : NodeEntity<ProvinceNode, AreaNode> {
+    private var isExpanded = false
     override fun getChildNodeEntityList(): List<AreaNode> {
         return area
     }
 
+    override fun isNodeExpandedStatus(): Boolean {
+        return isExpanded
+    }
+
+    override fun setNodeExpandedStatus(isExpanded: Boolean) {
+        this.isExpanded = isExpanded
+    }
 }
 
 data class AreaNode(val name: String) : NodeEntity<CityNode, Unit> {
