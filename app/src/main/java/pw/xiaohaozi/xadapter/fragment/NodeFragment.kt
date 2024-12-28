@@ -45,9 +45,10 @@ class NodeFragment : Fragment() {
         val province = object : XProvider<ItemNodeBinding, ProvinceNode>(adapter) {
             override fun onCreated(holder: XHolder<ItemNodeBinding>) {
                 holder.binding.tvContent.setOnClickListener {
-                    val nodeEntity = adapter.getData().get(holder.bindingAdapterPosition)
-                    if (nodeEntity.isNodeExpandedStatus()) adapter.collapse(nodeEntity, true)
-                    else adapter.expand(nodeEntity, )
+                    val adapterPosition = holder.bindingAdapterPosition
+                    val nodeEntity = adapter.getData()[adapterPosition]
+                    if (nodeEntity.isNodeExpandedStatus()) adapter.collapse(adapterPosition, false)
+                    else adapter.expand(adapterPosition,false )
                 }
             }
 
@@ -63,9 +64,10 @@ class NodeFragment : Fragment() {
         val city = object : XProvider<ItemNodeBinding, CityNode>(adapter) {
             override fun onCreated(holder: XHolder<ItemNodeBinding>) {
                 holder.binding.tvContent.setOnClickListener {
-                    val nodeEntity = adapter.getData().get(holder.bindingAdapterPosition)
-                    if (nodeEntity.isNodeExpandedStatus()) adapter.collapse(nodeEntity, true)
-                    else adapter.expand(nodeEntity, )
+                    val adapterPosition = holder.bindingAdapterPosition
+                    val nodeEntity = adapter.getData()[adapterPosition]
+                    if (nodeEntity.isNodeExpandedStatus()) adapter.collapse(adapterPosition, true)
+                    else adapter.expand(adapterPosition, )
                 }
             }
 
@@ -151,10 +153,18 @@ data class CityNode(val name: String, val area: ArrayList<AreaNode>) : NodeEntit
 }
 
 data class AreaNode(val name: String) : NodeEntity<CityNode, Unit> {
+    private var isExpanded = false
+
     override fun getChildNodeEntityList(): List<Unit>? {
         return null
     }
+    override fun isNodeExpandedStatus(): Boolean {
+        return isExpanded
+    }
 
+    override fun setNodeExpandedStatus(isExpanded: Boolean) {
+        this.isExpanded = isExpanded
+    }
 }
 
 
