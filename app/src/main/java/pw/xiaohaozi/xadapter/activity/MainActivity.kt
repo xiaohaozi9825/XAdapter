@@ -22,6 +22,7 @@ import pw.xiaohaozi.xadapter.fragment.GroupFragment
 import pw.xiaohaozi.xadapter.fragment.ImageSelectFragment
 import pw.xiaohaozi.xadapter.fragment.LongClickFragment
 import pw.xiaohaozi.xadapter.fragment.MultipleFragment
+import pw.xiaohaozi.xadapter.fragment.NodeEditFragment
 import pw.xiaohaozi.xadapter.fragment.NodeFragment
 import pw.xiaohaozi.xadapter.fragment.SingleFragment
 import pw.xiaohaozi.xadapter.fragment.SpecialLayoutFragment
@@ -76,6 +77,7 @@ class MainActivity : AppCompatActivity() {
     private val list = arrayListOf(
         "NodeAdapter",
         HomeInfo("node测试", "", R.mipmap.ic_launcher, NodeFragment::class.java),
+        HomeInfo("node编辑", "", R.mipmap.ic_launcher, NodeEditFragment::class.java),
 
         "Adapter创建",
         HomeInfo("创建单布局", "单布局创建方式", R.mipmap.ic_launcher, SingleFragment::class.java),

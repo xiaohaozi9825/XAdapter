@@ -48,7 +48,7 @@ class NodeFragment : Fragment() {
                     val adapterPosition = holder.bindingAdapterPosition
                     val nodeEntity = adapter.getData()[adapterPosition]
                     if (nodeEntity.isNodeExpandedStatus()) adapter.collapse(adapterPosition, false)
-                    else adapter.expand(adapterPosition,false )
+                    else adapter.expand(adapterPosition, false)
                 }
             }
 
@@ -67,7 +67,7 @@ class NodeFragment : Fragment() {
                     val adapterPosition = holder.bindingAdapterPosition
                     val nodeEntity = adapter.getData()[adapterPosition]
                     if (nodeEntity.isNodeExpandedStatus()) adapter.collapse(adapterPosition, true)
-                    else adapter.expand(adapterPosition, )
+                    else adapter.expand(adapterPosition)
                 }
             }
 
@@ -98,13 +98,13 @@ class NodeFragment : Fragment() {
         return adapter
     }
 
-    private fun getList(): ArrayList<ProvinceNode> {
+    private fun getList(): MutableList<ProvinceNode> {
         val json = requireContext().assets.open("省市县.json").readBytes().toString(Charsets.UTF_8)
         val gson = GsonBuilder()
             //由于县/区部分是字符串类型，而我们期望是AreaNode类型，所以这里需要自定义解析器
             .registerTypeAdapter(AreaNode::class.java, AreaNodeDeserializer())
             .create()
-        return gson.fromJson(json, object : TypeToken<ArrayList<ProvinceNode>>() {}.type)
+        return gson.fromJson(json, object : TypeToken<MutableList<ProvinceNode>>() {}.type)
     }
 }
 
@@ -124,7 +124,7 @@ internal class AreaNodeDeserializer : JsonDeserializer<AreaNode> {
 data class ProvinceNode(val name: String, val city: MutableList<CityNode>) : NodeEntity<Unit, CityNode> {
     private var isExpanded = false
 
-    override fun getChildNodeEntityList(): List<CityNode> {
+    override fun getChildNodeEntityList(): MutableList<CityNode> {
         return city
     }
 
@@ -139,7 +139,7 @@ data class ProvinceNode(val name: String, val city: MutableList<CityNode>) : Nod
 
 data class CityNode(val name: String, val area: ArrayList<AreaNode>) : NodeEntity<ProvinceNode, AreaNode> {
     private var isExpanded = false
-    override fun getChildNodeEntityList(): List<AreaNode> {
+    override fun getChildNodeEntityList(): MutableList<AreaNode> {
         return area
     }
 
@@ -155,9 +155,10 @@ data class CityNode(val name: String, val area: ArrayList<AreaNode>) : NodeEntit
 data class AreaNode(val name: String) : NodeEntity<CityNode, Unit> {
     private var isExpanded = false
 
-    override fun getChildNodeEntityList(): List<Unit>? {
+    override fun getChildNodeEntityList(): MutableList<Unit>? {
         return null
     }
+
     override fun isNodeExpandedStatus(): Boolean {
         return isExpanded
     }

@@ -28,7 +28,7 @@ interface NodeEntity<Parent, Child> {
     /**
      * 获取子节点列表
      */
-    fun getChildNodeEntityList(): List<Child>?
+    fun getChildNodeEntityList(): MutableList<Child>?
 
     /**
      * 设置节点级别
