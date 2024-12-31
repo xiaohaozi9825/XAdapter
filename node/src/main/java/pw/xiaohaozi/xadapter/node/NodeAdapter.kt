@@ -78,7 +78,7 @@ open class NodeAdapter<VB : ViewBinding> : XAdapter<VB, NodeEntity<*, *>>() {
         else findAdapterPosition(node)
         //不符合条件，则不刷新UI
         if (startIndex < 0 || startIndex > itemCount) return
-        val flatten = node.flattenAndAssociationNode()
+        val flatten = node.flattenAndAssociationNode(parent, parent.getNodeEntityGrade() + 1)
         getData().addAll(startIndex, flatten)
         notifyItemRangeInserted(startIndex, flatten.size)
     }
@@ -105,7 +105,10 @@ open class NodeAdapter<VB : ViewBinding> : XAdapter<VB, NodeEntity<*, *>>() {
 
     fun <Node : NodeEntity<*, *>> removeNode(node: Node) {
         val flatten = node.flatten { it.isNodeExpandedStatus() }
-        source?.remove(node)
+        Log.i(TAG, "removeNode: parent = ${node.getParentNodeEntity()}")
+        val parent = node.getParentNodeEntity() as? NodeEntity<*, *>
+        if (parent == null) source?.remove(node)
+        else parent.getChildNodeEntityList()?.remove(node)
         val position = getData().indexOf(node)
         if (getData().removeAll(flatten)) {
             if (position >= 0) {
@@ -115,7 +118,7 @@ open class NodeAdapter<VB : ViewBinding> : XAdapter<VB, NodeEntity<*, *>>() {
     }
 
     fun removeNodeAt(index: Int) {
-        val node = source?.get(index) ?: return
+        val node = source?.get(index) as? NodeEntity<NodeEntity<*, *>, *> ?: return
         removeNode(node)
     }
 
@@ -125,24 +128,62 @@ open class NodeAdapter<VB : ViewBinding> : XAdapter<VB, NodeEntity<*, *>>() {
         }
     }
 
-    fun removeNode(nodes: List<NodeEntity<*, *>>) {
+    fun removeNodeList(nodes: List<NodeEntity<NodeEntity<*, *>, *>>, continuous: Boolean = true) {
         val flatten = nodes.flatten { it.isNodeExpandedStatus() }
+        val node = nodes.first()
+        val parent = node.getParentNodeEntity()
+        if (parent == null) source?.removeAll(nodes)
+        else parent.getChildNodeEntityList()?.removeAll(nodes)
         source?.removeAll(nodes)
-//            val position = getData().indexOf(nodes.first())
+        val position = getData().indexOf(node)
         if (getData().removeAll(flatten)) {
-//            if (position >= 0) {
-//                notifyItemRangeRemoved(position, flatten.size)
-//            }
-            //删除多个时，可能不连续，所以这里全刷新
-            notifyDataSetChanged()
+            if (position >= 0) {
+                if (continuous) notifyItemRangeRemoved(position, flatten.size)
+                else notifyDataSetChanged()
+            }
         }
     }
 
-    fun removeChildNode(parent: NodeEntity<*, *>, node: NodeEntity<*, *>) {}
-    fun removeChildNodeAt(parent: NodeEntity<*, *>, index: Int) {}
-    fun removeChildNode(parent: NodeEntity<*, *>, start: Int, count: Int) {}
-    fun removeChildNode(parent: NodeEntity<*, *>, nodes: List<NodeEntity<*, *>>) {}
-    fun removeNodePosition(position: Int) {}
+    fun removeChildNode(parent: NodeEntity<*, NodeEntity<*, *>>, node: NodeEntity<*, *>) {
+        val flatten = node.flatten { it.isNodeExpandedStatus() }
+        parent.getChildNodeEntityList()?.remove(node)
+        val position = getData().indexOf(node)
+        if (getData().removeAll(flatten)) {
+            if (position >= 0) {
+                notifyItemRangeRemoved(position, flatten.size)
+            }
+        }
+    }
+
+    fun removeChildNodeAt(parent: NodeEntity<*, NodeEntity<*, *>>, index: Int) {
+        val node = parent.getChildNodeEntityList()?.get(index) ?: return
+        removeChildNode(parent, node)
+    }
+
+    fun removeChildNode(parent: NodeEntity<*, NodeEntity<*, *>>, start: Int, count: Int) {
+        for (index in start until start + count) {
+            removeChildNodeAt(parent, start)
+        }
+    }
+
+    fun removeChildNodeList(parent: NodeEntity<*, *>, nodes: List<NodeEntity<*, *>>, continuous: Boolean = true) {
+        val flatten = nodes.flatten { it.isNodeExpandedStatus() }
+        parent.getChildNodeEntityList()?.removeAll(nodes)
+        val position = getData().indexOf(nodes.first())
+        if (getData().removeAll(flatten)) {
+            if (position >= 0) {
+                if (continuous) notifyItemRangeRemoved(position, flatten.size)
+                else notifyDataSetChanged()
+            }
+        }
+    }
+
+    fun removeNodePosition(position: Int) {
+        val node = getData()[position] as? NodeEntity<NodeEntity<*, *>, *> ?: return
+        val parent = node.getParentNodeEntity() as? NodeEntity<*, NodeEntity<*, *>>
+        if (parent == null) removeNode(node)
+        else removeChildNode(parent, node)
+    }
 
     fun updateNode(oldNode: NodeEntity<*, *>, newNode: NodeEntity<*, *>) {}
     fun updateNode(index: Int, newNode: NodeEntity<*, *>) {}

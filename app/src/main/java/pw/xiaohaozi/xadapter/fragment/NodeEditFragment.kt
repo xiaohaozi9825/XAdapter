@@ -7,7 +7,6 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import pw.xiaohaozi.xadapter.databinding.FragmentNodeEditBinding
-import pw.xiaohaozi.xadapter.databinding.ItemNodeBinding
 import pw.xiaohaozi.xadapter.databinding.ItemNodeEditBinding
 import pw.xiaohaozi.xadapter.node.NodeAdapter
 import pw.xiaohaozi.xadapter.node.NodeEntity
@@ -68,8 +67,10 @@ class NodeEditFragment : Fragment() {
                 }
 
                 holder.binding.btnDelete.setOnClickListener {
-                    val position = holder.bindingAdapterPosition
+                    val position = holder.absoluteAdapterPosition
+                    if (position == -1) return@setOnClickListener
                     val node = adapter.getData()[position] as NodeInfo
+//                    adapter.removeChildNode( adapter.getData()[0] as  NodeEntity<*, NodeEntity<*, *>>,node)
                     adapter.removeNode(node)
 //                    adapter.removeNode(0,1)
 //                    adapter.removeNodeAt(0)
@@ -92,8 +93,17 @@ class NodeEditFragment : Fragment() {
 
     data class NodeInfo(val no: String, val text: String) : NodeEntity<NodeInfo, NodeInfo> {
         private val childList: MutableList<NodeInfo> = mutableListOf()
+        private var parent: NodeInfo? = null
         override fun getChildNodeEntityList(): MutableList<NodeInfo> {
             return childList
+        }
+
+        override fun getParentNodeEntity(): NodeInfo? {
+            return parent
+        }
+
+        override fun setParentNodeEntity(parent: NodeInfo) {
+            this.parent = parent
         }
     }
 }
