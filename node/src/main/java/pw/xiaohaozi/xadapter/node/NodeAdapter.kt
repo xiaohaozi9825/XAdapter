@@ -128,10 +128,10 @@ open class NodeAdapter<VB : ViewBinding> : XAdapter<VB, NodeEntity<*, *>>() {
         }
     }
 
-    fun removeNodeList(nodes: List<NodeEntity<NodeEntity<*, *>, *>>, continuous: Boolean = true) {
+    fun removeNodeList(nodes: List<NodeEntity<*, *>>, continuous: Boolean = true) {
         val flatten = nodes.flatten { if (it is ExpandedNodeEntity) it.isExpanded() else true }
         val node = nodes.first()
-        val parent = node.getParentNodeEntity()
+        val parent = node.getParentNodeEntity() as? NodeEntity<NodeEntity<*, *>, *>
         if (parent == null) source?.removeAll(nodes)
         else parent.getChildNodeEntityList()?.removeAll(nodes)
         source?.removeAll(nodes)
