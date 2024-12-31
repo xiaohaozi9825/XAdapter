@@ -8,6 +8,7 @@ import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import pw.xiaohaozi.xadapter.databinding.FragmentNodeEditBinding
 import pw.xiaohaozi.xadapter.databinding.ItemNodeBinding
+import pw.xiaohaozi.xadapter.databinding.ItemNodeEditBinding
 import pw.xiaohaozi.xadapter.node.NodeAdapter
 import pw.xiaohaozi.xadapter.node.NodeEntity
 import pw.xiaohaozi.xadapter.smart.holder.XHolder
@@ -44,10 +45,10 @@ class NodeEditFragment : Fragment() {
     }
 
 
-    fun function(): NodeAdapter<ItemNodeBinding> {
-        val adapter = NodeAdapter<ItemNodeBinding>()
-        val provider = object : XProvider<ItemNodeBinding, NodeInfo>(adapter) {
-            override fun onCreated(holder: XHolder<ItemNodeBinding>) {
+    fun function(): NodeAdapter<ItemNodeEditBinding> {
+        val adapter = NodeAdapter<ItemNodeEditBinding>()
+        val provider = object : XProvider<ItemNodeEditBinding, NodeInfo>(adapter) {
+            override fun onCreated(holder: XHolder<ItemNodeEditBinding>) {
                 holder.binding.root.setOnClickListener {
                     val position = holder.bindingAdapterPosition
                     val data = adapter.getData()[position] as NodeInfo
@@ -65,9 +66,18 @@ class NodeEditFragment : Fragment() {
 //                    )
 //                    adapter.addChildNode(data, nodes, data.getChildNodeEntityList().size)
                 }
+
+                holder.binding.btnDelete.setOnClickListener {
+                    val position = holder.bindingAdapterPosition
+                    val node = adapter.getData()[position] as NodeInfo
+                    adapter.removeNode(node)
+//                    adapter.removeNode(0,1)
+//                    adapter.removeNodeAt(0)
+//                    adapter.source?.take(2)?.let { it1 -> adapter.removeNode(it1) }//移除前两个
+                }
             }
 
-            override fun onBind(holder: XHolder<ItemNodeBinding>, data: NodeInfo, position: Int) {
+            override fun onBind(holder: XHolder<ItemNodeEditBinding>, data: NodeInfo, position: Int) {
                 holder.binding.tvContent.text = data.no + "、" + data.text
             }
 

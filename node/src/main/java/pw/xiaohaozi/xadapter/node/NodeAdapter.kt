@@ -4,7 +4,6 @@ import android.util.Log
 import androidx.viewbinding.ViewBinding
 import pw.xiaohaozi.xadapter.smart.adapter.XAdapter
 import pw.xiaohaozi.xadapter.smart.ext.removeRange
-import kotlin.math.log
 
 /**
  *
@@ -21,7 +20,7 @@ open class NodeAdapter<VB : ViewBinding> : XAdapter<VB, NodeEntity<*, *>>() {
     var source: MutableList<NodeEntity<*, *>>? = null
         private set
     /**********************************************************************************************************/
-    /*********************************     数据操作    ******************************************************/
+    /***********************************     数据操作    ******************************************************/
     /**********************************************************************************************************/
     fun <L : Collection<Node>, Node : NodeEntity<*, *>> refresh(list: L) {
         source = list.toMutableList()
@@ -104,10 +103,41 @@ open class NodeAdapter<VB : ViewBinding> : XAdapter<VB, NodeEntity<*, *>>() {
     }
 
 
-    fun removeNode(node: NodeEntity<*, *>) {}
-    fun removeNodeAt(index: Int) {}
-    fun removeNode(start: Int, count: Int) {}
-    fun removeNode(nodes: List<NodeEntity<*, *>>) {}
+    fun <Node : NodeEntity<*, *>> removeNode(node: Node) {
+        val flatten = node.flatten { it.isNodeExpandedStatus() }
+        source?.remove(node)
+        val position = getData().indexOf(node)
+        if (getData().removeAll(flatten)) {
+            if (position >= 0) {
+                notifyItemRangeRemoved(position, flatten.size)
+            }
+        }
+    }
+
+    fun removeNodeAt(index: Int) {
+        val node = source?.get(index) ?: return
+        removeNode(node)
+    }
+
+    fun removeNode(start: Int, count: Int) {
+        for (index in start until start + count) {
+            removeNodeAt(start)
+        }
+    }
+
+    fun removeNode(nodes: List<NodeEntity<*, *>>) {
+        val flatten = nodes.flatten { it.isNodeExpandedStatus() }
+        source?.removeAll(nodes)
+//            val position = getData().indexOf(nodes.first())
+        if (getData().removeAll(flatten)) {
+//            if (position >= 0) {
+//                notifyItemRangeRemoved(position, flatten.size)
+//            }
+            //删除多个时，可能不连续，所以这里全刷新
+            notifyDataSetChanged()
+        }
+    }
+
     fun removeChildNode(parent: NodeEntity<*, *>, node: NodeEntity<*, *>) {}
     fun removeChildNodeAt(parent: NodeEntity<*, *>, index: Int) {}
     fun removeChildNode(parent: NodeEntity<*, *>, start: Int, count: Int) {}
@@ -270,6 +300,18 @@ open class NodeAdapter<VB : ViewBinding> : XAdapter<VB, NodeEntity<*, *>>() {
                 //遍历子节点，并将子节点结果赋值到临时列表中
                 temp += childNodeEntityList.flattenAndAssociationNode(this, grade + 1)
             }
+        }
+        return temp
+    }
+
+    //数据扁平化处理，不修改元素内容
+    //isGrandson:是否对所有后代扁平化处理
+    private fun <Node : NodeEntity<*, *>> Node.flatten(block: (node: NodeEntity<*, *>) -> Boolean): MutableList<NodeEntity<*, *>> {
+        val temp = mutableListOf<NodeEntity<*, *>>()
+        temp += this
+        val childList = this.getChildNodeEntityList() as? MutableList<NodeEntity<*, *>>
+        if (childList != null) {
+            temp += childList.flatten(block)
         }
         return temp
     }
