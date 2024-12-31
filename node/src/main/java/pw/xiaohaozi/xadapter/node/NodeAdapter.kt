@@ -104,7 +104,7 @@ open class NodeAdapter<VB : ViewBinding> : XAdapter<VB, NodeEntity<*, *>>() {
 
 
     fun <Node : NodeEntity<*, *>> removeNode(node: Node) {
-        val flatten = node.flatten { it.isNodeExpandedStatus() }
+        val flatten = node.flatten { if (it is ExpandedNodeEntity) it.isExpanded() else true }
         Log.i(TAG, "removeNode: parent = ${node.getParentNodeEntity()}")
         val parent = node.getParentNodeEntity() as? NodeEntity<*, *>
         if (parent == null) source?.remove(node)
@@ -129,7 +129,7 @@ open class NodeAdapter<VB : ViewBinding> : XAdapter<VB, NodeEntity<*, *>>() {
     }
 
     fun removeNodeList(nodes: List<NodeEntity<NodeEntity<*, *>, *>>, continuous: Boolean = true) {
-        val flatten = nodes.flatten { it.isNodeExpandedStatus() }
+        val flatten = nodes.flatten { if (it is ExpandedNodeEntity) it.isExpanded() else true }
         val node = nodes.first()
         val parent = node.getParentNodeEntity()
         if (parent == null) source?.removeAll(nodes)
@@ -145,7 +145,7 @@ open class NodeAdapter<VB : ViewBinding> : XAdapter<VB, NodeEntity<*, *>>() {
     }
 
     fun removeChildNode(parent: NodeEntity<*, NodeEntity<*, *>>, node: NodeEntity<*, *>) {
-        val flatten = node.flatten { it.isNodeExpandedStatus() }
+        val flatten = node.flatten { if (it is ExpandedNodeEntity) it.isExpanded() else true }
         parent.getChildNodeEntityList()?.remove(node)
         val position = getData().indexOf(node)
         if (getData().removeAll(flatten)) {
@@ -167,7 +167,7 @@ open class NodeAdapter<VB : ViewBinding> : XAdapter<VB, NodeEntity<*, *>>() {
     }
 
     fun removeChildNodeList(parent: NodeEntity<*, *>, nodes: List<NodeEntity<*, *>>, continuous: Boolean = true) {
-        val flatten = nodes.flatten { it.isNodeExpandedStatus() }
+        val flatten = nodes.flatten { if (it is ExpandedNodeEntity) it.isExpanded() else true }
         parent.getChildNodeEntityList()?.removeAll(nodes)
         val position = getData().indexOf(nodes.first())
         if (getData().removeAll(flatten)) {
@@ -198,7 +198,7 @@ open class NodeAdapter<VB : ViewBinding> : XAdapter<VB, NodeEntity<*, *>>() {
      * @return 在Adapter中对应的position，-1表示不在列表中
      */
     fun findAdapterPosition(node: NodeEntity<*, *>): Int {
-        return source?.flatten { it.isNodeExpandedStatus() }?.indexOf(node) ?: -1
+        return source?.flatten { if (it is ExpandedNodeEntity) it.isExpanded() else true }?.indexOf(node) ?: -1
     }
     /**********************************************************************************************************/
     /*********************************     展开与收起    ******************************************************/
@@ -210,7 +210,7 @@ open class NodeAdapter<VB : ViewBinding> : XAdapter<VB, NodeEntity<*, *>>() {
      */
     fun expand(isChangeChildExpand: Boolean = false) {
         source?.forEach { node ->
-            node.setNodeExpandedStatus(true)
+            (node as? ExpandedNodeEntity)?._isExpanded = true
             if (isChangeChildExpand) {
                 node.changeChildExpand()
             }
@@ -226,7 +226,7 @@ open class NodeAdapter<VB : ViewBinding> : XAdapter<VB, NodeEntity<*, *>>() {
      */
     fun collapse(isChangeChildExpand: Boolean = false) {
         source?.forEach { node ->
-            node.setNodeExpandedStatus(false)
+            (node as? ExpandedNodeEntity)?._isExpanded = false
             if (isChangeChildExpand) {
                 node.changeChildExpand()
             }
@@ -244,19 +244,19 @@ open class NodeAdapter<VB : ViewBinding> : XAdapter<VB, NodeEntity<*, *>>() {
         //拿到对应的节点
         val node = getData()[dataPosition]
         //将该节点设置为收起状态
-        node.setNodeExpandedStatus(true)
+        (node as? ExpandedNodeEntity)?._isExpanded = true
         //获取当前节点下的子节点
         val childList = node.getChildNodeEntityList() as? List<NodeEntity<*, *>>
         //子节点扁平化处理，得到被收起的所有节点
         val flatten = childList?.flatten {
             return@flatten if (isChangeChildExpand) true
             else {
-                it.isNodeExpandedStatus()
+                if (it is ExpandedNodeEntity) it.isExpanded() else true
             }
         }
         //如果同步更新子节点状态，则遍历所有子节点，并更改状态
         if (isChangeChildExpand) {
-            flatten?.forEach { it.setNodeExpandedStatus(true) }
+            flatten?.forEach { (it as? ExpandedNodeEntity)?._isExpanded = true }
         }
 
         //统计被收起的节点数量
@@ -279,14 +279,14 @@ open class NodeAdapter<VB : ViewBinding> : XAdapter<VB, NodeEntity<*, *>>() {
         //拿到对应的节点
         val node = getData()[dataPosition]
         //将该节点设置为收起状态
-        node.setNodeExpandedStatus(false)
+        (node as? ExpandedNodeEntity)?._isExpanded = false
         //获取当前节点下的子节点
         val childList = node.getChildNodeEntityList() as? List<NodeEntity<*, *>>
         //子节点扁平化处理，得到被收起的所有节点
-        val flatten = childList?.flatten { it.isNodeExpandedStatus() }
+        val flatten = childList?.flatten { if (it is ExpandedNodeEntity) it.isExpanded() else true }
         //如果同步更新子节点状态，则遍历所有子节点，并更改状态
         if (isChangeChildExpand) {
-            flatten?.forEach { it.setNodeExpandedStatus(false) }
+            flatten?.forEach { (it as? ExpandedNodeEntity)?._isExpanded = true }
         }
         //统计被收起的节点数量
         val count = flatten?.size ?: 0
@@ -304,7 +304,7 @@ open class NodeAdapter<VB : ViewBinding> : XAdapter<VB, NodeEntity<*, *>>() {
         val list = getChildNodeEntityList() ?: return
         for (childNode in list) {
             if ((childNode as? NodeEntity<*, *>) != null) {
-                childNode.setNodeExpandedStatus(isNodeExpandedStatus())
+                (childNode as? ExpandedNodeEntity)?._isExpanded = (if (this is ExpandedNodeEntity) this.isExpanded() else true)
                 childNode.changeChildExpand()
             }
         }
@@ -331,10 +331,10 @@ open class NodeAdapter<VB : ViewBinding> : XAdapter<VB, NodeEntity<*, *>>() {
         //将当前节点添加到零时列表中
         temp += this
         //设置节点等级，初始等级为1
-        this.setNodeEntityGrade(grade)
+        this._nodeGrade = grade
         //如果有父节点，则将当前节点与父节点建立关系
-        if (parent != null && (this as? NodeEntity<Any, *> != null)) this.setParentNodeEntity(parent)
-        if (this.isNodeExpandedStatus()) {
+        if (parent != null && (this as? NodeEntity<NodeEntity<*, *>, *> != null)) this._parentNodeEntity = parent
+        if (if (this is ExpandedNodeEntity) this.isExpanded() else true) {
             //如果有子节点
             val childNodeEntityList = this.getChildNodeEntityList() as? List<NodeEntity<*, *>>
             if (!childNodeEntityList.isNullOrEmpty()) {

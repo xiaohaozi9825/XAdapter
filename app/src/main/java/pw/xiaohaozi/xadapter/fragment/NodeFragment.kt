@@ -14,6 +14,7 @@ import com.google.gson.JsonParseException
 import com.google.gson.reflect.TypeToken
 import pw.xiaohaozi.xadapter.databinding.FragmentRecyclerBinding
 import pw.xiaohaozi.xadapter.databinding.ItemNodeBinding
+import pw.xiaohaozi.xadapter.node.ExpandedNodeEntity
 import pw.xiaohaozi.xadapter.node.NodeAdapter
 import pw.xiaohaozi.xadapter.node.NodeEntity
 import pw.xiaohaozi.xadapter.smart.holder.XHolder
@@ -46,8 +47,8 @@ class NodeFragment : Fragment() {
             override fun onCreated(holder: XHolder<ItemNodeBinding>) {
                 holder.binding.tvContent.setOnClickListener {
                     val adapterPosition = holder.bindingAdapterPosition
-                    val nodeEntity = adapter.getData()[adapterPosition]
-                    if (nodeEntity.isNodeExpandedStatus()) adapter.collapse(adapterPosition, false)
+                    val nodeEntity = adapter.getData()[adapterPosition] as ProvinceNode
+                    if (nodeEntity.isExpanded()) adapter.collapse(adapterPosition, false)
                     else adapter.expand(adapterPosition, false)
                 }
             }
@@ -65,8 +66,8 @@ class NodeFragment : Fragment() {
             override fun onCreated(holder: XHolder<ItemNodeBinding>) {
                 holder.binding.tvContent.setOnClickListener {
                     val adapterPosition = holder.bindingAdapterPosition
-                    val nodeEntity = adapter.getData()[adapterPosition]
-                    if (nodeEntity.isNodeExpandedStatus()) adapter.collapse(adapterPosition, true)
+                    val nodeEntity = adapter.getData()[adapterPosition] as CityNode
+                    if (nodeEntity.isExpanded()) adapter.collapse(adapterPosition, true)
                     else adapter.expand(adapterPosition)
                 }
             }
@@ -121,51 +122,37 @@ internal class AreaNodeDeserializer : JsonDeserializer<AreaNode> {
     }
 }
 
-data class ProvinceNode(val name: String, val city: MutableList<CityNode>) : NodeEntity<Unit, CityNode> {
-    private var isExpanded = false
+data class ProvinceNode(val name: String, val city: MutableList<CityNode>) : NodeEntity<Unit, CityNode>, ExpandedNodeEntity {
+    override var _parentNodeEntity: Unit? = null
+    override var _nodeGrade: Int? = null
+    override var _isExpanded: Boolean = true
 
     override fun getChildNodeEntityList(): MutableList<CityNode> {
         return city
     }
 
-    override fun isNodeExpandedStatus(): Boolean {
-        return isExpanded
-    }
-
-    override fun setNodeExpandedStatus(isExpanded: Boolean) {
-        this.isExpanded = isExpanded
-    }
 }
 
-data class CityNode(val name: String, val area: ArrayList<AreaNode>) : NodeEntity<ProvinceNode, AreaNode> {
-    private var isExpanded = false
+data class CityNode(val name: String, val area: ArrayList<AreaNode>) : NodeEntity<ProvinceNode, AreaNode>, ExpandedNodeEntity {
+    override var _parentNodeEntity: ProvinceNode? = null
+    override var _nodeGrade: Int? = null
+    override var _isExpanded: Boolean = true
+
     override fun getChildNodeEntityList(): MutableList<AreaNode> {
         return area
     }
 
-    override fun isNodeExpandedStatus(): Boolean {
-        return isExpanded
-    }
 
-    override fun setNodeExpandedStatus(isExpanded: Boolean) {
-        this.isExpanded = isExpanded
-    }
 }
 
 data class AreaNode(val name: String) : NodeEntity<CityNode, Unit> {
-    private var isExpanded = false
-
+    override var _parentNodeEntity: CityNode? = null
+    override var _nodeGrade: Int? = null
     override fun getChildNodeEntityList(): MutableList<Unit>? {
         return null
     }
 
-    override fun isNodeExpandedStatus(): Boolean {
-        return isExpanded
-    }
 
-    override fun setNodeExpandedStatus(isExpanded: Boolean) {
-        this.isExpanded = isExpanded
-    }
 }
 
 

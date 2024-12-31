@@ -93,17 +93,11 @@ class NodeEditFragment : Fragment() {
 
     data class NodeInfo(val no: String, val text: String) : NodeEntity<NodeInfo, NodeInfo> {
         private val childList: MutableList<NodeInfo> = mutableListOf()
-        private var parent: NodeInfo? = null
+        override var _parentNodeEntity: NodeInfo? = null
+        override var _nodeGrade: Int? = null
+
         override fun getChildNodeEntityList(): MutableList<NodeInfo> {
             return childList
-        }
-
-        override fun getParentNodeEntity(): NodeInfo? {
-            return parent
-        }
-
-        override fun setParentNodeEntity(parent: NodeInfo) {
-            this.parent = parent
         }
     }
 }
