@@ -12,6 +12,7 @@ import androidx.recyclerview.widget.AsyncListDiffer
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.RecyclerView.Adapter
+import androidx.recyclerview.widget.RecyclerView.NO_POSITION
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import androidx.viewbinding.ViewBinding
 import kotlinx.coroutines.CoroutineName
@@ -111,7 +112,9 @@ open class XAdapter<VB : ViewBinding, D> : Adapter<XHolder<VB>>(), CoroutineScop
     }
 
     private fun bindViewHolder(holder: XHolder<VB>, position: Int, payloads: MutableList<Any>?) {
+        Log.i(TAG, "bindViewHolder: ")
         if (position < 0) return
+        holder.xAdapter = this
         val provide = providers[holder.itemViewType] ?: providers[getItemViewType(position)]
         ?: throw XAdapterException("没有找到 itemViewType = ${holder.itemViewType} 的 Provider")
         onViewHolderChanges.tryNotify { if (payloads == null) onBinding(holder, position) else onBinding(holder, position, payloads) }
@@ -610,6 +613,7 @@ open class XAdapter<VB : ViewBinding, D> : Adapter<XHolder<VB>>(), CoroutineScop
     override fun onViewRecycled(holder: XHolder<VB>) {
         Log.i(TAG, "onViewRecycled: $holder")
         tryNotifyProvider { onViewRecycled(holder) }
+        holder.xAdapter = null
     }
 
     override fun onFailedToRecycleView(holder: XHolder<VB>): Boolean {
@@ -651,7 +655,7 @@ open class XAdapter<VB : ViewBinding, D> : Adapter<XHolder<VB>>(), CoroutineScop
         Log.i(TAG, "onViewAttachedToWindow: ")
         val layoutParams = holder.itemView.layoutParams
         if (layoutParams is StaggeredGridLayoutManager.LayoutParams) {
-            val isFixed = providers[getItemViewType(holder.bindingAdapterPosition)]?.isFixedViewType() ?: false
+            val isFixed = providers[getItemViewType(holder.adapterPosition)]?.isFixedViewType() ?: false
             layoutParams.isFullSpan = isFixed
         }
         onViewChanges.tryNotify { onViewAttachedToWindow(holder) }

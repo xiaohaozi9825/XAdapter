@@ -2,6 +2,7 @@ package pw.xiaohaozi.xadapter.smart.holder
 
 
 import androidx.recyclerview.widget.RecyclerView
+import androidx.recyclerview.widget.RecyclerView.NO_POSITION
 import androidx.viewbinding.ViewBinding
 import kotlinx.coroutines.CoroutineName
 import kotlinx.coroutines.CoroutineScope
@@ -19,12 +20,15 @@ import kotlin.coroutines.CoroutineContext
  * 创建时间：2022/8/10 20:09
  */
 open class XHolder<VB : ViewBinding>(val binding: VB) : RecyclerView.ViewHolder(binding.root), CoroutineScope {
+    var xAdapter: XAdapter<*, *>? = null
+        internal set
+
 
     override val coroutineContext: CoroutineContext
-            by lazy { SupervisorJob(getXAdapter().coroutineContext.job) + CoroutineName("XHolderCoroutine") }
+            by lazy { SupervisorJob(getNotNullXAdapter().coroutineContext.job) + CoroutineName("XHolderCoroutine") }
 
-    fun getXAdapter(): XAdapter<*, *> {
-        return bindingAdapter as XAdapter<*, *>
+    fun getNotNullXAdapter(): XAdapter<*, *> {
+        return xAdapter!!
     }
 
     /**
@@ -33,8 +37,8 @@ open class XHolder<VB : ViewBinding>(val binding: VB) : RecyclerView.ViewHolder(
      */
 
     fun isRoutineLayout(): Boolean {
-        val adapterProxy = getXAdapter()
-        val dataPosition = adapterProxy.getDataPosition(bindingAdapterPosition)
+        val adapterProxy = getNotNullXAdapter()
+        val dataPosition = adapterProxy.getDataPosition(adapterPosition)
         return dataPosition < 0 || dataPosition >= adapterProxy.getData().size
     }
 }
