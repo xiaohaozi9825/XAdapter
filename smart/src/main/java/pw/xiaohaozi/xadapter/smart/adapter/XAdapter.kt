@@ -12,7 +12,6 @@ import androidx.recyclerview.widget.AsyncListDiffer
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.RecyclerView.Adapter
-import androidx.recyclerview.widget.RecyclerView.NO_POSITION
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import androidx.viewbinding.ViewBinding
 import kotlinx.coroutines.CoroutineName
@@ -115,100 +114,11 @@ open class XAdapter<VB : ViewBinding, D> : Adapter<XHolder<VB>>(), CoroutineScop
         Log.i(TAG, "bindViewHolder: ")
         if (position < 0) return
         holder.xAdapter = this
+        holder.data = getData(position)
         val provide = providers[holder.itemViewType] ?: providers[getItemViewType(position)]
         ?: throw XAdapterException("没有找到 itemViewType = ${holder.itemViewType} 的 Provider")
         onViewHolderChanges.tryNotify { if (payloads == null) onBinding(holder, position) else onBinding(holder, position, payloads) }
-        val headerCount = if (hasHeader) getHeaderProviderCount() else 0
-        val dataSize = getData().size
-        if (defaultPageTriple != null) {
-            when {
-                hasHeader && hasFooter -> {
-                    //头布局
-                    if (position < headerCount) provideViewHolder(provide, holder, headers[position].third, position, payloads)
-                    //脚布局
-                    else if (position >= headerCount + 1) {
-                        val footerPosition = position - headerCount - 1
-                        provideViewHolder(provide, holder, footers[footerPosition].third, footerPosition, payloads)
-                    }
-                    //缺省页
-                    else provideViewHolder(provide, holder, defaultPageTriple!!.third, 0)
-                }
-
-                hasHeader && !hasFooter -> {
-                    //头布局
-                    if (position < headerCount) provideViewHolder(provide, holder, headers[position].third, position, payloads)
-                    //缺省页
-                    else provideViewHolder(provide, holder, defaultPageTriple!!.third, 0, payloads)
-                }
-
-                !hasHeader && hasFooter -> {
-                    //缺省页
-                    if (position == 0)
-                        provideViewHolder(provide, holder, defaultPageTriple!!.third, 0, payloads)
-                    //脚布局
-                    else
-                        provideViewHolder(provide, holder, footers[position - 1].third, position - 1, payloads)
-                }
-
-                else -> {
-                    //缺省页
-                    provideViewHolder(provide, holder, defaultPageTriple!!.third, 0, payloads)
-                }
-            }
-            return
-        }
-        if (emptyTriple != null && dataSize == 0) {
-            when {
-                hasHeader && hasFooter -> {
-                    //头布局
-                    if (position < headerCount)
-                        provideViewHolder(provide, holder, headers[position].third, position, payloads)
-                    //脚布局
-                    else if (position >= headerCount + 1) {
-                        val footerPosition = position - headerCount - 1
-                        provideViewHolder(provide, holder, footers[footerPosition].third, footerPosition, payloads)
-                    }
-
-                    //空布局
-                    else
-                        provideViewHolder(provide, holder, emptyTriple!!.third, 0, payloads)
-                }
-
-                hasHeader && !hasFooter -> {
-                    //头布局
-                    if (position < headerCount)
-                        provideViewHolder(provide, holder, headers[position].third, position, payloads)
-                    //空布局
-                    else
-                        provideViewHolder(provide, holder, emptyTriple!!.third, 0, payloads)
-                }
-
-                !hasHeader && hasFooter -> {
-                    //空布局
-                    if (position == 0)
-                        provideViewHolder(provide, holder, emptyTriple!!.third, 0, payloads)
-                    //脚布局
-                    else
-                        provideViewHolder(provide, holder, footers[position - 1].third, position - 1, payloads)
-                }
-
-                else -> {
-                    provideViewHolder(provide, holder, emptyTriple!!.third, 0, payloads)
-                }
-            }
-            return
-        }
-
-        if (hasHeader && position < headerCount)
-            provideViewHolder(provide, holder, headers[position].third, position, payloads)
-        else if (hasFooter && position >= headerCount + dataSize) {
-            val footerPosition = position - headerCount - dataSize
-            provideViewHolder(provide, holder, footers[footerPosition].third, footerPosition, payloads)
-        } else {
-            val dataPosition = getDataPosition(position)
-            val d = getData()[dataPosition]
-            provideViewHolder(provide, holder, d, dataPosition, payloads)
-        }
+        provideViewHolder(provide, holder, holder.data , position, payloads)
     }
 
     /**
@@ -228,7 +138,7 @@ open class XAdapter<VB : ViewBinding, D> : Adapter<XHolder<VB>>(), CoroutineScop
      * 修改数据
      * 框架内使用，只对datas赋值，不更新列表
      */
-    fun setData(list: MutableList<*>) {
+    fun setDataList(list: MutableList<*>) {
         if (this::asyncListDiffer.isInitialized) throw XAdapterException("由于您设置了differ，请使用submitList()方法跟新数据！")
         datas = list as MutableList<D>
     }
@@ -236,8 +146,47 @@ open class XAdapter<VB : ViewBinding, D> : Adapter<XHolder<VB>>(), CoroutineScop
     /**
      * 获取数据
      */
-    fun getData(): MutableList<D> {
+    fun getDataList(): MutableList<D> {
         return if (this::asyncListDiffer.isInitialized) asyncListDiffer.currentList else datas
+    }
+
+    /**
+     * 修改数据
+     * 框架内使用，只对datas赋值，不更新列表
+     */
+    @Deprecated("后续将不再使用该方法", ReplaceWith("setDataList()"), DeprecationLevel.WARNING)
+    fun setData(list: MutableList<*>) {
+        setDataList(list)
+    }
+
+    /**
+     * 获取数据
+     */
+    @Deprecated("后续将不再使用该方法", ReplaceWith("getDataList()"), DeprecationLevel.WARNING)
+    fun getData(): MutableList<D> {
+        return getDataList()
+    }
+
+    /**
+     * 获取指定位置的数据
+     * @param position adapterPosition
+     * @return 返回参数类型可能时对应的泛型D，也有可能是特殊类型，因此这里使用Any类型
+     */
+    fun getData(position: Int): Any? {
+        return if (defaultPageTriple?.third != null) {
+            defaultPageTriple?.third
+        } else if (getDataList().isEmpty()) {
+            emptyTriple?.third
+        } else {
+            val dataIndex = getDataPosition(position)
+            if (dataIndex < 0) {
+                headers[position].third
+            } else if (dataIndex >= getDataList().size) {
+                footers[position - (itemCount - footers.size)].third
+            } else {
+                getDataList()[dataIndex]
+            }
+        }
     }
 
     private fun provideViewHolder(
@@ -257,7 +206,7 @@ open class XAdapter<VB : ViewBinding, D> : Adapter<XHolder<VB>>(), CoroutineScop
      * @return
      */
     override fun getItemViewType(position: Int): Int {
-        val dataSize = getData().size
+        val dataSize = getDataList().size
         val headerCount = getHeaderProviderCount()
 
         //如果设置了缺省页，则使用缺省页
@@ -329,7 +278,7 @@ open class XAdapter<VB : ViewBinding, D> : Adapter<XHolder<VB>>(), CoroutineScop
         //用户自定义布局
         else {
             val pos = getDataPosition(position)
-            val data = getData()[pos]
+            val data = getDataList()[pos]
             return getCustomType(data, position)
         }
     }
@@ -404,7 +353,7 @@ open class XAdapter<VB : ViewBinding, D> : Adapter<XHolder<VB>>(), CoroutineScop
     override fun getItemCount(): Int {
         val headerCount = if (hasHeader) getHeaderProviderCount() else 0
         val footerCount = if (hasFooter) getFooterProviderCount() else 0
-        val dataCount = getData().size
+        val dataCount = getDataList().size
         if (defaultPageTriple != null) return headerCount + footerCount + 1
         if (emptyTriple != null && dataCount == 0) return headerCount + footerCount + 1
         return headerCount + footerCount + dataCount
@@ -614,6 +563,7 @@ open class XAdapter<VB : ViewBinding, D> : Adapter<XHolder<VB>>(), CoroutineScop
         Log.i(TAG, "onViewRecycled: $holder")
         tryNotifyProvider { onViewRecycled(holder) }
         holder.xAdapter = null
+        holder.data = null
     }
 
     override fun onFailedToRecycleView(holder: XHolder<VB>): Boolean {

@@ -1,6 +1,7 @@
 package pw.xiaohaozi.xadapter.smart.holder
 
 
+import android.util.Log
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.RecyclerView.NO_POSITION
 import androidx.viewbinding.ViewBinding
@@ -20,15 +21,27 @@ import kotlin.coroutines.CoroutineContext
  * 创建时间：2022/8/10 20:09
  */
 open class XHolder<VB : ViewBinding>(val binding: VB) : RecyclerView.ViewHolder(binding.root), CoroutineScope {
+    val TAG = "XHolder"
     var xAdapter: XAdapter<*, *>? = null
         internal set
-
+    var data: Any? = null
+        internal set
 
     override val coroutineContext: CoroutineContext
-            by lazy { SupervisorJob(getNotNullXAdapter().coroutineContext.job) + CoroutineName("XHolderCoroutine") }
+            by lazy { SupervisorJob(xAdapter!!.coroutineContext.job) + CoroutineName("XHolderCoroutine") }
 
-    fun getNotNullXAdapter(): XAdapter<*, *> {
-        return xAdapter!!
+
+    /**
+     * 获取ViewHolder对应的position
+     * 由于adapterPosition 在列表item更新时会返回NO_POSITION，因此增加该方法，可以有效避免NO_POSITION出现；
+     * 但是此方法并不代表永远不返回NO_POSITION，比如：
+     * -ViewHolder被回收后，该方法将会返回NO_POSITION；
+     * -当前item已被删除，但是删除动画还未结束，此时操作该该方法也会返回NO_POSITION
+     */
+    fun getXPosition(): Int {
+        val position = adapterPosition
+        return if (position != NO_POSITION) position
+        else xAdapter?.getDataList()?.indexOf(data) ?: NO_POSITION
     }
 
     /**
@@ -37,9 +50,9 @@ open class XHolder<VB : ViewBinding>(val binding: VB) : RecyclerView.ViewHolder(
      */
 
     fun isRoutineLayout(): Boolean {
-        val adapterProxy = getNotNullXAdapter()
+        val adapterProxy = xAdapter ?: return false
         val dataPosition = adapterProxy.getDataPosition(adapterPosition)
-        return dataPosition < 0 || dataPosition >= adapterProxy.getData().size
+        return dataPosition < 0 || dataPosition >= adapterProxy.getDataList().size
     }
 }
 

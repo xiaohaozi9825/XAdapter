@@ -66,13 +66,13 @@ class DragSort(
         if (target.isXRoutineLayout()) return false
         recyclerView.parent.requestDisallowInterceptTouchEvent(true)
         //得到当拖拽的viewHolder的Position
-        val fromPosition: Int = adapter.getDataPosition(source.adapterPosition)
+        val fromPosition: Int = adapter.getDataPosition(source.getXPosition())
         //拿到当前拖拽到的item的viewHolder
-        val toPosition = adapter.getDataPosition(target.adapterPosition)
+        val toPosition = adapter.getDataPosition(target.getXPosition())
         Log.i("交换数据", "onMove: fromPosition = $fromPosition  ==  toPosition = $toPosition")
         swap?.invoke(recyclerView, source, target, fromPosition, toPosition)
         if (adapter.isDifferMode()) {
-            val temp = ArrayList(adapter.getData())
+            val temp = ArrayList(adapter.getDataList())
             if (fromPosition < toPosition) {
                 for (i in fromPosition until toPosition) {
                     Collections.swap(temp, i, i + 1)

@@ -180,7 +180,7 @@ class DataOperationFragment : Fragment() {
                         data.content = content
 //                        adapter.upDate(data)
 //                        adapter.upDate(position,data)
-                        adapter.updateAt(getData().indexOf(data),"hello")
+                        adapter.updateAt(getDataList().indexOf(data),"hello")
                     }
                     .onCancel {}
                     .show()

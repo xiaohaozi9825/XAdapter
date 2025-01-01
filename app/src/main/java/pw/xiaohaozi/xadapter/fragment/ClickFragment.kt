@@ -117,8 +117,6 @@ class ClickFragment : Fragment() {
             }
             .setOnClickListener { holder, data, position, view ->
                 Toast.makeText(requireContext(), "点击了诗句 ${data.content}", Toast.LENGTH_SHORT).show()
-                adapter.removeAt(position)
-
             }
             .withType<ItemImageCardBinding, Int> { (holder, data, position) ->
                 holder.binding.image.setImageResource(data)

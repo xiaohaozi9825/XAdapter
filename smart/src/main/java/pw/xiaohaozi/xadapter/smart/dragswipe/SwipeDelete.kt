@@ -50,10 +50,10 @@ class SwipeDelete(
     override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
         if (viewHolder !is XHolder<*>) return
         if (swipe?.invoke(viewHolder, direction) != true) {
-            val adapter = viewHolder.getNotNullXAdapter() as? SmartAdapter<*, Any> ?: return
-            val dataPosition = adapter.getDataPosition(viewHolder.adapterPosition)
+            val adapter = viewHolder.xAdapter as? SmartAdapter<*, Any> ?: return
+            val dataPosition = adapter.getDataPosition(viewHolder.getXPosition())
             if (adapter.isDifferMode()) {
-                val temp = ArrayList(adapter.getData())
+                val temp = ArrayList(adapter.getDataList())
                 temp.removeAt(dataPosition)
                 adapter.submitList(temp)
             } else {
