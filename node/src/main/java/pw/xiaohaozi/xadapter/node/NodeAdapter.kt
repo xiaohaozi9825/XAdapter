@@ -2,8 +2,13 @@ package pw.xiaohaozi.xadapter.node
 
 import android.util.Log
 import androidx.viewbinding.ViewBinding
+import pw.xiaohaozi.xadapter.smart.XAdapterException
+import pw.xiaohaozi.xadapter.smart.adapter.SmartAdapter
 import pw.xiaohaozi.xadapter.smart.adapter.XAdapter
 import pw.xiaohaozi.xadapter.smart.ext.removeRange
+import pw.xiaohaozi.xadapter.smart.impl.EventImpl
+import pw.xiaohaozi.xadapter.smart.proxy.EventProxy
+import pw.xiaohaozi.xadapter.smart.proxy.XEmployer
 
 /**
  *
@@ -13,8 +18,34 @@ import pw.xiaohaozi.xadapter.smart.ext.removeRange
  * github：https://github.com/xiaohaozi9825
  * 创建时间：2024/12/25 10:58
  */
-open class NodeAdapter<VB : ViewBinding, D : NodeEntity<*, *>> : XAdapter<VB, D>() {
+open class NodeAdapter<VB : ViewBinding, D : NodeEntity<*, *>>(
+    val eventProxy: EventProxy<NodeAdapter<VB, D>, VB, D> = EventImpl(),//
+) : XAdapter<VB, D>(),
+    XEmployer, //宿主
+    EventProxy<NodeAdapter<VB, D>, VB, D> by eventProxy {
     val TAG = "NodeAdapter"
+
+    init {
+        initProxy()
+    }
+
+    private fun initProxy() {
+        initProxy(this)
+    }
+
+    override var employer: NodeAdapter<VB, D>
+        get() = this
+        set(value) {
+            throw XAdapterException("employer不允许设置")
+        }
+
+    final override fun initProxy(employer: NodeAdapter<VB, D>) {
+        eventProxy.initProxy(employer)
+    }
+
+    override fun getEmployerAdapter(): XAdapter<VB, D> {
+        return this
+    }
 
     //源数据
     var source: MutableList<D>? = null

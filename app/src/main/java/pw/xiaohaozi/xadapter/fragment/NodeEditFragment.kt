@@ -6,6 +6,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
+import pw.xiaohaozi.xadapter.R
 import pw.xiaohaozi.xadapter.databinding.FragmentNodeEditBinding
 import pw.xiaohaozi.xadapter.databinding.ItemNodeEditBinding
 import pw.xiaohaozi.xadapter.node.NodeAdapter
@@ -46,16 +47,13 @@ class NodeEditFragment : Fragment() {
 
     fun function(): NodeAdapter<ItemNodeEditBinding,NodeInfo> {
         val adapter = NodeAdapter<ItemNodeEditBinding,NodeInfo>()
-        val provider = object : XProvider<ItemNodeEditBinding, NodeInfo>(adapter) {
-            override fun onCreated(holder: XHolder<ItemNodeEditBinding>) {
-                holder.binding.root.setOnClickListener {
-                    val data = holder.data as NodeInfo
-                    //添加单个节点
-                    adapter.addChildNode(
-                        data,
-                        NodeInfo("    ${data.no}.${data.getChildNodeEntityList().size + 1}", data.text),
-                        data.getChildNodeEntityList().size
-                    )
+            .setOnClickListener { holder, data, position, view ->
+                //添加单个节点
+                adapter.addChildNode(
+                    data,
+                    NodeInfo("    ${data.no}.${data.getChildNodeEntityList().size + 1}", data.text),
+                    data.getChildNodeEntityList().size
+                )
 
 //                    // 添加多个节点
 //                    val nodes = arrayListOf(
@@ -63,13 +61,11 @@ class NodeEditFragment : Fragment() {
 //                        NodeInfo("    ${data.no}.${data.getChildNodeEntityList().size + 2}", "Child2")
 //                    )
 //                    adapter.addChildNode(data, nodes, data.getChildNodeEntityList().size)
-                }
-
-                holder.binding.btnDelete.setOnClickListener {
-                    val position = holder.getXPosition()
-                    if (position == -1) return@setOnClickListener
-                    //移除指定位置节点
-                    adapter.removeNodePosition(position)
+            }
+            .setOnClickListener(R.id.btn_delete) { holder, data, position, view ->
+                if (position == -1) return@setOnClickListener
+                //移除指定位置节点
+                adapter.removeNodePosition(position)
 
 //                    val node = adapter.getData()[position] as NodeInfo
 //移除指定节点测试，可以是子节点或非子节点
@@ -78,7 +74,7 @@ class NodeEditFragment : Fragment() {
 //                    adapter.removeNodeAt(0)
 //                    adapter.source?.take(2)?.let { it1 -> adapter.removeNodeList(it1) }//移除前两个
 
-                    //移除子节点测试
+                //移除子节点测试
 //                    val parent = node.getParentNodeEntity() ?: return@setOnClickListener
 //                    adapter.removeChildNode( parent as  NodeEntity<*, NodeEntity<*, *>>,node)
 //                    adapter.removeChildNodeAt(parent as NodeEntity<*, NodeEntity<*, *>>, parent.getChildNodeEntityList().indexOf(node))
@@ -86,7 +82,10 @@ class NodeEditFragment : Fragment() {
 //                    parent.getChildNodeEntityList().take(2).let { it1 ->   adapter.removeChildNodeList( parent as  NodeEntity<*, NodeEntity<*, *>>,it1) }//移除前两个
 
 
-                }
+            }
+        val provider = object : XProvider<ItemNodeEditBinding, NodeInfo>(adapter) {
+            override fun onCreated(holder: XHolder<ItemNodeEditBinding>) {
+
             }
 
             override fun onBind(holder: XHolder<ItemNodeEditBinding>, data: NodeInfo, position: Int) {
