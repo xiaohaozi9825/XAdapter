@@ -13,16 +13,16 @@ import pw.xiaohaozi.xadapter.smart.ext.removeRange
  * github：https://github.com/xiaohaozi9825
  * 创建时间：2024/12/25 10:58
  */
-open class NodeAdapter<VB : ViewBinding> : XAdapter<VB, NodeEntity<*, *>>() {
+open class NodeAdapter<VB : ViewBinding, D : NodeEntity<*, *>> : XAdapter<VB, D>() {
     val TAG = "NodeAdapter"
 
     //源数据
-    var source: MutableList<NodeEntity<*, *>>? = null
+    var source: MutableList<D>? = null
         private set
     /**********************************************************************************************************/
     /***********************************     数据操作    ******************************************************/
     /**********************************************************************************************************/
-    fun <L : Collection<Node>, Node : NodeEntity<*, *>> refresh(list: L) {
+    fun <L : Collection<D>> refresh(list: L) {
         source = list.toMutableList()
         refresh()
     }
@@ -39,7 +39,7 @@ open class NodeAdapter<VB : ViewBinding> : XAdapter<VB, NodeEntity<*, *>>() {
      * @param node
      * @param index 指定位置，null 在末尾添加
      */
-    fun <Node : NodeEntity<*, *>> addNode(node: Node, index: Int? = null) {
+    fun addNode(node: D, index: Int? = null) {
         if (index == null) source?.add(node) else source?.add(index, node)
         val flatten = node.flattenAndAssociationNode()
         val startIndex = if (index == null) getData().size else findAdapterPosition(node)
@@ -53,7 +53,7 @@ open class NodeAdapter<VB : ViewBinding> : XAdapter<VB, NodeEntity<*, *>>() {
      * 增加node
      * @param node
      */
-    fun <L : Collection<Node>, Node : NodeEntity<*, *>> addNode(nodes: L, index: Int? = null) {
+    fun <L : Collection<D>> addNode(nodes: L, index: Int? = null) {
         if (nodes.isEmpty()) return
         if (index == null) source?.addAll(nodes) else source?.addAll(index, nodes)
         val flatten = nodes.flattenAndAssociationNode()
@@ -69,8 +69,8 @@ open class NodeAdapter<VB : ViewBinding> : XAdapter<VB, NodeEntity<*, *>>() {
      * @param index 相对与根节点
      * @param node
      */
-    fun <Node : NodeEntity<*, *>> addChildNode(parent: NodeEntity<*, Node>, node: Node, index: Int? = null) {
-        val childList = parent.getChildNodeEntityList() ?: return
+    fun addChildNode(parent: D, node: D, index: Int? = null) {
+        val childList = parent.getChildNodeEntityList() as? MutableList<D> ?: return
         val parentIndex = getData().indexOf(parent)
         if (index == null) childList.add(node) else childList.add(index, node)
         //如果父节点未展示，则无需刷新UI，为减少递归，这里提前判断
@@ -88,8 +88,8 @@ open class NodeAdapter<VB : ViewBinding> : XAdapter<VB, NodeEntity<*, *>>() {
      * @param index 相对与根节点
      * @param nodes
      */
-    fun <L : Collection<Node>, Node : NodeEntity<*, *>> addChildNode(parent: NodeEntity<*, Node>, nodes: L, index: Int? = null) {
-        val childList = parent.getChildNodeEntityList() ?: return
+    fun <L : Collection<D>> addChildNode(parent: D, nodes: L, index: Int? = null) {
+        val childList = parent.getChildNodeEntityList() as? MutableList<D> ?: return
         val parentIndex = getData().indexOf(parent)
         if (index == null) childList.addAll(nodes) else childList.addAll(index, nodes)
         //如果父节点未展示，则无需刷新UI，为减少递归，这里提前判断
@@ -103,7 +103,7 @@ open class NodeAdapter<VB : ViewBinding> : XAdapter<VB, NodeEntity<*, *>>() {
     }
 
 
-    fun <Node : NodeEntity<*, *>> removeNode(node: Node) {
+    fun removeNode(node: D) {
         val flatten = node.flatten { if (it is ExpandedNodeEntity) it.isExpanded() else true }
         Log.i(TAG, "removeNode: parent = ${node.getParentNodeEntity()}")
         val parent = node.getParentNodeEntity() as? NodeEntity<*, *>
@@ -118,7 +118,7 @@ open class NodeAdapter<VB : ViewBinding> : XAdapter<VB, NodeEntity<*, *>>() {
     }
 
     fun removeNodeAt(index: Int) {
-        val node = source?.get(index) as? NodeEntity<NodeEntity<*, *>, *> ?: return
+        val node = source?.get(index) as? D ?: return
         removeNode(node)
     }
 
@@ -128,7 +128,7 @@ open class NodeAdapter<VB : ViewBinding> : XAdapter<VB, NodeEntity<*, *>>() {
         }
     }
 
-    fun removeNodeList(nodes: List<NodeEntity<*, *>>, continuous: Boolean = true) {
+    fun removeNodeList(nodes: List<D>, continuous: Boolean = true) {
         val flatten = nodes.flatten { if (it is ExpandedNodeEntity) it.isExpanded() else true }
         val node = nodes.first()
         val parent = node.getParentNodeEntity() as? NodeEntity<NodeEntity<*, *>, *>
@@ -144,7 +144,7 @@ open class NodeAdapter<VB : ViewBinding> : XAdapter<VB, NodeEntity<*, *>>() {
         }
     }
 
-    fun removeChildNode(parent: NodeEntity<*, NodeEntity<*, *>>, node: NodeEntity<*, *>) {
+    fun removeChildNode(parent: D, node: D) {
         val flatten = node.flatten { if (it is ExpandedNodeEntity) it.isExpanded() else true }
         parent.getChildNodeEntityList()?.remove(node)
         val position = getData().indexOf(node)
@@ -155,18 +155,18 @@ open class NodeAdapter<VB : ViewBinding> : XAdapter<VB, NodeEntity<*, *>>() {
         }
     }
 
-    fun removeChildNodeAt(parent: NodeEntity<*, NodeEntity<*, *>>, index: Int) {
-        val node = parent.getChildNodeEntityList()?.get(index) ?: return
+    fun removeChildNodeAt(parent: D, index: Int) {
+        val node = parent.getChildNodeEntityList()?.get(index) as? D ?: return
         removeChildNode(parent, node)
     }
 
-    fun removeChildNode(parent: NodeEntity<*, NodeEntity<*, *>>, start: Int, count: Int) {
+    fun removeChildNode(parent: D, start: Int, count: Int) {
         for (index in start until start + count) {
             removeChildNodeAt(parent, start)
         }
     }
 
-    fun removeChildNodeList(parent: NodeEntity<*, *>, nodes: List<NodeEntity<*, *>>, continuous: Boolean = true) {
+    fun removeChildNodeList(parent: D, nodes: List<D>, continuous: Boolean = true) {
         val flatten = nodes.flatten { if (it is ExpandedNodeEntity) it.isExpanded() else true }
         parent.getChildNodeEntityList()?.removeAll(nodes)
         val position = getData().indexOf(nodes.first())
@@ -179,8 +179,8 @@ open class NodeAdapter<VB : ViewBinding> : XAdapter<VB, NodeEntity<*, *>>() {
     }
 
     fun removeNodePosition(position: Int) {
-        val node = getData()[position] as? NodeEntity<NodeEntity<*, *>, *> ?: return
-        val parent = node.getParentNodeEntity() as? NodeEntity<*, NodeEntity<*, *>>
+        val node = getData()[position] as? D ?: return
+        val parent = node.getParentNodeEntity() as? D
         if (parent == null) removeNode(node)
         else removeChildNode(parent, node)
     }
@@ -197,7 +197,7 @@ open class NodeAdapter<VB : ViewBinding> : XAdapter<VB, NodeEntity<*, *>>() {
      * @param node 需要查找的元素
      * @return 在Adapter中对应的position，-1表示不在列表中
      */
-    fun findAdapterPosition(node: NodeEntity<*, *>): Int {
+    fun findAdapterPosition(node: D): Int {
         return source?.flatten { if (it is ExpandedNodeEntity) it.isExpanded() else true }?.indexOf(node) ?: -1
     }
     /**********************************************************************************************************/
@@ -246,7 +246,7 @@ open class NodeAdapter<VB : ViewBinding> : XAdapter<VB, NodeEntity<*, *>>() {
         //将该节点设置为收起状态
         (node as? ExpandedNodeEntity)?.xIsExpanded = true
         //获取当前节点下的子节点
-        val childList = node.getChildNodeEntityList() as? List<NodeEntity<*, *>>
+        val childList = node.getChildNodeEntityList() as? List<D>
         //子节点扁平化处理，得到被收起的所有节点
         val flatten = childList?.flatten {
             return@flatten if (isChangeChildExpand) true
@@ -281,7 +281,7 @@ open class NodeAdapter<VB : ViewBinding> : XAdapter<VB, NodeEntity<*, *>>() {
         //将该节点设置为收起状态
         (node as? ExpandedNodeEntity)?.xIsExpanded = false
         //获取当前节点下的子节点
-        val childList = node.getChildNodeEntityList() as? List<NodeEntity<*, *>>
+        val childList = node.getChildNodeEntityList() as? List<D>
         //子节点扁平化处理，得到被收起的所有节点
         val flatten = childList?.flatten { if (it is ExpandedNodeEntity) it.isExpanded() else true }
         //如果同步更新子节点状态，则遍历所有子节点，并更改状态
@@ -311,11 +311,11 @@ open class NodeAdapter<VB : ViewBinding> : XAdapter<VB, NodeEntity<*, *>>() {
     }
 
     //数据扁平化处理并建立父子关联关系
-    private fun <Node : NodeEntity<*, *>> Collection<Node>.flattenAndAssociationNode(
+    private fun Collection<D>.flattenAndAssociationNode(
         parent: NodeEntity<*, *>? = null,
         grade: Int = 1
-    ): MutableList<NodeEntity<*, *>> {
-        val temp = mutableListOf<NodeEntity<*, *>>()
+    ): MutableList<D> {
+        val temp = mutableListOf<D>()
         for (nodeEntity in this) {
             temp += nodeEntity.flattenAndAssociationNode(parent, grade)
         }
@@ -323,11 +323,11 @@ open class NodeAdapter<VB : ViewBinding> : XAdapter<VB, NodeEntity<*, *>>() {
     }
 
     //数据扁平化处理并建立父子关联关系
-    private fun <Node : NodeEntity<*, *>> Node.flattenAndAssociationNode(
+    private fun D.flattenAndAssociationNode(
         parent: NodeEntity<*, *>? = null,
         grade: Int = 1
-    ): MutableList<NodeEntity<*, *>> {
-        val temp = mutableListOf<NodeEntity<*, *>>()
+    ): MutableList<D> {
+        val temp = mutableListOf<D>()
         //将当前节点添加到零时列表中
         temp += this
         //设置节点等级，初始等级为1
@@ -336,7 +336,7 @@ open class NodeAdapter<VB : ViewBinding> : XAdapter<VB, NodeEntity<*, *>>() {
         if (parent != null && (this as? NodeEntity<NodeEntity<*, *>, *> != null)) this.xParentNodeEntity = parent
         if (if (this is ExpandedNodeEntity) this.isExpanded() else true) {
             //如果有子节点
-            val childNodeEntityList = this.getChildNodeEntityList() as? List<NodeEntity<*, *>>
+            val childNodeEntityList = this.getChildNodeEntityList() as? List<D>
             if (!childNodeEntityList.isNullOrEmpty()) {
                 //遍历子节点，并将子节点结果赋值到临时列表中
                 temp += childNodeEntityList.flattenAndAssociationNode(this, grade + 1)
@@ -347,10 +347,10 @@ open class NodeAdapter<VB : ViewBinding> : XAdapter<VB, NodeEntity<*, *>>() {
 
     //数据扁平化处理，不修改元素内容
     //isGrandson:是否对所有后代扁平化处理
-    private fun <Node : NodeEntity<*, *>> Node.flatten(block: (node: NodeEntity<*, *>) -> Boolean): MutableList<NodeEntity<*, *>> {
-        val temp = mutableListOf<NodeEntity<*, *>>()
+    private fun D.flatten(block: (node: D) -> Boolean): MutableList<D> {
+        val temp = mutableListOf<D>()
         temp += this
-        val childList = this.getChildNodeEntityList() as? MutableList<NodeEntity<*, *>>
+        val childList = this.getChildNodeEntityList() as? MutableList<D>
         if (childList != null) {
             temp += childList.flatten(block)
         }
@@ -359,13 +359,13 @@ open class NodeAdapter<VB : ViewBinding> : XAdapter<VB, NodeEntity<*, *>>() {
 
     //数据扁平化处理，不修改元素内容
     //isGrandson:是否对所有后代扁平化处理
-    private fun <Node : NodeEntity<*, *>> Collection<Node>.flatten(isGrandson: Boolean): MutableList<NodeEntity<*, *>> {
-        val temp = mutableListOf<NodeEntity<*, *>>()
+    private fun Collection<D>.flatten(isGrandson: Boolean): MutableList<D> {
+        val temp = mutableListOf<D>()
         for (childNode in this) {//遍历列表，得到子节点
             //将当前节点添加到零时列表中
             temp += childNode
             if (isGrandson) {//如果需要扁平化所有后代
-                val childNodeEntityList = childNode.getChildNodeEntityList() as? List<NodeEntity<*, *>>
+                val childNodeEntityList = childNode.getChildNodeEntityList() as? List<D>
                 if (!childNodeEntityList.isNullOrEmpty()) {
                     temp += childNodeEntityList.flatten(true)
                 }
@@ -374,13 +374,13 @@ open class NodeAdapter<VB : ViewBinding> : XAdapter<VB, NodeEntity<*, *>>() {
         return temp
     }
 
-    private fun <Node : NodeEntity<*, *>> Collection<Node>.flatten(block: (node: Node) -> Boolean): MutableList<NodeEntity<*, *>> {
-        val temp = mutableListOf<NodeEntity<*, *>>()
+    private fun Collection<D>.flatten(block: (node: D) -> Boolean): MutableList<D> {
+        val temp = mutableListOf<D>()
         for (childNode in this) {//遍历列表，得到子节点
             //将当前节点添加到零时列表中
             temp += childNode
             if (block.invoke(childNode)) {//如果需要扁平化所有后代
-                val childNodeEntityList = childNode.getChildNodeEntityList() as? List<NodeEntity<*, *>>
+                val childNodeEntityList = childNode.getChildNodeEntityList() as? List<D>
                 if (!childNodeEntityList.isNullOrEmpty()) {
                     temp += childNodeEntityList.flatten(true)
                 }

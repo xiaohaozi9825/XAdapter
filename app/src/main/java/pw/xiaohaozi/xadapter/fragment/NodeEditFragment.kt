@@ -44,8 +44,8 @@ class NodeEditFragment : Fragment() {
     }
 
 
-    fun function(): NodeAdapter<ItemNodeEditBinding> {
-        val adapter = NodeAdapter<ItemNodeEditBinding>()
+    fun function(): NodeAdapter<ItemNodeEditBinding,NodeInfo> {
+        val adapter = NodeAdapter<ItemNodeEditBinding,NodeInfo>()
         val provider = object : XProvider<ItemNodeEditBinding, NodeInfo>(adapter) {
             override fun onCreated(holder: XHolder<ItemNodeEditBinding>) {
                 holder.binding.root.setOnClickListener {

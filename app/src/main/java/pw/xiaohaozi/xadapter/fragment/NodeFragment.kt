@@ -41,8 +41,8 @@ class NodeFragment : Fragment() {
         return binding.root
     }
 
-    fun function(): NodeAdapter<ItemNodeBinding> {
-        val adapter = NodeAdapter<ItemNodeBinding>()
+    fun function(): NodeAdapter<ItemNodeBinding, NodeEntity<*, *>> {
+        val adapter = NodeAdapter<ItemNodeBinding, NodeEntity<*, *>>()
         val province = object : XProvider<ItemNodeBinding, ProvinceNode>(adapter) {
             override fun onCreated(holder: XHolder<ItemNodeBinding>) {
                 holder.binding.tvContent.setOnClickListener {
