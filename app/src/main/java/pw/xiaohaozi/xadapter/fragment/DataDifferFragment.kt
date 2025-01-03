@@ -48,13 +48,13 @@ class DataDifferFragment : Fragment() {
         binding.btnAddData.setOnClickListener {
             val index = pos++ % list.size
             val data = list[index]
-            val dataList = ArrayList(adapter.getData())
+            val dataList = ArrayList(adapter.getDataList())
             dataList.add(data)
             adapter.submitList(ArrayList(dataList))
         }
 
         binding.btnDeleteSelected.setOnClickListener {
-            val dataList = ArrayList(adapter.getData())
+            val dataList = ArrayList(adapter.getDataList())
             dataList.removeAll(adapter.getSelectedList().toSet())
             adapter.submitList(ArrayList(dataList))
 
@@ -97,7 +97,7 @@ class DataDifferFragment : Fragment() {
         refreshLayout.setOnRefreshListener { refreshlayout ->
             lifecycleScope.launch {
                 delay(1000)
-                val dataList = ArrayList(adapter.getData())
+                val dataList = ArrayList(adapter.getDataList())
                 dataList.clear()
                 for (i in 0..5) {
                     val index = pos++ % list.size
@@ -111,7 +111,7 @@ class DataDifferFragment : Fragment() {
         refreshLayout.setOnLoadMoreListener { refreshlayout ->
             lifecycleScope.launch {
                 delay(1000)
-                val dataList = ArrayList(adapter.getData())
+                val dataList = ArrayList(adapter.getDataList())
                 for (i in 0..5) {
                     val index = pos++ % list.size
                     dataList.add(list[index])
@@ -169,7 +169,7 @@ class DataDifferFragment : Fragment() {
                         data.content = content
 //                        adapter.upDate(data)
 //                        adapter.upDate(position,data)
-                        adapter.updateAt(getData().indexOf(data))
+                        adapter.updateAt(getDataList().indexOf(data))
                     }
                     .onCancel {}
                     .show()

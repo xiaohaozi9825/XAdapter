@@ -24,7 +24,6 @@ import pw.xiaohaozi.xadapter.smart.proxy.XProxy
 import java.lang.reflect.ParameterizedType
 import kotlin.math.max
 import kotlin.math.min
-import kotlin.reflect.KClass
 
 /**
  *
@@ -46,7 +45,7 @@ open class AdapterSelectedImpl<Employer : XProxy<Employer>, VB : ViewBinding, D>
         }
     }
 
-    private fun getData() = adapter.getData() as MutableList<D>
+    private fun getData() = adapter.getDataList() as MutableList<D>
     override var onSelectedDataChangesListener: OnSelectedDataChangesListener<Employer, D>? = null
     override var itemSelectListener: SelectedProxy.Selected<Employer, D>? = null
     override var maxSelectCount: Int? = null

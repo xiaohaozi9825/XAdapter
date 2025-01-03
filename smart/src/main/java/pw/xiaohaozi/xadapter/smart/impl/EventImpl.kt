@@ -41,7 +41,7 @@ class EventImpl<Employer : XProxy<Employer>, VB : ViewBinding, D> : EventProxy<E
     }
 
     //adapter中的datas可以被重新赋值，所以不能用by lazy 的方式获取
-    private fun getData() = adapter.getData()
+    private fun getData() = adapter.getDataList()
     override val clickListenerMap: HashMap<Int?, OnItemClickListener<Employer, VB, D>> = hashMapOf()
     override val longClickListenerMap: HashMap<Int?, OnItemLongClickListener<Employer, VB, D>> = hashMapOf()
     override val checkedChangeListener: HashMap<Int?, OnItemCheckedChangeListener<Employer, VB, D>> = hashMapOf()
@@ -86,22 +86,8 @@ class EventImpl<Employer : XProxy<Employer>, VB : ViewBinding, D> : EventProxy<E
             val value = it.value
             val tagger: View = id?.let { holder.itemView.findViewById(it) } ?: holder.itemView
             tagger.setOnClickListener {
-                val position = holder.adapterPosition
-                val dataIndex = adapter.getDataPosition(position)
-                val data = if (adapter.defaultPageTriple?.third != null) {
-                    adapter.defaultPageTriple?.third
-                } else if (getData().isEmpty()) {
-                    adapter.emptyTriple?.third
-                } else {
-                    if (dataIndex < 0) {
-                        adapter.headers[position].third
-                    } else if (dataIndex >= getData().size) {
-                        adapter.footers[position - (adapter.itemCount - adapter.footers.size)].third
-                    } else {
-                        getData()[dataIndex]
-                    }
-                }
-                value.invoke(employer, holder as XHolder<VB>, data as D, position, it)
+                val position = holder.getXPosition()
+                value.invoke(employer, holder as XHolder<VB>,  holder.data as D, position, it)
             }
         }
         longClickListenerMap.forEach {
@@ -109,22 +95,8 @@ class EventImpl<Employer : XProxy<Employer>, VB : ViewBinding, D> : EventProxy<E
             val value = it.value
             val tagger: View = id?.let { holder.itemView.findViewById(it) } ?: holder.itemView
             tagger.setOnLongClickListener {
-                val position = holder.adapterPosition
-                val dataIndex = adapter.getDataPosition(position)
-                val data = if (adapter.defaultPageTriple?.third != null) {
-                    adapter.defaultPageTriple?.third
-                } else if (getData().isEmpty()) {
-                    adapter.emptyTriple?.third
-                } else {
-                    if (dataIndex < 0) {
-                        adapter.headers[position].third
-                    } else if (dataIndex >= getData().size) {
-                        adapter.footers[position - (adapter.itemCount - adapter.footers.size)].third
-                    } else {
-                        getData()[dataIndex]
-                    }
-                }
-                value.invoke(employer, holder as XHolder<VB>, data as D, position, it)
+                val position = holder.getXPosition()
+                value.invoke(employer, holder as XHolder<VB>, holder.data as D, position, it)
             }
         }
         checkedChangeListener.forEach {
@@ -132,22 +104,8 @@ class EventImpl<Employer : XProxy<Employer>, VB : ViewBinding, D> : EventProxy<E
             val value = it.value
             val tagger: CompoundButton? = (id?.let { holder.itemView.findViewById(it) } ?: holder.itemView) as? CompoundButton
             tagger?.setOnCheckedChangeListener { buttonView, isChecked ->
-                val position = holder.adapterPosition
-                val dataIndex = adapter.getDataPosition(position)
-                val data = if (adapter.defaultPageTriple?.third != null) {
-                    adapter.defaultPageTriple?.third
-                } else if (getData().isEmpty()) {
-                    adapter.emptyTriple?.third
-                } else {
-                    if (dataIndex < 0) {
-                        adapter.headers[position].third
-                    } else if (dataIndex >= getData().size) {
-                        adapter.footers[position - (adapter.itemCount - adapter.footers.size)].third
-                    } else {
-                        getData()[dataIndex]
-                    }
-                }
-                value.invoke(employer, holder as XHolder<VB>, data as D, position, buttonView, isChecked)
+                val position = holder.getXPosition()
+                value.invoke(employer, holder as XHolder<VB>,  holder.data as D, position, buttonView, isChecked)
             }
         }
         textChangeMap.forEach {
@@ -155,22 +113,8 @@ class EventImpl<Employer : XProxy<Employer>, VB : ViewBinding, D> : EventProxy<E
             val value = it.value
             val tagger: TextView? = (id?.let { holder.itemView.findViewById(it) } ?: holder.itemView) as? TextView
             tagger?.addTextChangedListener {
-                val position = holder.adapterPosition
-                val dataIndex = adapter.getDataPosition(position)
-                val data = if (adapter.defaultPageTriple?.third != null) {
-                    adapter.defaultPageTriple?.third
-                } else if (getData().isEmpty()) {
-                    adapter.emptyTriple?.third
-                } else {
-                    if (dataIndex < 0) {
-                        adapter.headers[position].third
-                    } else if (dataIndex >= getData().size) {
-                        adapter.footers[position - (adapter.itemCount - adapter.footers.size)].third
-                    } else {
-                        getData()[dataIndex]
-                    }
-                }
-                value.invoke(employer, holder as XHolder<VB>, data as D, position, tagger, it)
+                val position = holder.getXPosition()
+                value.invoke(employer, holder as XHolder<VB>,  holder.data as D, position, tagger, it)
             }
         }
 

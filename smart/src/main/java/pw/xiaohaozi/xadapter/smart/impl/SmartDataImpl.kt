@@ -32,7 +32,7 @@ class SmartDataImpl<Employer : XProxy<Employer>, VB : ViewBinding, D> : SmartDat
         }
     }
 
-    private fun getData(): MutableList<D> = adapter.getData()
+    private fun getData(): MutableList<D> = adapter.getDataList()
     override val callbacks: LinkedList<ObservableList.OnListChangedCallback<MutableList<D>>?> = LinkedList()
 
 
@@ -167,7 +167,7 @@ class SmartDataImpl<Employer : XProxy<Employer>, VB : ViewBinding, D> : SmartDat
      */
     override fun <L : MutableList<D>> setList(list: L) {
         if (adapter.isDifferMode()) throw XAdapterException("Differ模式不能使用改方法操作数据，更新数据请使用submitList()方法")
-        adapter.setData(list)
+        adapter.setDataList(list)
         adapter.notifyDataSetChanged()
         notifyChanged()
     }
@@ -329,14 +329,14 @@ class SmartDataImpl<Employer : XProxy<Employer>, VB : ViewBinding, D> : SmartDat
         override fun onInserted(position: Int, count: Int) {
             adapter.notifyItemRangeInserted(adapter.getAdapterPosition(position), count)
             callbacks.forEach {
-                it?.onItemRangeInserted(adapter.getData(), adapter.getAdapterPosition(position), count)
+                it?.onItemRangeInserted(adapter.getDataList(), adapter.getAdapterPosition(position), count)
             }
         }
 
         override fun onRemoved(position: Int, count: Int) {
             adapter.notifyItemRangeRemoved(adapter.getAdapterPosition(position), count)
             callbacks.forEach {
-                it?.onItemRangeRemoved(adapter.getData(), adapter.getAdapterPosition(position), count)
+                it?.onItemRangeRemoved(adapter.getDataList(), adapter.getAdapterPosition(position), count)
             }
         }
 
@@ -344,7 +344,7 @@ class SmartDataImpl<Employer : XProxy<Employer>, VB : ViewBinding, D> : SmartDat
             adapter.notifyItemMoved(adapter.getAdapterPosition(fromPosition), adapter.getAdapterPosition(toPosition))
             callbacks.forEach {
                 it?.onItemRangeMoved(
-                    adapter.getData(),
+                    adapter.getDataList(),
                     adapter.getAdapterPosition(fromPosition),
                     adapter.getAdapterPosition(toPosition),
                     1
@@ -356,7 +356,7 @@ class SmartDataImpl<Employer : XProxy<Employer>, VB : ViewBinding, D> : SmartDat
         override fun onChanged(position: Int, count: Int, payload: Any?) {
             adapter.notifyItemRangeChanged(adapter.getAdapterPosition(position), count, payload)
             callbacks.forEach {
-                it?.onItemRangeChanged(adapter.getData(), adapter.getAdapterPosition(position), count, payload)
+                it?.onItemRangeChanged(adapter.getDataList(), adapter.getAdapterPosition(position), count, payload)
             }
         }
     }

@@ -9,6 +9,7 @@ import androidx.recyclerview.widget.ItemTouchHelper.START
 import androidx.recyclerview.widget.ItemTouchHelper.UP
 import androidx.recyclerview.widget.RecyclerView
 import pw.xiaohaozi.xadapter.smart.adapter.SmartAdapter
+import pw.xiaohaozi.xadapter.smart.holder.XHolder
 import pw.xiaohaozi.xadapter.smart.holder.isXRoutineLayout
 import java.util.*
 import kotlin.collections.ArrayList
@@ -56,19 +57,22 @@ class DragSort(
         source: RecyclerView.ViewHolder,
         target: RecyclerView.ViewHolder
     ): Boolean {
+        if (source !is XHolder<*>) return false
+        if (target !is XHolder<*>) return false
+
         if (onMove != null) return onMove.invoke(recyclerView, source, target)
         val adapter = recyclerView.adapter as? SmartAdapter<*, Any> ?: return false
         if (source.isXRoutineLayout()) return false
         if (target.isXRoutineLayout()) return false
         recyclerView.parent.requestDisallowInterceptTouchEvent(true)
         //得到当拖拽的viewHolder的Position
-        val fromPosition: Int = adapter.getDataPosition(source.bindingAdapterPosition)
+        val fromPosition: Int = adapter.getDataPosition(source.getXPosition())
         //拿到当前拖拽到的item的viewHolder
-        val toPosition = adapter.getDataPosition(target.bindingAdapterPosition)
+        val toPosition = adapter.getDataPosition(target.getXPosition())
         Log.i("交换数据", "onMove: fromPosition = $fromPosition  ==  toPosition = $toPosition")
         swap?.invoke(recyclerView, source, target, fromPosition, toPosition)
         if (adapter.isDifferMode()) {
-            val temp = ArrayList(adapter.getData())
+            val temp = ArrayList(adapter.getDataList())
             if (fromPosition < toPosition) {
                 for (i in fromPosition until toPosition) {
                     Collections.swap(temp, i, i + 1)
