@@ -154,7 +154,7 @@ open class XAdapter<VB : ViewBinding, D> : Adapter<XHolder<VB>>(), CoroutineScop
      * 修改数据
      * 框架内使用，只对datas赋值，不更新列表
      */
-    @Deprecated("后续将不再使用该方法", ReplaceWith("setDataList()"), DeprecationLevel.WARNING)
+    @Deprecated("后续将不再使用该方法", ReplaceWith("this.setDataList(list)"), DeprecationLevel.WARNING)
     fun setData(list: MutableList<*>) {
         setDataList(list)
     }
@@ -162,7 +162,7 @@ open class XAdapter<VB : ViewBinding, D> : Adapter<XHolder<VB>>(), CoroutineScop
     /**
      * 获取数据
      */
-    @Deprecated("后续将不再使用该方法", ReplaceWith("getDataList()"), DeprecationLevel.WARNING)
+    @Deprecated("后续将不再使用该方法", ReplaceWith("this.getDataList()"), DeprecationLevel.WARNING)
     fun getData(): MutableList<D> {
         return getDataList()
     }

@@ -178,9 +178,9 @@ class DataOperationFragment : Fragment() {
                     .setMsg(data.content)
                     .onConfirm { _, content: String ->
                         data.content = content
-//                        adapter.upDate(data)
-//                        adapter.upDate(position,data)
-                        adapter.updateAt(getDataList().indexOf(data),"hello")
+//                        adapter.update(data)
+//                        adapter.updateAt(getDataList().indexOf(data),data)
+                        adapter.updateAt(getDataList().indexOf(data),)
                     }
                     .onCancel {}
                     .show()
