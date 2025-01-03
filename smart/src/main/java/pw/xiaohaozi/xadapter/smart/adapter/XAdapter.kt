@@ -118,7 +118,7 @@ open class XAdapter<VB : ViewBinding, D> : Adapter<XHolder<VB>>(), CoroutineScop
         val provide = providers[holder.itemViewType] ?: providers[getItemViewType(position)]
         ?: throw XAdapterException("没有找到 itemViewType = ${holder.itemViewType} 的 Provider")
         onViewHolderChanges.tryNotify { if (payloads == null) onBinding(holder, position) else onBinding(holder, position, payloads) }
-        provideViewHolder(provide, holder, holder.data , position, payloads)
+        provideViewHolder(provide, holder, holder.data, position, payloads)
     }
 
     /**
@@ -173,19 +173,95 @@ open class XAdapter<VB : ViewBinding, D> : Adapter<XHolder<VB>>(), CoroutineScop
      * @return 返回参数类型可能时对应的泛型D，也有可能是特殊类型，因此这里使用Any类型
      */
     fun getData(position: Int): Any? {
-        return if (defaultPageTriple?.third != null) {
-            defaultPageTriple?.third
-        } else if (getDataList().isEmpty()) {
-            emptyTriple?.third
-        } else {
-            val dataIndex = getDataPosition(position)
-            if (dataIndex < 0) {
-                headers[position].third
-            } else if (dataIndex >= getDataList().size) {
-                footers[position - (itemCount - footers.size)].third
-            } else {
-                getDataList()[dataIndex]
+        val headerCount = if (hasHeader) getHeaderProviderCount() else 0
+        val dataSize = getData().size
+        if (defaultPageTriple != null) {
+            return when {
+                hasHeader && hasFooter -> {
+                    //头布局
+                    if (position < headerCount) headers[position].third
+                    //脚布局
+                    else if (position >= headerCount + 1) {
+                        val footerPosition = position - headerCount - 1
+                        footers[footerPosition].third
+                    }
+                    //缺省页
+                    else defaultPageTriple!!.third
+                }
+
+                hasHeader && !hasFooter -> {
+                    //头布局
+                    if (position < headerCount) headers[position].third
+                    //缺省页
+                    else defaultPageTriple!!.third
+                }
+
+                !hasHeader && hasFooter -> {
+                    //缺省页
+                    if (position == 0)
+                        defaultPageTriple!!.third
+                    //脚布局
+                    else
+                        footers[position - 1].third
+                }
+
+                else -> {
+                    //缺省页
+                    defaultPageTriple!!.third
+                }
             }
+
+        }
+        if (emptyTriple != null && dataSize == 0) {
+            return when {
+                hasHeader && hasFooter -> {
+                    //头布局
+                    if (position < headerCount)
+                        headers[position].third
+                    //脚布局
+                    else if (position >= headerCount + 1) {
+                        val footerPosition = position - headerCount - 1
+                        footers[footerPosition].third
+                    }
+
+                    //空布局
+                    else
+                        emptyTriple!!.third
+                }
+
+                hasHeader && !hasFooter -> {
+                    //头布局
+                    if (position < headerCount)
+                        headers[position].third
+                    //空布局
+                    else
+                        emptyTriple!!.third
+                }
+
+                !hasHeader && hasFooter -> {
+                    //空布局
+                    if (position == 0)
+                        emptyTriple!!.third
+                    //脚布局
+                    else
+                        footers[position - 1].third
+                }
+
+                else -> {
+                    emptyTriple!!.third
+                }
+            }
+
+        }
+
+        return if (hasHeader && position < headerCount)
+            headers[position].third
+        else if (hasFooter && position >= headerCount + dataSize) {
+            val footerPosition = position - headerCount - dataSize
+            footers[footerPosition].third
+        } else {
+            val dataPosition = getDataPosition(position)
+            getData()[dataPosition]
         }
     }
 
