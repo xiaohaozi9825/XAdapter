@@ -123,9 +123,9 @@ internal class AreaNodeDeserializer : JsonDeserializer<AreaNode> {
 }
 
 data class ProvinceNode(val name: String, val city: MutableList<CityNode>) : NodeEntity<Unit, CityNode>, ExpandedNodeEntity {
-    override var _parentNodeEntity: Unit? = null
-    override var _nodeGrade: Int? = null
-    override var _isExpanded: Boolean = true
+    override var xParentNodeEntity: Unit? = null
+    override var xNodeGrade: Int? = null
+    override var xIsExpanded: Boolean = true
 
     override fun getChildNodeEntityList(): MutableList<CityNode> {
         return city
@@ -134,9 +134,9 @@ data class ProvinceNode(val name: String, val city: MutableList<CityNode>) : Nod
 }
 
 data class CityNode(val name: String, val area: ArrayList<AreaNode>) : NodeEntity<ProvinceNode, AreaNode>, ExpandedNodeEntity {
-    override var _parentNodeEntity: ProvinceNode? = null
-    override var _nodeGrade: Int? = null
-    override var _isExpanded: Boolean = true
+    override var xParentNodeEntity: ProvinceNode? = null
+    override var xNodeGrade: Int? = null
+    override var xIsExpanded: Boolean = true
 
     override fun getChildNodeEntityList(): MutableList<AreaNode> {
         return area
@@ -146,8 +146,8 @@ data class CityNode(val name: String, val area: ArrayList<AreaNode>) : NodeEntit
 }
 
 data class AreaNode(val name: String) : NodeEntity<CityNode, Unit> {
-    override var _parentNodeEntity: CityNode? = null
-    override var _nodeGrade: Int? = null
+    override var xParentNodeEntity: CityNode? = null
+    override var xNodeGrade: Int? = null
     override fun getChildNodeEntityList(): MutableList<Unit>? {
         return null
     }

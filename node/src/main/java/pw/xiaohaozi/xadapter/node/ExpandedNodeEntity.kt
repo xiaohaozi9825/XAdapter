@@ -9,14 +9,14 @@ package pw.xiaohaozi.xadapter.node
  * 创建时间：2024/12/31 16:15
  */
 interface ExpandedNodeEntity {
-    var _isExpanded: Boolean
+    var xIsExpanded: Boolean
 
 
     /**
      * 是否为展开状态
      */
     fun isExpanded(): Boolean {
-        return _isExpanded
+        return xIsExpanded
     }
 
 }

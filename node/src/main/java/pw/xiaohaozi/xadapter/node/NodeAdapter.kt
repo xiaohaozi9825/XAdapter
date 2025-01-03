@@ -210,7 +210,7 @@ open class NodeAdapter<VB : ViewBinding> : XAdapter<VB, NodeEntity<*, *>>() {
      */
     fun expand(isChangeChildExpand: Boolean = false) {
         source?.forEach { node ->
-            (node as? ExpandedNodeEntity)?._isExpanded = true
+            (node as? ExpandedNodeEntity)?.xIsExpanded = true
             if (isChangeChildExpand) {
                 node.changeChildExpand()
             }
@@ -226,7 +226,7 @@ open class NodeAdapter<VB : ViewBinding> : XAdapter<VB, NodeEntity<*, *>>() {
      */
     fun collapse(isChangeChildExpand: Boolean = false) {
         source?.forEach { node ->
-            (node as? ExpandedNodeEntity)?._isExpanded = false
+            (node as? ExpandedNodeEntity)?.xIsExpanded = false
             if (isChangeChildExpand) {
                 node.changeChildExpand()
             }
@@ -244,7 +244,7 @@ open class NodeAdapter<VB : ViewBinding> : XAdapter<VB, NodeEntity<*, *>>() {
         //拿到对应的节点
         val node = getData()[dataPosition]
         //将该节点设置为收起状态
-        (node as? ExpandedNodeEntity)?._isExpanded = true
+        (node as? ExpandedNodeEntity)?.xIsExpanded = true
         //获取当前节点下的子节点
         val childList = node.getChildNodeEntityList() as? List<NodeEntity<*, *>>
         //子节点扁平化处理，得到被收起的所有节点
@@ -256,7 +256,7 @@ open class NodeAdapter<VB : ViewBinding> : XAdapter<VB, NodeEntity<*, *>>() {
         }
         //如果同步更新子节点状态，则遍历所有子节点，并更改状态
         if (isChangeChildExpand) {
-            flatten?.forEach { (it as? ExpandedNodeEntity)?._isExpanded = true }
+            flatten?.forEach { (it as? ExpandedNodeEntity)?.xIsExpanded = true }
         }
 
         //统计被收起的节点数量
@@ -279,14 +279,14 @@ open class NodeAdapter<VB : ViewBinding> : XAdapter<VB, NodeEntity<*, *>>() {
         //拿到对应的节点
         val node = getData()[dataPosition]
         //将该节点设置为收起状态
-        (node as? ExpandedNodeEntity)?._isExpanded = false
+        (node as? ExpandedNodeEntity)?.xIsExpanded = false
         //获取当前节点下的子节点
         val childList = node.getChildNodeEntityList() as? List<NodeEntity<*, *>>
         //子节点扁平化处理，得到被收起的所有节点
         val flatten = childList?.flatten { if (it is ExpandedNodeEntity) it.isExpanded() else true }
         //如果同步更新子节点状态，则遍历所有子节点，并更改状态
         if (isChangeChildExpand) {
-            flatten?.forEach { (it as? ExpandedNodeEntity)?._isExpanded = true }
+            flatten?.forEach { (it as? ExpandedNodeEntity)?.xIsExpanded = true }
         }
         //统计被收起的节点数量
         val count = flatten?.size ?: 0
@@ -304,7 +304,7 @@ open class NodeAdapter<VB : ViewBinding> : XAdapter<VB, NodeEntity<*, *>>() {
         val list = getChildNodeEntityList() ?: return
         for (childNode in list) {
             if ((childNode as? NodeEntity<*, *>) != null) {
-                (childNode as? ExpandedNodeEntity)?._isExpanded = (if (this is ExpandedNodeEntity) this.isExpanded() else true)
+                (childNode as? ExpandedNodeEntity)?.xIsExpanded = (if (this is ExpandedNodeEntity) this.isExpanded() else true)
                 childNode.changeChildExpand()
             }
         }
@@ -331,9 +331,9 @@ open class NodeAdapter<VB : ViewBinding> : XAdapter<VB, NodeEntity<*, *>>() {
         //将当前节点添加到零时列表中
         temp += this
         //设置节点等级，初始等级为1
-        this._nodeGrade = grade
+        this.xNodeGrade = grade
         //如果有父节点，则将当前节点与父节点建立关系
-        if (parent != null && (this as? NodeEntity<NodeEntity<*, *>, *> != null)) this._parentNodeEntity = parent
+        if (parent != null && (this as? NodeEntity<NodeEntity<*, *>, *> != null)) this.xParentNodeEntity = parent
         if (if (this is ExpandedNodeEntity) this.isExpanded() else true) {
             //如果有子节点
             val childNodeEntityList = this.getChildNodeEntityList() as? List<NodeEntity<*, *>>

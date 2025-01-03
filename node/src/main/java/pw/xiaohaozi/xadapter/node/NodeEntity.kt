@@ -10,16 +10,16 @@ package pw.xiaohaozi.xadapter.node
  */
 interface NodeEntity<Parent, Child> {
     //父节点
-    var _parentNodeEntity: Parent?
+    var xParentNodeEntity: Parent?
     //级别
-    var _nodeGrade: Int?
+    var xNodeGrade: Int?
 
     /**
      * 获取父节点
      * 如果该节点不是根节点，需要重新该方法。
      */
     fun getParentNodeEntity(): Parent? {
-        return _parentNodeEntity
+        return xParentNodeEntity
     }
 
     /**
@@ -34,7 +34,7 @@ interface NodeEntity<Parent, Child> {
      * 如果没有重写，则默认-1.如果每个节点对呀不同的实体类，可以不用重写set方法，直接在get方法中返回对应的级别即可。
      */
     fun getNodeEntityGrade(): Int {
-        return _nodeGrade ?: -1
+        return xNodeGrade ?: -1
     }
 
 
