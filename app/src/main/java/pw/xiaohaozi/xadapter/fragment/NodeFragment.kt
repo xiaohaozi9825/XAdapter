@@ -46,7 +46,7 @@ class NodeFragment : Fragment() {
         val province = object : XProvider<ItemNodeBinding, ProvinceNode>(adapter) {
             override fun onCreated(holder: XHolder<ItemNodeBinding>) {
                 holder.binding.tvContent.setOnClickListener {
-                    val adapterPosition = holder.bindingAdapterPosition
+                    val adapterPosition = holder.getXPosition()
                     val nodeEntity = adapter.getData()[adapterPosition] as ProvinceNode
                     if (nodeEntity.isExpanded()) adapter.collapse(adapterPosition, false)
                     else adapter.expand(adapterPosition, false)
@@ -65,7 +65,7 @@ class NodeFragment : Fragment() {
         val city = object : XProvider<ItemNodeBinding, CityNode>(adapter) {
             override fun onCreated(holder: XHolder<ItemNodeBinding>) {
                 holder.binding.tvContent.setOnClickListener {
-                    val adapterPosition = holder.bindingAdapterPosition
+                    val adapterPosition = holder.getXPosition()
                     val nodeEntity = adapter.getData()[adapterPosition] as CityNode
                     if (nodeEntity.isExpanded()) adapter.collapse(adapterPosition, true)
                     else adapter.expand(adapterPosition)

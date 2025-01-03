@@ -49,8 +49,7 @@ class NodeEditFragment : Fragment() {
         val provider = object : XProvider<ItemNodeEditBinding, NodeInfo>(adapter) {
             override fun onCreated(holder: XHolder<ItemNodeEditBinding>) {
                 holder.binding.root.setOnClickListener {
-                    val position = holder.bindingAdapterPosition
-                    val data = adapter.getData()[position] as NodeInfo
+                    val data = holder.data as NodeInfo
                     //添加单个节点
                     adapter.addChildNode(
                         data,
@@ -67,7 +66,7 @@ class NodeEditFragment : Fragment() {
                 }
 
                 holder.binding.btnDelete.setOnClickListener {
-                    val position = holder.absoluteAdapterPosition
+                    val position = holder.getXPosition()
                     if (position == -1) return@setOnClickListener
                     //移除指定位置节点
                     adapter.removeNodePosition(position)
