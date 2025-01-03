@@ -10,9 +10,8 @@ import pw.xiaohaozi.xadapter.R
 import pw.xiaohaozi.xadapter.databinding.FragmentNodeEditBinding
 import pw.xiaohaozi.xadapter.databinding.ItemNodeEditBinding
 import pw.xiaohaozi.xadapter.node.NodeAdapter
-import pw.xiaohaozi.xadapter.node.NodeEntity
-import pw.xiaohaozi.xadapter.smart.holder.XHolder
-import pw.xiaohaozi.xadapter.smart.provider.XProvider
+import pw.xiaohaozi.xadapter.node.entity.NodeEntity
+import pw.xiaohaozi.xadapter.node.ext.nodeAdapter
 
 
 /**
@@ -45,8 +44,10 @@ class NodeEditFragment : Fragment() {
     }
 
 
-    fun function(): NodeAdapter<ItemNodeEditBinding,NodeInfo> {
-        val adapter = NodeAdapter<ItemNodeEditBinding,NodeInfo>()
+    fun function(): NodeAdapter<ItemNodeEditBinding, NodeInfo> {
+        val adapter = nodeAdapter<ItemNodeEditBinding, NodeInfo> { (holder, data) ->
+            holder.binding.tvContent.text = data.no + "、" + data.text
+        }
             .setOnClickListener { holder, data, position, view ->
                 //添加单个节点
                 adapter.addChildNode(
@@ -83,21 +84,6 @@ class NodeEditFragment : Fragment() {
 
 
             }
-        val provider = object : XProvider<ItemNodeEditBinding, NodeInfo>(adapter) {
-            override fun onCreated(holder: XHolder<ItemNodeEditBinding>) {
-
-            }
-
-            override fun onBind(holder: XHolder<ItemNodeEditBinding>, data: NodeInfo, position: Int) {
-                holder.binding.tvContent.text = data.no + "、" + data.text
-            }
-
-            override fun isFixedViewType(): Boolean {
-                return false
-            }
-
-        }
-        adapter + provider
         return adapter
     }
 

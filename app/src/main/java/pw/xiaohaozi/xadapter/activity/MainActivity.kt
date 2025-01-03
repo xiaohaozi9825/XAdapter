@@ -31,7 +31,6 @@ import pw.xiaohaozi.xadapter.fragment.SwipeMenuFragment
 import pw.xiaohaozi.xadapter.fragment.TextChangeFragment
 import pw.xiaohaozi.xadapter.info.HomeInfo
 import pw.xiaohaozi.xadapter.info.VerseInfo
-import pw.xiaohaozi.xadapter.node.NodeAdapter
 import pw.xiaohaozi.xadapter.smart.ext.createAdapter
 import pw.xiaohaozi.xadapter.smart.ext.toAdapter
 import pw.xiaohaozi.xadapter.smart.ext.withType

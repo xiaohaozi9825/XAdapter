@@ -6,6 +6,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.viewbinding.ViewBinding
 import com.google.gson.GsonBuilder
 import com.google.gson.JsonDeserializationContext
 import com.google.gson.JsonDeserializer
@@ -14,11 +15,12 @@ import com.google.gson.JsonParseException
 import com.google.gson.reflect.TypeToken
 import pw.xiaohaozi.xadapter.databinding.FragmentRecyclerBinding
 import pw.xiaohaozi.xadapter.databinding.ItemNodeBinding
-import pw.xiaohaozi.xadapter.node.ExpandedNodeEntity
+import pw.xiaohaozi.xadapter.node.entity.ExpandedNodeEntity
 import pw.xiaohaozi.xadapter.node.NodeAdapter
-import pw.xiaohaozi.xadapter.node.NodeEntity
-import pw.xiaohaozi.xadapter.smart.holder.XHolder
-import pw.xiaohaozi.xadapter.smart.provider.XProvider
+import pw.xiaohaozi.xadapter.node.entity.NodeEntity
+import pw.xiaohaozi.xadapter.node.ext.nodeAdapter
+import pw.xiaohaozi.xadapter.node.ext.toAdapter
+import pw.xiaohaozi.xadapter.node.ext.withType
 
 
 /**
@@ -41,61 +43,27 @@ class NodeFragment : Fragment() {
         return binding.root
     }
 
-    fun function(): NodeAdapter<ItemNodeBinding, NodeEntity<*, *>> {
-        val adapter = NodeAdapter<ItemNodeBinding, NodeEntity<*, *>>()
-        val province = object : XProvider<ItemNodeBinding, ProvinceNode>(adapter) {
-            override fun onCreated(holder: XHolder<ItemNodeBinding>) {
-                holder.binding.tvContent.setOnClickListener {
-                    val adapterPosition = holder.getXPosition()
-                    val nodeEntity = adapter.getData()[adapterPosition] as ProvinceNode
-                    if (nodeEntity.isExpanded()) adapter.collapse(adapterPosition, false)
-                    else adapter.expand(adapterPosition, false)
-                }
-            }
-
-            override fun onBind(holder: XHolder<ItemNodeBinding>, data: ProvinceNode, position: Int) {
+    fun function(): NodeAdapter<ViewBinding, NodeEntity<*, *>> {
+        val adapter = nodeAdapter()
+            .withType<ItemNodeBinding, ProvinceNode> { (holder, data) ->
                 holder.binding.tvContent.text = "+ ${data.name}"
             }
-
-            override fun isFixedViewType(): Boolean {
-                return false
+            .setOnClickListener { holder, data, position, view ->
+                if (data.isExpanded()) adapter.collapse(position, false)
+                else adapter.expand(position, false)
             }
-
-        }
-        val city = object : XProvider<ItemNodeBinding, CityNode>(adapter) {
-            override fun onCreated(holder: XHolder<ItemNodeBinding>) {
-                holder.binding.tvContent.setOnClickListener {
-                    val adapterPosition = holder.getXPosition()
-                    val nodeEntity = adapter.getData()[adapterPosition] as CityNode
-                    if (nodeEntity.isExpanded()) adapter.collapse(adapterPosition, true)
-                    else adapter.expand(adapterPosition)
-                }
-            }
-
-            override fun onBind(holder: XHolder<ItemNodeBinding>, data: CityNode, position: Int) {
+            .withType<ItemNodeBinding, CityNode> { (holder, data) ->
                 holder.binding.tvContent.text = "  + ${data.name}"
             }
-
-            override fun isFixedViewType(): Boolean {
-                return false
+            .setOnClickListener { holder, data, position, view ->
+                if (data.isExpanded()) adapter.collapse(position, true)
+                else adapter.expand(position)
             }
-
-        }
-        val area = object : XProvider<ItemNodeBinding, AreaNode>(adapter) {
-            override fun onCreated(holder: XHolder<ItemNodeBinding>) {
-
-            }
-
-            override fun onBind(holder: XHolder<ItemNodeBinding>, data: AreaNode, position: Int) {
+            .withType<ItemNodeBinding, AreaNode> { (holder, data) ->
                 holder.binding.tvContent.text = "         ${data.name}"
-            }
+            }.toAdapter()
 
-            override fun isFixedViewType(): Boolean {
-                return false
-            }
 
-        }
-        adapter + province + city + area
         return adapter
     }
 

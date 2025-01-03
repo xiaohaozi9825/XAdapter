@@ -2,8 +2,9 @@ package pw.xiaohaozi.xadapter.node
 
 import android.util.Log
 import androidx.viewbinding.ViewBinding
+import pw.xiaohaozi.xadapter.node.entity.ExpandedNodeEntity
+import pw.xiaohaozi.xadapter.node.entity.NodeEntity
 import pw.xiaohaozi.xadapter.smart.XAdapterException
-import pw.xiaohaozi.xadapter.smart.adapter.SmartAdapter
 import pw.xiaohaozi.xadapter.smart.adapter.XAdapter
 import pw.xiaohaozi.xadapter.smart.ext.removeRange
 import pw.xiaohaozi.xadapter.smart.impl.EventImpl

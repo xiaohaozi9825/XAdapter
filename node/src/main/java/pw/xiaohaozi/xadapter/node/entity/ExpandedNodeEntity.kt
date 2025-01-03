@@ -1,4 +1,4 @@
-package pw.xiaohaozi.xadapter.node
+package pw.xiaohaozi.xadapter.node.entity
 
 /**
  *
