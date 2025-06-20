@@ -1,6 +1,7 @@
 package pw.xiaohaozi.xadapter.node
 
 import androidx.viewbinding.ViewBinding
+import pw.xiaohaozi.xadapter.node.entity.NodeEntity
 import pw.xiaohaozi.xadapter.smart.adapter.SmartAdapter
 import pw.xiaohaozi.xadapter.smart.impl.EventImpl
 import pw.xiaohaozi.xadapter.smart.provider.XProvider
@@ -40,6 +41,10 @@ abstract class NodeProvider<VB : ViewBinding, D>(
 
     fun getSmartAdapter(): SmartAdapter<ViewBinding, Any?> {
         return adapter as SmartAdapter<ViewBinding, Any?>
+    }
+
+    fun getNodeAdapter(): NodeAdapter<ViewBinding, NodeEntity<*,*>> {
+        return adapter as NodeAdapter<ViewBinding, NodeEntity<*,*>>
     }
 
 }

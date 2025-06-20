@@ -1,13 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content">
+    android:layout_height="wrap_content"
+    android:gravity="center"
+    android:orientation="horizontal">
 
     <TextView
         android:id="@+id/tv_content"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:layout_weight="1"
         android:padding="8dp"
         android:textColor="@color/black"
         android:textSize="16sp"
@@ -17,18 +20,45 @@
         app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
+        android:id="@+id/btn_add"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="4dp"
+        android:background="@drawable/bg_button"
+        android:backgroundTint="#00ff00"
+        android:paddingHorizontal="8dp"
+        android:paddingVertical="2dp"
+        android:text="添加"
+        android:textColor="@color/white"
+        android:textSize="12sp" />
+    <TextView
+        android:id="@+id/btn_edit"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="4dp"
+        android:background="@drawable/bg_button"
+        android:backgroundTint="#0000ff"
+        android:paddingHorizontal="8dp"
+        android:paddingVertical="2dp"
+        android:text="编辑"
+        android:textColor="@color/white"
+        android:textSize="12sp" />
+    <TextView
         android:id="@+id/btn_delete"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_margin="8dp"
+        android:layout_margin="4dp"
         android:background="@drawable/bg_button"
         android:backgroundTint="#ff0000"
-        android:paddingHorizontal="12dp"
+        android:paddingHorizontal="8dp"
         android:paddingVertical="2dp"
         android:text="删除"
         android:textColor="@color/white"
-        android:textSize="12sp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-</androidx.constraintlayout.widget.ConstraintLayout>
+        android:textSize="12sp" />
+    <ImageView
+        android:id="@+id/iv_arrow"
+        android:layout_width="32dp"
+        android:layout_height="32dp"
+        android:padding="6dp"
+        android:src="@drawable/arrow" />
+</LinearLayout>
