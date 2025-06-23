@@ -62,15 +62,15 @@ class Node2EditFragment : Fragment() {
                     .apply { btnAdd.isVisible = true }
                     .apply { btnEdit.isVisible = false }
                     .apply { ivArrow.isInvisible = false }
-                    .apply { ivArrow.rotation = if (data.isExpanded()) 0f else -90f  }
+                    .apply { ivArrow.rotation = if (data.isExpanded()) 0f else -90f }
             }.setOnClickListener { holder, data, position, view ->
-                if (data.isExpanded()) adapter.collapse(position, )
-                else adapter.expand(position,true)
+                if (data.isExpanded()) adapter.collapse(position)
+                else adapter.expand(position, true)
             }.setOnClickListener(R.id.btn_add) { holder, data, position, view ->
                 //点击一级菜单，添加二级菜单数据
                 val size = data.getChildNodeEntityList().size
-                getNodeAdapter().addChildNode(data, NodeInfo2(" ${data.no}$size", "Node2", mutableListOf()))
-                if (!data.isExpanded())adapter.expand(position)
+                adapter.addChildNode(data, NodeInfo2(" ${data.no}$size", "Node2", mutableListOf()))
+                if (!data.isExpanded()) adapter.expand(position)
             }.withType<ItemNodeEditBinding, NodeInfo2> { (holder, data) ->
                 //创建二级菜单
                 holder.binding
@@ -79,18 +79,18 @@ class Node2EditFragment : Fragment() {
                     .apply { btnAdd.isVisible = true }
                     .apply { btnEdit.isVisible = false }
                     .apply { ivArrow.isInvisible = false }
-                    .apply { ivArrow.rotation = if (data.isExpanded()) 0f else -90f  }
+                    .apply { ivArrow.rotation = if (data.isExpanded()) 0f else -90f }
             }.setOnClickListener { holder, data, position, view ->
                 if (data.isExpanded()) adapter.collapse(position, true)
                 else adapter.expand(position)
             }.setOnClickListener(R.id.btn_add) { holder, data, position, view ->
                 val size = data.getChildNodeEntityList().size
-                getNodeAdapter().addChildNode(
+                adapter.addChildNode(
                     data,
                     NodeInfo3("  ${data.no}${size}", "Node3"),
                     //size//在末尾添加数据，该参数可不传
                 )
-                if (!data.isExpanded())adapter.expand(position)
+                if (!data.isExpanded()) adapter.expand(position)
             }.withType<ItemNodeEditBinding, NodeInfo3> { (holder, data) ->
                 //创建三级菜单
                 holder.binding
@@ -105,10 +105,12 @@ class Node2EditFragment : Fragment() {
                     .setTitle("编辑内容")
                     .setMsg(data.text)
                     .onConfirm { _, content: String ->
-                        data.text = content
-//                        adapter.upDate(data)
-//                        adapter.upDate(position,data)
-//                        adapter.updateAt(getDataList().indexOf(data))
+                        //①数据属性变化
+//                        data.text = content
+//                        getNodeAdapter().updateNode(data)
+                        //②数据引用变化
+                        val newNode = NodeInfo3(data.no, content)
+                        adapter.updateNode(data, newNode)
                     }
                     .onCancel {}
                     .show()

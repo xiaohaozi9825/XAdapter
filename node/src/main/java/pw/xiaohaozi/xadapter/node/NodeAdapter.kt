@@ -1,5 +1,6 @@
 package pw.xiaohaozi.xadapter.node
 
+import android.annotation.SuppressLint
 import android.util.Log
 import androidx.viewbinding.ViewBinding
 import pw.xiaohaozi.xadapter.node.entity.ExpandedNodeEntity
@@ -12,8 +13,12 @@ import pw.xiaohaozi.xadapter.smart.proxy.EventProxy
 import pw.xiaohaozi.xadapter.smart.proxy.XEmployer
 
 /**
+ * NodeAdapter
+ * 描述：该类主要用于提供多级列表
+ * 主要功能：1、子列表的展开与折叠
+ *         2、子列表的增删改
+ * 注意：数据在展现过程中，会做扁平化处理，涉及到很多递归操作，对性能有一定影响，适合数据量少的场景
  *
- * 描述：
  * 作者：小耗子
  * 简书地址：https://www.jianshu.com/u/2a2ea7b43087
  * github：https://github.com/xiaohaozi9825
@@ -51,32 +56,40 @@ open class NodeAdapter<VB : ViewBinding, D : NodeEntity<*, *>>(
     //源数据
     var source: MutableList<D>? = null
         private set
+
+
     /**********************************************************************************************************/
     /***********************************     数据操作    ******************************************************/
     /**********************************************************************************************************/
+
+    /**
+     * 更新数据
+     */
     fun <L : Collection<D>> refresh(list: L) {
         source = list.toMutableList()
         refresh()
     }
 
+
+    @SuppressLint("NotifyDataSetChanged")
     fun refresh() {
         val temp = source?.flattenAndAssociationNode() ?: return
-        getData().clear()
-        getData().addAll(temp)
+        getDataList().clear()
+        getDataList().addAll(temp)
         notifyDataSetChanged()
     }
 
     /**
      * 增加node
      * @param node
-     * @param index 指定位置，null 在末尾添加
+     * @param index 指定位置(相对数据源)，null 在末尾添加
      */
     fun addNode(node: D, index: Int? = null) {
         if (index == null) source?.add(node) else source?.add(index, node)
         val flatten = node.flattenAndAssociationNode()
-        val startIndex = if (index == null) getData().size else findAdapterPosition(node)
+        val startIndex = if (index == null) getDataList().size else findAdapterPosition(node)
         if (startIndex < 0 || startIndex > itemCount) return
-        getData().addAll(startIndex, flatten)
+        getDataList().addAll(startIndex, flatten)
         notifyItemRangeInserted(startIndex, flatten.size)
     }
 
@@ -89,9 +102,9 @@ open class NodeAdapter<VB : ViewBinding, D : NodeEntity<*, *>>(
         if (nodes.isEmpty()) return
         if (index == null) source?.addAll(nodes) else source?.addAll(index, nodes)
         val flatten = nodes.flattenAndAssociationNode()
-        val startIndex = if (index == null) getData().size else findAdapterPosition(nodes.first())
+        val startIndex = if (index == null) getDataList().size else findAdapterPosition(nodes.first())
         if (startIndex < 0 || startIndex > itemCount) return
-        getData().addAll(startIndex, flatten)
+        getDataList().addAll(startIndex, flatten)
         notifyItemRangeInserted(startIndex, flatten.size)
     }
 
@@ -123,7 +136,7 @@ open class NodeAdapter<VB : ViewBinding, D : NodeEntity<*, *>>(
      */
     fun <L : Collection<D>> addChildNode(parent: D, nodes: L, index: Int? = null) {
         val childList = parent.getChildNodeEntityList() as? MutableList<D> ?: return
-        val parentIndex = getData().indexOf(parent)
+        val parentIndex = getDataList().indexOf(parent)
         if (index == null) childList.addAll(nodes) else childList.addAll(index, nodes)
         //如果父节点未展示，则无需刷新UI，为减少递归，这里提前判断
         val startIndex = if (parentIndex < 0) -1
@@ -131,19 +144,18 @@ open class NodeAdapter<VB : ViewBinding, D : NodeEntity<*, *>>(
         //不符合条件，则不刷新UI
         if (startIndex < 0 || startIndex > itemCount) return
         val flatten = nodes.flattenAndAssociationNode()
-        getData().addAll(startIndex, flatten)
+        getDataList().addAll(startIndex, flatten)
         notifyItemRangeInserted(startIndex, flatten.size)
     }
 
 
     fun removeNode(node: D) {
         val flatten = node.flatten { if (it is ExpandedNodeEntity) it.isExpanded() else true }
-//        Log.i(TAG, "removeNode: parent = ${node.getParentNodeEntity()}")
         val parent = node.getParentNodeEntity() as? NodeEntity<*, *>
         if (parent == null) source?.remove(node)
         else parent.getChildNodeEntityList()?.remove(node)
-        val position = getData().indexOf(node)
-        if (getData().removeAll(flatten)) {
+        val position = getDataList().indexOf(node)
+        if (getDataList().removeAll(flatten)) {
             if (position >= 0) {
                 notifyItemRangeRemoved(position, flatten.size)
             }
@@ -161,30 +173,20 @@ open class NodeAdapter<VB : ViewBinding, D : NodeEntity<*, *>>(
         }
     }
 
-    fun removeNodeList(nodes: List<D>, continuous: Boolean = true) {
-        val flatten = nodes.flatten { if (it is ExpandedNodeEntity) it.isExpanded() else true }
-        val node = nodes.first()
-        val parent = node.getParentNodeEntity() as? NodeEntity<NodeEntity<*, *>, *>
-        if (parent == null) source?.removeAll(nodes)
-        else parent.getChildNodeEntityList()?.removeAll(nodes)
-        source?.removeAll(nodes)
-        val position = getData().indexOf(node)
-        if (getData().removeAll(flatten)) {
-            if (position >= 0) {
-                if (continuous) notifyItemRangeRemoved(position, flatten.size)
-                else notifyDataSetChanged()
-            }
+
+    fun removeNodeList(nodes: List<D>) {
+        //由于我们很难确定nodes中元素在recyclerView中是否是连续的，因此采用逐个删除的方法
+        nodes.forEach {
+            removeNode(it)
         }
     }
 
     fun removeChildNode(parent: D, node: D) {
         val flatten = node.flatten { if (it is ExpandedNodeEntity) it.isExpanded() else true }
-        Log.i(TAG, "removeChildNode: ${flatten.joinToString()}")
         parent.getChildNodeEntityList()?.remove(node)
         val position = getDataList().indexOf(node)
         if (getDataList().removeAll(flatten)) {
             if (position >= 0) {
-                Log.i(TAG, "removeChildNode: $position , ${flatten.size}")
                 notifyItemRangeRemoved(position, flatten.size)
             }
         }
@@ -201,42 +203,94 @@ open class NodeAdapter<VB : ViewBinding, D : NodeEntity<*, *>>(
         }
     }
 
-    fun removeChildNodeList(parent: D, nodes: List<D>, continuous: Boolean = true) {
-        val flatten = nodes.flatten { if (it is ExpandedNodeEntity) it.isExpanded() else true }
-        parent.getChildNodeEntityList()?.removeAll(nodes)
-        val position = getData().indexOf(nodes.first())
-        if (getData().removeAll(flatten)) {
-            if (position >= 0) {
-                if (continuous) notifyItemRangeRemoved(position, flatten.size)
-                else notifyDataSetChanged()
-            }
+    fun removeChildNodeList(parent: D, nodes: List<D>) {
+        //由于我们很难确定nodes中元素在recyclerView中是否是连续的，因此采用逐个删除的方法
+        nodes.forEach {
+            removeChildNode(parent, it)
         }
     }
 
     fun removeNodePosition(position: Int) {
-        val node = getData()[position] as? D ?: return
+        val node = getDataList()[position] as? D ?: return
         val parent = node.getParentNodeEntity() as? D
         if (parent == null) removeNode(node)
         else removeChildNode(parent, node)
     }
 
-    fun updateNode(oldNode: D, newNode: D) {
-//        val flatten = oldNode.flatten { if (it is ExpandedNodeEntity) it.isExpanded() else true }
-//        val parent = oldNode.getParentNodeEntity() as? NodeEntity<*, *>
-//        if (parent==null){
-//
-//        }else{
-//            updateChildNode(parent,oldNode, newNode)
-//        }
+    /**
+     * 更新数据
+     * 如果只是node属性变更，可以调用该方法同步刷新UI
+     */
+    fun updateNode(node: D, payload: Any? = null) {
+        updateNode(node, node, payload)
     }
 
-    fun updateNode(index: Int, newNode: NodeEntity<*, *>) {}
-    fun updateChildNode(parent: D, oldNode: D, newNode: D) {
-//        val childList = parent.getChildNodeEntityList() ?: return
-//        parent.getChildNodeEntityList()?.set(childList.indexOf(oldNode),newNode)
+    /**
+     * 更新数据
+     * 可以是任意节点数据
+     * 该方法只更新当前数据，不会同步刷新子节点数据
+     * @param oldNode 旧数据
+     * @param newNode 新数据
+     */
+    fun updateNode(oldNode: D, newNode: D, payload: Any? = null) {
+        val parent = oldNode.getParentNodeEntity() as? D
+        //如果是一级目录，则更新源数据；否则更新子节点
+        if (parent == null) {
+            val dataList = getDataList()
+            val position = dataList.indexOf(oldNode)//在recyclerView中的位置
+            val childIndex = source?.indexOf(oldNode) ?: return//在子节点中的位置
+            source!![childIndex] = newNode//交换数据
+            if (position >= 0 && position < dataList.size) {
+                dataList[position] = newNode
+                notifyItemChanged(position, payload)
+            }
+        } else {
+            updateChildNode(parent, oldNode, newNode, payload)
+        }
     }
 
-    fun updateChildNode(parent: NodeEntity<*, *>, index: Int, newNode: NodeEntity<*, *>) {}
+    /**
+     * 更新子节点数据
+     *
+     * 该方法只更新当前数据，不会同步刷新子节点数据
+     * @param oldNode 旧数据
+     * @param newNode 新数据
+     */
+    fun updateChildNode(parent: D, oldNode: D, newNode: D, payload: Any? = null) {
+        val childList = parent.getChildNodeEntityList() as? MutableList<D> ?: return
+        val dataList = getDataList()
+        val position = dataList.indexOf(oldNode)//在recyclerView中的位置
+        val childIndex = childList.indexOf(oldNode)//在子节点中的位置
+        if (parent != null && (newNode as? NodeEntity<NodeEntity<*, *>, *> != null)) newNode.xParentNodeEntity = parent
+        childList[childIndex] = newNode//交换数据
+        if (position >= 0 && position < dataList.size) {
+            dataList[position] = newNode
+            notifyItemChanged(position, payload)
+        }
+    }
+
+    /**
+     * 交换数据
+     * 该方法会对所有子节点更新
+     *
+     */
+    fun replaceNode(oldNode: D, newNode: D) {
+        val parent = oldNode.getParentNodeEntity() as? D
+        //如果是一级目录，则更新源数据；否则更新子节点
+        if (parent == null) {
+            val childIndex = source?.indexOf(oldNode) ?: return//在子节点中的位置
+            if (childIndex > -1) {
+                removeNode(oldNode)
+                addNode(newNode, childIndex)
+            }
+        } else {
+            val childIndex = parent.getChildNodeEntityList()?.indexOf(oldNode) ?: return//在子节点中的位置
+            if (childIndex > -1) {
+                removeChildNode(parent, oldNode)
+                addChildNode(parent, newNode, childIndex)
+            }
+        }
+    }
 
     /**
      * 查找当前元素在Adapter中理论上所在的位置。
@@ -260,7 +314,7 @@ open class NodeAdapter<VB : ViewBinding, D : NodeEntity<*, *>>(
         source?.forEach { node ->
             (node as? ExpandedNodeEntity)?.xIsExpanded = true
             if (isChangeChildExpand) {
-                node.changeChildExpand()
+                node.changeChildExpandStatus()
             }
         }
 
@@ -276,7 +330,7 @@ open class NodeAdapter<VB : ViewBinding, D : NodeEntity<*, *>>(
         source?.forEach { node ->
             (node as? ExpandedNodeEntity)?.xIsExpanded = false
             if (isChangeChildExpand) {
-                node.changeChildExpand()
+                node.changeChildExpandStatus()
             }
         }
         refresh()
@@ -352,12 +406,12 @@ open class NodeAdapter<VB : ViewBinding, D : NodeEntity<*, *>>(
     }
 
     //更改所有子节点的展开状态
-    private fun NodeEntity<*, *>.changeChildExpand() {
+    private fun NodeEntity<*, *>.changeChildExpandStatus() {
         val list = getChildNodeEntityList() ?: return
         for (childNode in list) {
             if ((childNode as? NodeEntity<*, *>) != null) {
                 (childNode as? ExpandedNodeEntity)?.xIsExpanded = (if (this is ExpandedNodeEntity) this.isExpanded() else true)
-                childNode.changeChildExpand()
+                childNode.changeChildExpandStatus()
             }
         }
     }
@@ -402,7 +456,7 @@ open class NodeAdapter<VB : ViewBinding, D : NodeEntity<*, *>>(
     private fun D.flatten(block: (node: D) -> Boolean): MutableList<D> {
         val temp = mutableListOf<D>()//创建一个临时数组
         temp += this//将当前值保存到数组中，不管是否能展开子元素，当前元素都会在数组中返回
-        if (block.invoke(this)){//验证当前元素子元素是否需要扁平化处理
+        if (block.invoke(this)) {//验证当前元素子元素是否需要扁平化处理
             val childList = this.getChildNodeEntityList() as? MutableList<D>
             if (childList != null) {
                 temp += childList.flatten(block)
@@ -420,7 +474,7 @@ open class NodeAdapter<VB : ViewBinding, D : NodeEntity<*, *>>(
             if (block.invoke(childNode)) {//如果需要扁平化所有后代
                 val childNodeEntityList = childNode.getChildNodeEntityList() as? List<D>
                 if (!childNodeEntityList.isNullOrEmpty()) {
-                    temp += childNodeEntityList.flatten{block.invoke(it)}
+                    temp += childNodeEntityList.flatten { block.invoke(it) }
                 }
             }
         }

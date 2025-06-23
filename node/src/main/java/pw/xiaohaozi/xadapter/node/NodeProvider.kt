@@ -15,13 +15,16 @@ import pw.xiaohaozi.xadapter.smart.proxy.EventProxy
  * github：https://github.com/xiaohaozi9825
  * 创建时间：2024/6/9 22:08
  */
-abstract class NodeProvider<VB : ViewBinding, D>(
-    override val adapter: NodeAdapter<*, *>, //
+abstract class NodeProvider<VB : ViewBinding, D : NodeEntity<*, *>>(
+    private val _adapter: NodeAdapter<*, *>,
     private val listener: EventImpl<NodeProvider<VB, D>, VB, D> = EventImpl(),//
-) : XProvider<VB, D>(adapter), EventProxy<NodeProvider<VB, D>, VB, D> by listener {
+) : XProvider<VB, D>(_adapter), EventProxy<NodeProvider<VB, D>, VB, D> by listener {
     init {
         initProxy()
     }
+
+    override val adapter: NodeAdapter<ViewBinding, NodeEntity<*, *>>
+        get() = (_adapter as NodeAdapter<ViewBinding, NodeEntity<*, *>>)
 
 
     override var employer: NodeProvider<VB, D>
@@ -37,14 +40,5 @@ abstract class NodeProvider<VB : ViewBinding, D>(
     }
 
     override fun isFixedViewType() = false
-
-
-    fun getSmartAdapter(): SmartAdapter<ViewBinding, Any?> {
-        return adapter as SmartAdapter<ViewBinding, Any?>
-    }
-
-    fun getNodeAdapter(): NodeAdapter<ViewBinding, NodeEntity<*,*>> {
-        return adapter as NodeAdapter<ViewBinding, NodeEntity<*,*>>
-    }
 
 }
