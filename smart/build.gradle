@@ -7,19 +7,18 @@ plugins {
 
 group='com.github.xiaohaozi9825'
 version ='1.0.0'
-afterEvaluate {
-    publishing {
-        publications {
-            release(MavenPublication) {
-                from components.release
-//                groupId 'pw.xiaohaozi.xadapter'
-//                artifactId 'smart'
-//                version '1.0.0'
+publishing {
+    publications {
+        release(MavenPublication) {
+            groupId 'com.github.xiaohaozi9825'
+            artifactId 'smart'
+            version '1.0.0'
 
-//                // 增加上传源码的 task
-//                artifact sourceJar
-//                // 必须有这个 否则不会上传AAR包  将bundleReleaseAar任务的单个输出文件作为发布的AAR文件。这样，该AAR文件就会成为 MavenPublication 的 artifact 并进行发布
-//                afterEvaluate { artifact(tasks.getByName("bundleReleaseAar")) }
+            afterEvaluate {
+                // 发布 AAR 包（Android 库）
+                from components.release
+                // 如为纯 Java/Kotlin 库，用 from components.java
+
             }
         }
     }

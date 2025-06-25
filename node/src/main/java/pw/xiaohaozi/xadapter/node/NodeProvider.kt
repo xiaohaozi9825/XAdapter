@@ -15,7 +15,7 @@ import pw.xiaohaozi.xadapter.smart.proxy.EventProxy
  * github：https://github.com/xiaohaozi9825
  * 创建时间：2024/6/9 22:08
  */
-abstract class NodeProvider<VB : ViewBinding, D : NodeEntity<*, *>>(
+abstract class NodeProvider<VB : ViewBinding, D >(
     private val _adapter: NodeAdapter<*, *>,
     private val listener: EventImpl<NodeProvider<VB, D>, VB, D> = EventImpl(),//
 ) : XProvider<VB, D>(_adapter), EventProxy<NodeProvider<VB, D>, VB, D> by listener {

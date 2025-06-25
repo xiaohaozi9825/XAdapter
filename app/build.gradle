@@ -38,12 +38,7 @@ android {
     }
     signingConfigs {
         debug {
-            keyAlias 'key0'
-            storeFile file('xadapter.jks')
-            storePassword 'xadapter@2024'
-            keyPassword 'xadapter@2024'
-            v1SigningEnabled true
-            v2SigningEnabled true
+            null
         }
         release {
             keyAlias 'key0'
