@@ -107,6 +107,25 @@ class MainActivity : AppCompatActivity() {
         "其他",
         HomeInfo("协程测试", "", R.mipmap.ic_launcher, CoroutineScopeFragment::class.java),
         HomeInfo("ConcatAdapter", "结合ConcatAdapter使用", R.mipmap.ic_launcher, ConcatAdapterFragment::class.java),
-    )
+
+        "NodeAdapter",
+        HomeInfo("单类型Node创建", "", R.mipmap.ic_launcher),
+        HomeInfo("多类型Node创建", "", R.mipmap.ic_launcher),
+
+        HomeInfo("Node展开与折叠", "", R.mipmap.ic_launcher),
+
+        HomeInfo("添加根Node", "", R.mipmap.ic_launcher),
+        HomeInfo("添加同级Node", "", R.mipmap.ic_launcher),
+        HomeInfo("添加子级Node", "", R.mipmap.ic_launcher),
+
+        HomeInfo("修改同级Node", "", R.mipmap.ic_launcher),
+        HomeInfo("修改子级Node", "", R.mipmap.ic_launcher),
+        HomeInfo("替换Node", "", R.mipmap.ic_launcher),
+
+        HomeInfo("删除同级Node", "", R.mipmap.ic_launcher),
+        HomeInfo("删除子级Node", "", R.mipmap.ic_launcher),
+
+
+        )
 
 }

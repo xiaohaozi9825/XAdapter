@@ -53,3 +53,11 @@ fun Activity.toEmptyActivity(clazz: Class<out Fragment>, title: String, name: St
             .putExtra("name", name)
     )
 }
+fun Fragment.toEmptyActivity(clazz: Class<out Fragment>, title: String, name: String) {
+    startActivity(
+        Intent(requireContext(), EmptyActivity::class.java)
+            .putExtra("fragmentClassName", clazz.name)
+            .putExtra("title", title)
+            .putExtra("name", name)
+    )
+}

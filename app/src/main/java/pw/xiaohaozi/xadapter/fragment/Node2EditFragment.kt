@@ -2,6 +2,7 @@ package pw.xiaohaozi.xadapter.fragment
 
 import android.graphics.Typeface
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -60,7 +61,7 @@ class Node2EditFragment : Fragment() {
                     .apply { tvContent.text = data.no + "、" + data.text }
                     .apply { tvContent.setTypeface(Typeface.DEFAULT_BOLD) }
                     .apply { btnAdd.isVisible = true }
-                    .apply { btnEdit.isVisible = false }
+//                    .apply { btnEdit.isVisible = false }
                     .apply { ivArrow.isInvisible = false }
                     .apply { ivArrow.rotation = if (data.isExpanded()) 0f else -90f }
             }.setOnClickListener { holder, data, position, view ->
@@ -71,13 +72,27 @@ class Node2EditFragment : Fragment() {
                 val size = data.getChildNodeEntityList().size
                 adapter.addChildNode(data, NodeInfo2(" ${data.no}$size", "Node2", mutableListOf()))
                 if (!data.isExpanded()) adapter.expand(position)
+            }.setOnClickListener(R.id.btn_edit){holder, data, position, view ->
+                InputDialog(requireActivity())
+                    .setTitle("编辑内容")
+                    .setMsg(data.text)
+                    .onConfirm { _, content: String ->
+                        //①数据属性变化
+//                        data.text = content
+//                        getNodeAdapter().updateNode(data)
+                        //②数据引用变化
+                        val newNode = NodeInfo1(data.no, content, mutableListOf(NodeInfo2("22","二级菜单", mutableListOf())))
+                        adapter.replaceNode(data, newNode)
+                    }
+                    .onCancel {}
+                    .show()
             }.withType<ItemNodeEditBinding, NodeInfo2> { (holder, data) ->
                 //创建二级菜单
                 holder.binding
                     .apply { tvContent.text = data.no + "、" + data.text }
                     .apply { tvContent.setTypeface(Typeface.DEFAULT) }
                     .apply { btnAdd.isVisible = true }
-                    .apply { btnEdit.isVisible = false }
+//                    .apply { btnEdit.isVisible = false }
                     .apply { ivArrow.isInvisible = false }
                     .apply { ivArrow.rotation = if (data.isExpanded()) 0f else -90f }
             }.setOnClickListener { holder, data, position, view ->
@@ -91,13 +106,27 @@ class Node2EditFragment : Fragment() {
                     //size//在末尾添加数据，该参数可不传
                 )
                 if (!data.isExpanded()) adapter.expand(position)
+            }.setOnClickListener(R.id.btn_edit){holder, data, position, view ->
+                InputDialog(requireActivity())
+                    .setTitle("编辑内容")
+                    .setMsg(data.text)
+                    .onConfirm { _, content: String ->
+                        //①数据属性变化
+//                        data.text = content
+//                        getNodeAdapter().updateNode(data)
+                        //②数据引用变化
+                        val newNode = NodeInfo2(data.no, content, mutableListOf(NodeInfo3("33","三级菜单")))
+                        adapter.replaceNode(data, newNode)
+                    }
+                    .onCancel {}
+                    .show()
             }.withType<ItemNodeEditBinding, NodeInfo3> { (holder, data) ->
                 //创建三级菜单
                 holder.binding
                     .apply { tvContent.text = data.no + "、" + data.text }
                     .apply { tvContent.setTypeface(null, Typeface.ITALIC) }
                     .apply { btnAdd.isVisible = false }
-                    .apply { btnEdit.isVisible = true }
+//                    .apply { btnEdit.isVisible = true }
                     .apply { ivArrow.isInvisible = true }
             }
             .setOnClickListener(R.id.btn_edit) { holder, data, position, view ->

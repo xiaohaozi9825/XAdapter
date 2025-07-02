@@ -228,7 +228,7 @@ open class NodeAdapter<VB : ViewBinding, D : NodeEntity<*, *>>(
     /**
      * 更新数据
      * 可以是任意节点数据
-     * 该方法只更新当前数据，不会同步刷新子节点数据
+     * 该方法只更新当前数据，不会同步刷新子节点数据,如果需要更新子节点列表，请使用replaceNode()方法。
      * @param oldNode 旧数据
      * @param newNode 新数据
      */
@@ -252,7 +252,7 @@ open class NodeAdapter<VB : ViewBinding, D : NodeEntity<*, *>>(
     /**
      * 更新子节点数据
      *
-     * 该方法只更新当前数据，不会同步刷新子节点数据
+     * 该方法只更新当前数据，不会同步刷新子节点数据，如果需要更新子节点列表，请使用replaceNode()方法。
      * @param oldNode 旧数据
      * @param newNode 新数据
      */
