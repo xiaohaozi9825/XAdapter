@@ -68,7 +68,7 @@ class HomeActivity : AppCompatActivity() {
         NevButton(R.mipmap.ic_launcher, "Smart", SmartMenuFragment::class.java),
         NevButton(R.mipmap.ic_launcher, "Node", NodeMenuFragment::class.java),
         NevButton(R.mipmap.ic_launcher, "示例", SingleFragment::class.java),
-        NevButton(R.mipmap.ic_launcher, "接入", Node2EditFragment::class.java),
+        NevButton(R.mipmap.ic_launcher, "文档", DocumentFragment::class.java),
     )
 
     data class NevButton(
