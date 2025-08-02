@@ -76,7 +76,7 @@ provider.setOnClickListener(R.id.btn) { holder, data, position, view ->
 ```kotlin
 adapter.setOnItemSelectListener() { data, position, index, fromUser ->
                
-            }
+}
 ```
 #### 特殊布局
 ```kotlin

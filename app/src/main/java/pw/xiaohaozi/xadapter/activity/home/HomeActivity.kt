@@ -12,12 +12,7 @@ import pw.xiaohaozi.xadapter.R
 import pw.xiaohaozi.xadapter.databinding.ActivityHomeBinding
 import pw.xiaohaozi.xadapter.databinding.ItemHomeBottomButtonBinding
 import pw.xiaohaozi.xadapter.enableEdgeToEdge
-import pw.xiaohaozi.xadapter.fragment.CheckFragment
-import pw.xiaohaozi.xadapter.fragment.ImageSelectFragment
-import pw.xiaohaozi.xadapter.fragment.Node2EditFragment
-import pw.xiaohaozi.xadapter.fragment.SingleFragment
 import pw.xiaohaozi.xadapter.smart.ext.createAdapter
-import pw.xiaohaozi.xadapter.smartMenuList
 
 
 class HomeActivity : AppCompatActivity() {
@@ -67,7 +62,7 @@ class HomeActivity : AppCompatActivity() {
         NevButton(R.mipmap.ic_launcher, "首页", HomeFragment::class.java),
         NevButton(R.mipmap.ic_launcher, "Smart", SmartMenuFragment::class.java),
         NevButton(R.mipmap.ic_launcher, "Node", NodeMenuFragment::class.java),
-        NevButton(R.mipmap.ic_launcher, "示例", SingleFragment::class.java),
+        NevButton(R.mipmap.ic_launcher, "示例", ExampleMenuFragment::class.java),
         NevButton(R.mipmap.ic_launcher, "文档", DocumentFragment::class.java),
     )
 

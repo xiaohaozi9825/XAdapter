@@ -25,6 +25,7 @@ import kotlinx.coroutines.withContext
 import pw.xiaohaozi.xadapter.databinding.ActivitySearchBinding
 import pw.xiaohaozi.xadapter.databinding.ItemSearchBinding
 import pw.xiaohaozi.xadapter.enableEdgeToEdge
+import pw.xiaohaozi.xadapter.exampleMenuList
 import pw.xiaohaozi.xadapter.info.HomeInfo
 import pw.xiaohaozi.xadapter.nodeMenuList
 import pw.xiaohaozi.xadapter.smart.ext.createAdapter
@@ -35,7 +36,7 @@ class SearchActivity : AppCompatActivity() {
     val binding by lazy { ActivitySearchBinding.inflate(layoutInflater) }
 
     // 原始数据
-    private val originalList = (smartMenuList + nodeMenuList).filterIsInstance<HomeInfo>()
+    private val originalList = (smartMenuList + nodeMenuList+ exampleMenuList).filterIsInstance<HomeInfo>()
 
     //创建adapter
     val adapter = createAdapter<ItemSearchBinding, HomeInfo> { (holder, data, position) ->
