@@ -370,7 +370,7 @@ open class AdapterSelectedImpl<Employer : XProxy<Employer>, VB : ViewBinding, D>
     /*******************************************  辅助方法  ******************************************************/
     //取消选中
     protected open fun cancelCheck(data: D, fromUser: Boolean): Int {
-        if (!isAllowCancel) return -1//如果不允许取消，则无法选择，操作失败
+        if (!isAllowCancel && fromUser) return -1//如果不允许取消，则无法选择，操作失败
         //必须在删除前拿到被删除item索引
         val indexOf = selectedCache.indexOf(data)
         if (indexOf == -1) return 0//如果没有找到该元素，则取消个数为0
@@ -406,12 +406,13 @@ open class AdapterSelectedImpl<Employer : XProxy<Employer>, VB : ViewBinding, D>
         if (maxSelectCount != null) {
             val selectedSize = selectedCache.size
             if (selectedSize >= maxSelectCount!!) {//如果超出了最大选择数
-                if (!isAllowCancel) return -1//如果不允许取消，则无法选择，操作失败
                 if (!isAutoCancel) return -1//超出范围，不自动取消，也无法选择更多，操作失败
+
+                if (!(isAllowCancel || fromUser)) return -1//如果不允许取消，则无法选择，操作失败
                 //超出范围自动取消
                 while (selectedCache.size >= (maxSelectCount!!)) {
-                    val get = selectedCache.firstOrNull()
-                    if (get != null) cancelCheck(get, false)
+                    val first = selectedCache.firstOrNull()
+                    if (first != null) cancelCheck(first, false)
                 }
             }
         }
