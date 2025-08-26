@@ -81,7 +81,7 @@ open class AdapterSelectedImpl<Employer : XProxy<Employer>, VB : ViewBinding, D>
         val TAG = "OnListChangedCallback"
 
         //刷新所有数据时回调
-        override fun onChanged(sender: MutableList<D>) {
+        override fun onChanged(sender: MutableList<D>, payload: Any?) {
             Log.i(TAG, "onChanged: ")
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
                 selectedCache.removeIf { !sender.contains(it) }
@@ -106,7 +106,7 @@ open class AdapterSelectedImpl<Employer : XProxy<Employer>, VB : ViewBinding, D>
         }
 
         //插入数据时回调
-        override fun onItemRangeInserted(sender: MutableList<D>, positionStart: Int, itemCount: Int) {
+        override fun onItemRangeInserted(sender: MutableList<D>, positionStart: Int, itemCount: Int, payload: Any?) {
             Log.i(TAG, "onItemRangeInserted: ")
             curSelectedAllStatus = false
             val start = max(positionStart, 0)
@@ -119,12 +119,12 @@ open class AdapterSelectedImpl<Employer : XProxy<Employer>, VB : ViewBinding, D>
         }
 
         //移动数据时回调
-        override fun onItemRangeMoved(sender: MutableList<D>, fromPosition: Int, toPosition: Int, itemCount: Int) {
+        override fun onItemRangeMoved(sender: MutableList<D>, fromPosition: Int, toPosition: Int, itemCount: Int, payload: Any?) {
             Log.i(TAG, "onItemRangeMoved: ")
         }
 
         //删除数据时回调
-        override fun onItemRangeRemoved(sender: MutableList<D>, positionStart: Int, itemCount: Int) {
+        override fun onItemRangeRemoved(sender: MutableList<D>, positionStart: Int, itemCount: Int, payload: Any?) {
             //被删除的元素在selectedCache中的起始索引
             val startIndex = adapter.getDataPosition(positionStart)
             Log.i(TAG, "onItemRangeRemoved: startIndex = ${startIndex}")
@@ -144,7 +144,7 @@ open class AdapterSelectedImpl<Employer : XProxy<Employer>, VB : ViewBinding, D>
                     Log.i(TAG, "notifyItemChanged: position = ${position}")
                     val adapterPosition = adapter.getAdapterPosition(position)
                     if (adapterPosition > -1 && adapterPosition < adapter.itemCount) {
-                        adapter.notifyItemChanged(adapterPosition, itemSelectListener?.payload)
+                        adapter.notifyItemChanged(adapterPosition, payload ?: itemSelectListener?.payload)
                         notifyItemSelectedChanges(d, adapterPosition, -1, false)
                     }
                 }
@@ -153,7 +153,7 @@ open class AdapterSelectedImpl<Employer : XProxy<Employer>, VB : ViewBinding, D>
         }
 
         //删除数据时回调
-        override fun onItemRangeRemoved(sender: MutableList<D>, changeDatas: MutableList<D>?) {
+        override fun onItemRangeRemoved(sender: MutableList<D>, changeDatas: MutableList<D>?, payload: Any?) {
             //被删除的元素在selectedCache中的起始索引
             val startIndex = selectedCache.indexOfFirst { changeDatas?.contains(it) ?: false }
             Log.i(TAG, "onItemRangeRemoved: startIndex = ${startIndex}")
@@ -175,7 +175,7 @@ open class AdapterSelectedImpl<Employer : XProxy<Employer>, VB : ViewBinding, D>
                     Log.i(TAG, "notifyItemChanged: position = ${position}")
                     val adapterPosition = adapter.getAdapterPosition(position)
                     if (adapterPosition > -1 && adapterPosition < adapter.itemCount) {
-                        adapter.notifyItemChanged(adapterPosition, itemSelectListener?.payload)
+                        adapter.notifyItemChanged(adapterPosition, payload ?: itemSelectListener?.payload)
                         notifyItemSelectedChanges(d, adapterPosition, -1, false)
                     }
                 }
@@ -301,20 +301,20 @@ open class AdapterSelectedImpl<Employer : XProxy<Employer>, VB : ViewBinding, D>
         return employer
     }
 
-    override fun setSelectAt(position: Int, isSelect: Boolean, fromUser: Boolean): Int {
+    override fun setSelectAt(position: Int, isSelect: Boolean, fromUser: Boolean, payload: Any?): Int {
         return setSelect(getData()[position], isSelect, fromUser)
     }
 
-    override fun setSelect(data: D, isSelect: Boolean, fromUser: Boolean): Int {
-        return if (isSelect) setCheck(data, fromUser)
-        else cancelCheck(data, fromUser)
+    override fun setSelect(data: D, isSelect: Boolean, fromUser: Boolean, payload: Any?): Int {
+        return if (isSelect) setCheck(data, fromUser, payload)
+        else cancelCheck(data, fromUser, payload)
     }
 
     override fun isSelectAll(): Boolean {
         return curSelectedAllStatus
     }
 
-    override fun selectAll(): Int {
+    override fun selectAll(payload: Any?): Int {
         if (oldSelectedAllStatus == true) return 0//如果已经全选了，则无需执行后续操作
         val selects = filterSelectTypeDatas()
         if (maxSelectCount != null && selects.size > maxSelectCount!!) {
@@ -341,7 +341,7 @@ open class AdapterSelectedImpl<Employer : XProxy<Employer>, VB : ViewBinding, D>
         return selectedCache.size
     }
 
-    override fun deselectAll(): Int {
+    override fun deselectAll(payload: Any?): Int {
         if (selectedCache.isEmpty()) return 0 //如果在这之前一个元素都没有选择，则无需执行后续操作
         selectedCache.clear()
         curSelectedAllStatus = false
@@ -349,7 +349,7 @@ open class AdapterSelectedImpl<Employer : XProxy<Employer>, VB : ViewBinding, D>
         adapter.notifyItemRangeChanged(
             adapter.getAdapterPosition(0),
             adapter.getAdapterPosition(getData().size),
-            itemSelectListener?.payload
+            payload ?: itemSelectListener?.payload
         )
         getData().forEachIndexed { position, data ->
             val indexOf = selectedCache.indexOf(data)
@@ -369,7 +369,7 @@ open class AdapterSelectedImpl<Employer : XProxy<Employer>, VB : ViewBinding, D>
 
     /*******************************************  辅助方法  ******************************************************/
     //取消选中
-    protected open fun cancelCheck(data: D, fromUser: Boolean): Int {
+    protected open fun cancelCheck(data: D, fromUser: Boolean, payload: Any?): Int {
         if (!isAllowCancel && fromUser) return -1//如果不允许取消，则无法选择，操作失败
         //必须在删除前拿到被删除item索引
         val indexOf = selectedCache.indexOf(data)
@@ -381,7 +381,7 @@ open class AdapterSelectedImpl<Employer : XProxy<Employer>, VB : ViewBinding, D>
             if (d == data) {
                 val adapterPosition = adapter.getAdapterPosition(position)
                 if (adapterPosition > -1 && adapterPosition < adapter.itemCount) {
-                    adapter.notifyItemChanged(adapterPosition, itemSelectListener?.payload)
+                    adapter.notifyItemChanged(adapterPosition, payload ?: itemSelectListener?.payload)
                     notifyItemSelectedChanges(d, adapterPosition, -1, fromUser)
                 }
             }
@@ -392,7 +392,7 @@ open class AdapterSelectedImpl<Employer : XProxy<Employer>, VB : ViewBinding, D>
             if (filter.contains(d)) {
                 val adapterPosition = adapter.getAdapterPosition(position)
                 if (adapterPosition > -1 && adapterPosition < adapter.itemCount) {
-                    adapter.notifyItemChanged(adapterPosition, itemSelectListener?.payload)
+                    adapter.notifyItemChanged(adapterPosition, payload ?: itemSelectListener?.payload)
                     notifyItemSelectedChanges(d, adapterPosition, -1, fromUser)
                 }
             }
@@ -402,17 +402,23 @@ open class AdapterSelectedImpl<Employer : XProxy<Employer>, VB : ViewBinding, D>
     }
 
     //设置为选中
-    protected open fun setCheck(data: D, fromUser: Boolean): Int {
+    protected open fun setCheck(data: D, fromUser: Boolean, payload: Any?): Int {
+        if (data == null) return -1//空数据不允许参与选择
         if (maxSelectCount != null) {
             val selectedSize = selectedCache.size
             if (selectedSize >= maxSelectCount!!) {//如果超出了最大选择数
                 if (!isAutoCancel) return -1//超出范围，不自动取消，也无法选择更多，操作失败
-
+                //允许用户取消
+                //isAllowCancel = true fromUser = true ==> false
+                //isAllowCancel = true fromUser = false ==> false
+                //禁止用户取消
+                //isAllowCancel = false fromUser = false ==> true
+                //isAllowCancel = false fromUser = true ==> false
                 if (!(isAllowCancel || fromUser)) return -1//如果不允许取消，则无法选择，操作失败
                 //超出范围自动取消
                 while (selectedCache.size >= (maxSelectCount!!)) {
-                    val first = selectedCache.firstOrNull()
-                    if (first != null) cancelCheck(first, false)
+                    val first = selectedCache.firstOrNull() ?: break
+                    cancelCheck(first, false, payload)
                 }
             }
         }
@@ -426,7 +432,7 @@ open class AdapterSelectedImpl<Employer : XProxy<Employer>, VB : ViewBinding, D>
             if (d == data) {
                 val adapterPosition = adapter.getAdapterPosition(position)
                 if (adapterPosition > -1 && adapterPosition < adapter.itemCount) {
-                    adapter.notifyItemChanged(adapterPosition, itemSelectListener?.payload)
+                    adapter.notifyItemChanged(adapterPosition, payload ?: itemSelectListener?.payload)
                     notifyItemSelectedChanges(d, adapterPosition, indexOf, fromUser)
                 }
             }
@@ -439,9 +445,9 @@ open class AdapterSelectedImpl<Employer : XProxy<Employer>, VB : ViewBinding, D>
     protected open fun clickCheck(holder: XHolder<VB>?, isCheck: Boolean, position: Int) {
         val data = getData()[position] ?: return
         if (isCheck) {
-            setCheck(data, true)
+            setCheck(data, true, null)
         } else {
-            cancelCheck(data, true)
+            cancelCheck(data, true, null)
         }
     }
 

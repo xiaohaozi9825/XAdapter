@@ -47,7 +47,7 @@ class SmartDataImpl<Employer : XProxy<Employer>, VB : ViewBinding, D> : SmartDat
         getData().addAll(list)
         val startPosition = adapter.itemCount - list.size - adapter.getFooterProviderCount()
         adapter.notifyItemRangeInserted(startPosition, list.size)
-        notifyItemRangeInserted(startPosition, list.size)
+        notifyItemRangeInserted(startPosition, list.size, null)
     }
 
     /**
@@ -60,7 +60,7 @@ class SmartDataImpl<Employer : XProxy<Employer>, VB : ViewBinding, D> : SmartDat
         getData().add(data)
         val startPosition = adapter.itemCount - 1 - adapter.getFooterProviderCount()
         adapter.notifyItemInserted(startPosition)
-        notifyItemRangeInserted(startPosition, 1)
+        notifyItemRangeInserted(startPosition, 1, null)
     }
 
     /**
@@ -74,7 +74,7 @@ class SmartDataImpl<Employer : XProxy<Employer>, VB : ViewBinding, D> : SmartDat
         getData().add(index, data)
         val adapterPosition = adapter.getAdapterPosition(index)
         adapter.notifyItemInserted(adapterPosition)
-        notifyItemRangeInserted(adapterPosition, 1)
+        notifyItemRangeInserted(adapterPosition, 1, null)
     }
 
     /**
@@ -88,7 +88,7 @@ class SmartDataImpl<Employer : XProxy<Employer>, VB : ViewBinding, D> : SmartDat
         getData().addAll(index, list)
         val adapterPosition = adapter.getAdapterPosition(index)
         adapter.notifyItemRangeInserted(adapterPosition, list.size)
-        notifyItemRangeInserted(adapterPosition, list.size)
+        notifyItemRangeInserted(adapterPosition, list.size, null)
     }
 
     /**
@@ -101,7 +101,7 @@ class SmartDataImpl<Employer : XProxy<Employer>, VB : ViewBinding, D> : SmartDat
         getData().removeAt(index)
         val adapterPosition = adapter.getAdapterPosition(index)
         adapter.notifyItemRemoved(adapterPosition)
-        notifyItemRangeRemoved(adapterPosition, 1)
+        notifyItemRangeRemoved(adapterPosition, 1, null)
     }
 
     /**
@@ -115,7 +115,7 @@ class SmartDataImpl<Employer : XProxy<Employer>, VB : ViewBinding, D> : SmartDat
         getData().removeRange(start, count)
         val adapterPosition = adapter.getAdapterPosition(start)
         adapter.notifyItemRangeRemoved(adapterPosition, count)
-        notifyItemRangeRemoved(adapterPosition, count)
+        notifyItemRangeRemoved(adapterPosition, count, null)
     }
 
     /**
@@ -130,7 +130,7 @@ class SmartDataImpl<Employer : XProxy<Employer>, VB : ViewBinding, D> : SmartDat
             getData().remove(data)
             val adapterPosition = adapter.getAdapterPosition(indexOf)
             adapter.notifyItemRemoved(adapterPosition)
-            notifyItemRangeRemoved(adapterPosition, 1)
+            notifyItemRangeRemoved(adapterPosition, 1, null)
         }
     }
 
@@ -143,7 +143,7 @@ class SmartDataImpl<Employer : XProxy<Employer>, VB : ViewBinding, D> : SmartDat
         if (list.isEmpty()) return
         getData().removeAll(list)
         adapter.notifyDataSetChanged()//list 在 datas 中的位置可能是不连续的，所以需要刷新全部数据
-        notifyItemRangeRemoved(list.toMutableList())//此处无法判断起始点
+        notifyItemRangeRemoved(list.toMutableList(), null)//此处无法判断起始点
     }
 
     /**
@@ -157,7 +157,7 @@ class SmartDataImpl<Employer : XProxy<Employer>, VB : ViewBinding, D> : SmartDat
         datas.clear()
         val startPosition = adapter.getAdapterPosition(0)
         adapter.notifyItemRangeRemoved(startPosition, temp.size)
-        notifyItemRangeRemoved(startPosition, temp.size)
+        notifyItemRangeRemoved(startPosition, temp.size, null)
     }
 
     /**
@@ -169,7 +169,7 @@ class SmartDataImpl<Employer : XProxy<Employer>, VB : ViewBinding, D> : SmartDat
         if (adapter.isDifferMode()) throw XAdapterException("Differ模式不能使用改方法操作数据，更新数据请使用submitList()方法")
         adapter.setDataList(list)
         adapter.notifyDataSetChanged()
-        notifyChanged()
+        notifyChanged(null)
     }
 
     override fun <L : Collection<D>> refresh(list: L) {
@@ -177,7 +177,7 @@ class SmartDataImpl<Employer : XProxy<Employer>, VB : ViewBinding, D> : SmartDat
         getData().clear()
         getData().addAll(list)
         adapter.notifyDataSetChanged()
-        notifyChanged()
+        notifyChanged(null)
     }
 
     /**
@@ -242,7 +242,7 @@ class SmartDataImpl<Employer : XProxy<Employer>, VB : ViewBinding, D> : SmartDat
         val toAdapterPosition = adapter.getAdapterPosition(toPosition)
 
         adapter.notifyItemMoved(fromAdapterPosition, toAdapterPosition)
-        notifyItemRangeMoved(fromAdapterPosition, toAdapterPosition, toAdapterPosition - fromAdapterPosition)
+        notifyItemRangeMoved(fromAdapterPosition, toAdapterPosition, toAdapterPosition - fromAdapterPosition,null)
     }
 
 
@@ -284,9 +284,9 @@ class SmartDataImpl<Employer : XProxy<Employer>, VB : ViewBinding, D> : SmartDat
         callbacks.remove(callback)
     }
 
-    private fun notifyChanged() {
+    private fun notifyChanged(payload: Any?) {
         callbacks.forEach {
-            it?.onChanged(getData())
+            it?.onChanged(getData(), payload)
         }
     }
 
@@ -296,27 +296,27 @@ class SmartDataImpl<Employer : XProxy<Employer>, VB : ViewBinding, D> : SmartDat
         }
     }
 
-    private fun notifyItemRangeInserted(positionStart: Int, itemCount: Int) {
+    private fun notifyItemRangeInserted(positionStart: Int, itemCount: Int, payload: Any?) {
         callbacks.forEach {
-            it?.onItemRangeInserted(getData(), positionStart, itemCount)
+            it?.onItemRangeInserted(getData(), positionStart, itemCount, payload)
         }
     }
 
-    private fun notifyItemRangeMoved(fromPosition: Int, toPosition: Int, itemCount: Int) {
+    private fun notifyItemRangeMoved(fromPosition: Int, toPosition: Int, itemCount: Int, payload: Any?) {
         callbacks.forEach {
-            it?.onItemRangeMoved(getData(), fromPosition, toPosition, itemCount)
+            it?.onItemRangeMoved(getData(), fromPosition, toPosition, itemCount, payload)
         }
     }
 
-    private fun notifyItemRangeRemoved(positionStart: Int, itemCount: Int) {
+    private fun notifyItemRangeRemoved(positionStart: Int, itemCount: Int, payload: Any?) {
         callbacks.forEach {
-            it?.onItemRangeRemoved(getData(), positionStart, itemCount)
+            it?.onItemRangeRemoved(getData(), positionStart, itemCount, payload)
         }
     }
 
-    private fun notifyItemRangeRemoved(changeDatas: MutableList<D>) {
+    private fun notifyItemRangeRemoved(changeDatas: MutableList<D>, payload: Any?) {
         callbacks.forEach {
-            it?.onItemRangeRemoved(getData(), changeDatas)
+            it?.onItemRangeRemoved(getData(), changeDatas, payload)
         }
     }
 
@@ -329,14 +329,14 @@ class SmartDataImpl<Employer : XProxy<Employer>, VB : ViewBinding, D> : SmartDat
         override fun onInserted(position: Int, count: Int) {
             adapter.notifyItemRangeInserted(adapter.getAdapterPosition(position), count)
             callbacks.forEach {
-                it?.onItemRangeInserted(adapter.getDataList(), adapter.getAdapterPosition(position), count)
+                it?.onItemRangeInserted(adapter.getDataList(), adapter.getAdapterPosition(position), count, null)
             }
         }
 
         override fun onRemoved(position: Int, count: Int) {
             adapter.notifyItemRangeRemoved(adapter.getAdapterPosition(position), count)
             callbacks.forEach {
-                it?.onItemRangeRemoved(adapter.getDataList(), adapter.getAdapterPosition(position), count)
+                it?.onItemRangeRemoved(adapter.getDataList(), adapter.getAdapterPosition(position), count, null)
             }
         }
 
@@ -347,7 +347,7 @@ class SmartDataImpl<Employer : XProxy<Employer>, VB : ViewBinding, D> : SmartDat
                     adapter.getDataList(),
                     adapter.getAdapterPosition(fromPosition),
                     adapter.getAdapterPosition(toPosition),
-                    1
+                    1, null
                 )
             }
         }
