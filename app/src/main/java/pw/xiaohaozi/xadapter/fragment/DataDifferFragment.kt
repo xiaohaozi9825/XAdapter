@@ -61,7 +61,7 @@ class DataDifferFragment : Fragment() {
         }
         binding.rvList.adapter = adapter
         adapter.addOnListChangedCallback(object : ObservableList.OnListChangedCallback<MutableList<VerseInfo>>() {
-            override fun onChanged(sender: MutableList<VerseInfo>) {
+            override fun onChanged(sender: MutableList<VerseInfo>, payload: Any?) {
                 binding.tvItemCount.text = "共${sender.size}条数据"
             }
 
@@ -70,19 +70,19 @@ class DataDifferFragment : Fragment() {
 
             }
 
-            override fun onItemRangeInserted(sender: MutableList<VerseInfo>, positionStart: Int, itemCount: Int) {
+            override fun onItemRangeInserted(sender: MutableList<VerseInfo>, positionStart: Int, itemCount: Int, payload: Any?) {
                 binding.tvItemCount.text = "共${sender.size}条数据"
             }
 
-            override fun onItemRangeMoved(sender: MutableList<VerseInfo>, fromPosition: Int, toPosition: Int, itemCount: Int) {
+            override fun onItemRangeMoved(sender: MutableList<VerseInfo>, fromPosition: Int, toPosition: Int, itemCount: Int, payload: Any?) {
                 binding.tvItemCount.text = "共${sender.size}条数据"
             }
 
-            override fun onItemRangeRemoved(sender: MutableList<VerseInfo>, positionStart: Int, itemCount: Int) {
+            override fun onItemRangeRemoved(sender: MutableList<VerseInfo>, positionStart: Int, itemCount: Int, payload: Any?) {
                 binding.tvItemCount.text = "共${sender.size}条数据"
             }
 
-            override fun onItemRangeRemoved(sender: MutableList<VerseInfo>, changeDatas: MutableList<VerseInfo>?) {
+            override fun onItemRangeRemoved(sender: MutableList<VerseInfo>, changeDatas: MutableList<VerseInfo>?, payload: Any?) {
                 binding.tvItemCount.text = "共${sender.size}条数据"
             }
         })

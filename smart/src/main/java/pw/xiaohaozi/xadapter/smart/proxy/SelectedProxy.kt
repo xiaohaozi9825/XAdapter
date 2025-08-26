@@ -43,6 +43,7 @@ interface SelectedProxy<Employer : XProxy<Employer>, VB : ViewBinding, D> :
 
     //是否允许取消，默认允许
     var isAllowCancel: Boolean
+
     /**
      * 设置选中事件监听
      * @param id 触发选中事件的 view，默认为item
@@ -55,6 +56,7 @@ interface SelectedProxy<Employer : XProxy<Employer>, VB : ViewBinding, D> :
         payload: Any? = null,
         listener: OnItemSelectListener<Employer, D>
     ): Employer
+
     /**
      * 设置选中事件监听
      * @param id 触发选中事件的 view，默认为item
@@ -68,6 +70,7 @@ interface SelectedProxy<Employer : XProxy<Employer>, VB : ViewBinding, D> :
         permittedTypes: Array<Int>,
         listener: OnItemSelectListener<Employer, D>
     ): Employer
+
     /**
      * 设置选中事件监听
      * @param id 触发选中事件的 view，默认为item
@@ -104,8 +107,8 @@ interface SelectedProxy<Employer : XProxy<Employer>, VB : ViewBinding, D> :
     fun isAutoCancel(isAutoCancel: Boolean = true): Employer
 
     /**
-     * 设置是否允许点击取消选中，设置后无法取消选中
-     * @param isAllowCancel 如果该值为 true，则点击后可以取消选择。否则点击无法取消选择
+     * 设置是否允许用户点击取消选中，非用户点击不受影响
+     * @param isAllowCancel true：允许用户点击取消，false：禁止用户点击取消
      */
     fun isAllowCancel(isAllowCancel: Boolean = true): Employer
 
@@ -116,7 +119,7 @@ interface SelectedProxy<Employer : XProxy<Employer>, VB : ViewBinding, D> :
      * @param fromUser 选择事件是否由用户发起的
      * @return 选中索引
      */
-    fun setSelectAt(position: Int, isSelect: Boolean, fromUser: Boolean = false): Int
+    fun setSelectAt(position: Int, isSelect: Boolean, fromUser: Boolean = false, payload: Any? = null): Int
 
     /**
      * 设置指定 item 为选中状态
@@ -125,7 +128,7 @@ interface SelectedProxy<Employer : XProxy<Employer>, VB : ViewBinding, D> :
      * @param fromUser 选择事件是否由用户发起的
      * @return 选中索引
      */
-    fun setSelect(data: D, isSelect: Boolean, fromUser: Boolean = false): Int
+    fun setSelect(data: D, isSelect: Boolean, fromUser: Boolean = false, payload: Any? = null): Int
 
 
     /**
@@ -137,12 +140,12 @@ interface SelectedProxy<Employer : XProxy<Employer>, VB : ViewBinding, D> :
     /**
      *  全选
      */
-    fun selectAll(): Int
+    fun selectAll(payload: Any?= null): Int
 
     /**
      * 取消全选
      */
-    fun deselectAll(): Int
+    fun deselectAll(payload: Any?= null): Int
 
     /**
      * 获取选中的数据

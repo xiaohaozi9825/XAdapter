@@ -1,5 +1,6 @@
 package pw.xiaohaozi.xadapter.smart.ext
 
+import android.view.View
 import androidx.lifecycle.LifecycleOwner
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.ItemTouchHelper.DOWN
@@ -368,29 +369,47 @@ fun <VB : ViewBinding, D> SmartProvider<VB, D>.dragSort(
 }
 
 
-//
-///**
-// * 设置为单选
-// * 此方法不会触发点击事件，需要手动编写点击事件与选择事件
-// */
-//fun <A : SmartAdapter<VB, D>, VB : ViewBinding, D> A.radio(): A {
-//    this.setMaxSelectedCount(1)
-//        .allowCancel(false)
-//    return this
-//}
-//
-///**
-// * 设置为单选
-// * 此方法会触发点击事件，改方法会设置选择事件，并回调回来
-// */
-//fun <A : SmartAdapter<VB, D>, VB : ViewBinding, D> A.radio(
-//    @IdRes id: Int? = null,
-//    listener: A.(holder: SmartHolder<VB>?, data: D?, position: Int, index: Int, view: View?) -> Unit
-//): A {
-//    this.setMaxSelectedCount(1)
-//        .allowCancel(false)
-//        .setOnSelectedListener(id) { holder, data, position, index, view ->
-//            listener.invoke(this@radio, holder, data, position, index, view)
-//        }
-//    return this
-//}
+/**
+ * 设置为单选
+ * 此方法会触发点击事件，改方法会设置选择事件，并回调回来
+ */
+fun <A : SmartAdapter<VB, D>, VB : ViewBinding, D> A.singleSelect(
+    id: Int? = null,
+    payload: Any? = null,
+    listener: A.(data: D, position: Int, index: Int, fromUser: Boolean) -> Unit
+): A {
+    this.setMaxSelectCount(1)
+        .isAllowCancel(false)
+        .setOnItemSelectListener(id, payload) { data, position, index, fromUser ->
+            listener.invoke(this@singleSelect, data, position, index, fromUser)
+        }
+    return this
+}
+
+fun <A : SmartAdapter<VB, D>, VB : ViewBinding, D> A.singleSelect(
+    id: Int? = null,
+    payload: Any? = null,
+    permittedTypes: Array<Int>,
+    listener: A.(data: D, position: Int, index: Int, fromUser: Boolean) -> Unit
+): A {
+    this.setMaxSelectCount(1)
+        .isAllowCancel(false)
+        .setOnItemSelectListener(id, payload, permittedTypes) { data, position, index, fromUser ->
+            listener.invoke(this@singleSelect, data, position, index, fromUser)
+        }
+    return this
+}
+
+fun <A : SmartAdapter<VB, D>, VB : ViewBinding, D> A.singleSelect(
+    id: Int? = null,
+    payload: Any? = null,
+    permittedTypes: Array<Class<*>>,
+    listener: A.(data: D, position: Int, index: Int, fromUser: Boolean) -> Unit
+): A {
+    this.setMaxSelectCount(1)
+        .isAllowCancel(false)
+        .setOnItemSelectListener(id, payload, permittedTypes) { data, position, index, fromUser ->
+            listener.invoke(this@singleSelect, data, position, index, fromUser)
+        }
+    return this
+}

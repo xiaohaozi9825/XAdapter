@@ -7,14 +7,19 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
 import androidx.viewbinding.ViewBinding
 import coil.load
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
+import kotlinx.coroutines.launch
 import pw.xiaohaozi.xadapter.R
 import pw.xiaohaozi.xadapter.databinding.FragmentSelectedBinding
 import pw.xiaohaozi.xadapter.databinding.ItemCameraBinding
 import pw.xiaohaozi.xadapter.databinding.ItemImageSelectedBinding
 import pw.xiaohaozi.xadapter.smart.adapter.SmartAdapter
 import pw.xiaohaozi.xadapter.smart.ext.createAdapter
+import pw.xiaohaozi.xadapter.smart.ext.singleSelect
 import pw.xiaohaozi.xadapter.smart.ext.toAdapter
 import pw.xiaohaozi.xadapter.smart.ext.withType
 
@@ -43,6 +48,16 @@ class ImageSelectFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         adapter.refresh(list2)
+//
+//        lifecycleScope.launch {
+//            var pos = 0
+//            while (isActive) {
+//                delay(1000)
+//                val dataList = adapter.getDataList()
+//                adapter.setSelectAt(pos % dataList.size, true,true)
+//                pos++
+//            }
+//        }
     }
 
 
@@ -75,21 +90,29 @@ class ImageSelectFragment : Fragment() {
     private fun function2(): SmartAdapter<ViewBinding, Any?> {
         //泛型VB 确定布局文件，泛型D确定数据类型，回调函数中绑定数据
         val adapter = createAdapter()
-            .setOnItemSelectListener(
+//            .setOnItemSelectListener(
+//                payload = "select",
+////                permittedTypes = arrayOf(java.lang.Integer::class.java)
+//                permittedTypes = arrayOf(Int.MIN_VALUE + 1)
+//            ) { data, position, index, fromUser ->
+//                binding.tvSelectedCount.text = "已选${getSelectedList().size}张"
+//            }
+//            .setMaxSelectCount(3)
+//            .isAutoCancel(false)
+//            .isAllowCancel(true)
+            .singleSelect(
                 payload = "select",
 //                permittedTypes = arrayOf(java.lang.Integer::class.java)
-                permittedTypes = arrayOf(Int.MIN_VALUE + 1)
+//                permittedTypes = arrayOf(Int.MIN_VALUE + 1)
             ) { data, position, index, fromUser ->
                 binding.tvSelectedCount.text = "已选${getSelectedList().size}张"
-            }.setOnSelectAllListener { selectedCache, isSelectedAll ->
+            }
+            .setOnSelectAllListener { selectedCache, isSelectedAll ->
                 if (binding.ivSelectedAll.isSelected != isSelectedAll) {
                     binding.ivSelectedAll.isSelected = isSelectedAll
                     binding.tvSelectedAll.text = if (isSelectedAll) "全不选" else "全选"
                 }
             }
-//            .setMaxSelectCount(9)
-//            .isAutoCancel(false)
-//            .isAllowCancel(false)
             .withType<ItemCameraBinding, Any?> {
 
             }
