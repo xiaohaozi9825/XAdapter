@@ -88,7 +88,7 @@ open class AdapterSelectedImpl<Employer : XProxy<Employer>, VB : ViewBinding, D>
             } else {
                 selectedCache.removeAll(selectedCache.filter { !sender.contains(it) }.toSet())
             }
-            curSelectedAllStatus = false
+            curSelectedAllStatus = dpSelectAll()
 
             val start = 0
             val end = sender.size
@@ -96,7 +96,7 @@ open class AdapterSelectedImpl<Employer : XProxy<Employer>, VB : ViewBinding, D>
                 val adapterPosition = adapter.getAdapterPosition(position)
                 notifyItemSelectedChanges(sender[position], adapterPosition, -1, false)
             }
-            notifySelectedDataChanges(false)
+            notifySelectedDataChanges(curSelectedAllStatus)
         }
 
         //更新部分数据时回调
