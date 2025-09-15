@@ -88,7 +88,7 @@ open class AdapterSelectedImpl<Employer : XProxy<Employer>, VB : ViewBinding, D>
             } else {
                 selectedCache.removeAll(selectedCache.filter { !sender.contains(it) }.toSet())
             }
-            curSelectedAllStatus = false
+            curSelectedAllStatus = dpSelectAll()
 
             val start = 0
             val end = sender.size
@@ -96,7 +96,7 @@ open class AdapterSelectedImpl<Employer : XProxy<Employer>, VB : ViewBinding, D>
                 val adapterPosition = adapter.getAdapterPosition(position)
                 notifyItemSelectedChanges(sender[position], adapterPosition, -1, false)
             }
-            notifySelectedDataChanges(false)
+            notifySelectedDataChanges(curSelectedAllStatus)
         }
 
         //更新部分数据时回调
@@ -408,17 +408,9 @@ open class AdapterSelectedImpl<Employer : XProxy<Employer>, VB : ViewBinding, D>
             val selectedSize = selectedCache.size
             if (selectedSize >= maxSelectCount!!) {//如果超出了最大选择数
                 if (!isAutoCancel) return -1//超出范围，不自动取消，也无法选择更多，操作失败
-                //允许用户取消
-                //isAllowCancel = true fromUser = true ==> false
-                //isAllowCancel = true fromUser = false ==> false
-                //禁止用户取消
-                //isAllowCancel = false fromUser = false ==> true
-                //isAllowCancel = false fromUser = true ==> false
-                if (!(isAllowCancel || fromUser)) return -1//如果不允许取消，则无法选择，操作失败
-                //超出范围自动取消
                 while (selectedCache.size >= (maxSelectCount!!)) {
                     val first = selectedCache.firstOrNull() ?: break
-                    cancelCheck(first, false, payload)
+                    if (cancelCheck(first, false, payload) == -1) break
                 }
             }
         }
