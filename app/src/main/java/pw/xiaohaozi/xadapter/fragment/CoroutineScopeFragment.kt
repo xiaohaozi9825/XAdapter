@@ -20,8 +20,7 @@ import pw.xiaohaozi.xadapter.databinding.ItemCameraBinding
 import pw.xiaohaozi.xadapter.databinding.ItemImageSelectedBinding
 import pw.xiaohaozi.xadapter.smart.adapter.SmartAdapter
 import pw.xiaohaozi.xadapter.smart.ext.createLifecycleAdapter
-import pw.xiaohaozi.xadapter.smart.ext.toAdapter
-import pw.xiaohaozi.xadapter.smart.ext.withType
+
 
 /**
  * item选择

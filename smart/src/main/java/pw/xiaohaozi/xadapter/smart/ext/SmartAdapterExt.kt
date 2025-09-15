@@ -1,6 +1,5 @@
 package pw.xiaohaozi.xadapter.smart.ext
 
-import android.view.View
 import androidx.lifecycle.LifecycleOwner
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.ItemTouchHelper.DOWN
@@ -25,10 +24,10 @@ import pw.xiaohaozi.xadapter.smart.widgets.SwipeItemLayout
  * 创建Adapter
  *****************************************************/
 typealias OnAdapterInitHolder<VB, D> = SmartAdapter<VB, D>.(holder: XHolder<VB>) -> Unit
-typealias OnProviderInitHolder<VB, D> = SmartProvider<VB, D>.(holder: XHolder<VB>) -> Unit
+typealias OnProviderInitHolder<AVB, AD, VB, D> = SmartProvider<AVB, AD, VB, D>.(holder: XHolder<VB>) -> Unit
 typealias OnAdapterBindHolder<VB, D> = SmartAdapter<VB, D>.(params: OnBindParams<VB, D>) -> Unit
-typealias OnProviderBindHolder<VB, D> = SmartProvider<VB, D>.(params: OnBindParams<VB, D>) -> Unit
-typealias OnCustomType = (SmartAdapter<ViewBinding, Any?>.(data: Any?, position: Int) -> Int?)
+typealias OnProviderBindHolder<AVB, AD, VB, D> = SmartProvider<AVB, AD, VB, D>.(params: OnBindParams<VB, D>) -> Unit
+typealias OnCustomType<VB, D> = (SmartAdapter<VB, D>.(data: D, position: Int) -> Int?)
 typealias OnItemId<VB, D> = (SmartAdapter<VB, D>.(position: Int) -> Long)
 
 data class OnBindParams<VB : ViewBinding, D>(
@@ -45,7 +44,7 @@ data class OnBindParams<VB : ViewBinding, D>(
 inline fun <VB : ViewBinding, D> createAdapter(
     itemType: Int = 0,
     crossinline onItemId: OnItemId<VB, D> = { NO_ID },
-    crossinline init: (SmartProvider<VB, D>.() -> Unit) = {},
+    crossinline init: (SmartProvider<VB, D, VB, D>.() -> Unit) = {},
     crossinline create: OnAdapterInitHolder<VB, D> = {},
     crossinline bind: OnAdapterBindHolder<VB, D>,
 ): SmartAdapter<VB, D> {
@@ -55,7 +54,7 @@ inline fun <VB : ViewBinding, D> createAdapter(
             return onItemId.invoke(this, position)
         }
     }
-    val provider = object : SmartProvider<VB, D>(adapter) {
+    val provider = object : SmartProvider<VB, D, VB, D>(adapter) {
 
         override fun onCreated(holder: XHolder<VB>) {
             create.invoke(adapter, holder)
@@ -79,7 +78,7 @@ inline fun <VB : ViewBinding, D> createAdapter(
 inline fun <VB : ViewBinding, D> LifecycleOwner.createLifecycleAdapter(
     itemType: Int = 0,
     crossinline onItemId: OnItemId<VB, D> = { NO_ID },
-    crossinline init: (SmartProvider<VB, D>.() -> Unit) = {},
+    crossinline init: (SmartProvider<VB, D, VB, D>.() -> Unit) = {},
     crossinline create: OnAdapterInitHolder<VB, D> = {},
     crossinline bind: OnAdapterBindHolder<VB, D>,
 ): SmartAdapter<VB, D> {
@@ -94,11 +93,11 @@ inline fun <VB : ViewBinding, D> LifecycleOwner.createLifecycleAdapter(
  *
  * @param custom 动态生成 itemType
  */
-fun createAdapter(
-    onItemId: OnItemId<ViewBinding, Any?>? = null,
-    custom: OnCustomType? = null,
-): SmartAdapter<ViewBinding, Any?> {
-    val adapter = object : SmartAdapter<ViewBinding, Any?>() {
+fun <VB : ViewBinding, D> createTypeAdapter(
+    onItemId: OnItemId<VB, D>? = null,
+    custom: OnCustomType<VB, D>? = null,
+): SmartAdapter<VB, D> {
+    val adapter = object : SmartAdapter<VB, D>() {
         override fun getItemId(position: Int): Long {
             return onItemId?.invoke(this, position) ?: super.getItemId(position)
         }
@@ -111,8 +110,24 @@ fun createAdapter(
     return adapter
 }
 
+fun createAdapter(
+    onItemId: OnItemId<ViewBinding, Any?>? = null,
+    custom: OnCustomType<ViewBinding, Any?>? = null,
+): SmartAdapter<ViewBinding, Any?> {
+    return createTypeAdapter(onItemId, custom)
+}
+
+fun <VB : ViewBinding, D> LifecycleOwner.createLifecycleTypeAdapter(
+    custom: OnCustomType<VB, D>? = null,
+    onItemId: OnItemId<VB, D> = { NO_ID }
+): SmartAdapter<VB, D> {
+    val adapter = createTypeAdapter(onItemId, custom)
+    adapter.bindLifecycle(this)
+    return adapter
+}
+
 fun LifecycleOwner.createLifecycleAdapter(
-    custom: OnCustomType? = null,
+    custom: OnCustomType<ViewBinding, Any?>? = null,
     onItemId: OnItemId<ViewBinding, Any?> = { NO_ID }
 ): SmartAdapter<ViewBinding, Any?> {
     val adapter = createAdapter(onItemId, custom)
@@ -124,34 +139,18 @@ fun LifecycleOwner.createLifecycleAdapter(
  * 多布局切换
  * 返回Provider
  */
+@Deprecated(
+    "该扩展方法已改为SmartAdapter内置方法了,以后版本可能会移除该方法。",
+    ReplaceWith("withType(isFixed, itemType, init, create, bind)")
+)
 inline fun <VB : ViewBinding, D : Any?> SmartAdapter<ViewBinding, Any?>.withType(
     isFixed: Boolean? = null,
     itemType: Int? = null,
-    crossinline init: (SmartProvider<VB, D>.() -> Unit) = {},
-    crossinline create: OnProviderInitHolder<VB, D> = {},
-    crossinline bind: OnProviderBindHolder<VB, D>,
-): SmartProvider<VB, D> {
-    val provider = object : SmartProvider<VB, D>(this) {
-
-        override fun onCreated(holder: XHolder<VB>) {
-            create.invoke(this, holder)
-        }
-
-        override fun onBind(holder: XHolder<VB>, data: D, position: Int) {
-        }
-
-        override fun onBind(holder: XHolder<VB>, data: D, position: Int, payloads: List<Any?>) {
-            bind.invoke(this, OnBindParams(holder, data, position, payloads))
-        }
-
-        override fun isFixedViewType(): Boolean {
-            return isFixed ?: false
-        }
-
-    }
-    this.addProvider(provider, itemType)
-    init.invoke(provider)
-    return provider
+    crossinline init: (SmartProvider<ViewBinding, Any?, VB, D>.() -> Unit) = {},
+    crossinline create: OnProviderInitHolder<ViewBinding, Any?, VB, D> = {},
+    crossinline bind: OnProviderBindHolder<ViewBinding, Any?, VB, D>,
+): SmartProvider<ViewBinding, Any?, VB, D> {
+    return withType(isFixed, itemType, init, create, bind)
 }
 
 
@@ -159,43 +158,27 @@ inline fun <VB : ViewBinding, D : Any?> SmartAdapter<ViewBinding, Any?>.withType
  * 多布局切换
  * 返回Provider
  */
-inline fun <reified VB : ViewBinding, D : Any?> SmartProvider<out ViewBinding, out Any?>.withType(
+@Deprecated(
+    "该扩展方法已改为SmartProvider内置方法了,以后版本可能会移除该方法。",
+    ReplaceWith("withType(isFixed, itemType, init, create, bind)")
+)
+inline fun <reified VB : ViewBinding, D : Any?> SmartProvider<ViewBinding, Any?, VB, D>.withType(
     isFixed: Boolean? = null,
     itemType: Int? = null,
-    crossinline init: (SmartProvider<VB, D>.() -> Unit) = {},
-    crossinline create: OnProviderInitHolder<VB, D> = {},
-    crossinline bind: OnProviderBindHolder<VB, D>,
-): SmartProvider<VB, D> {
-    val provider = object : SmartProvider<VB, D>(adapter) {
-
-        override fun onCreated(holder: XHolder<VB>) {
-            create.invoke(this, holder)
-        }
-
-        override fun onBind(holder: XHolder<VB>, data: D, position: Int) {
-
-        }
-
-        override fun onBind(holder: XHolder<VB>, data: D, position: Int, payloads: List<Any?>) {
-            bind.invoke(this, OnBindParams(holder, data, position, payloads))
-//            bind.invoke(this, OnBind(holder, data, position, payloads))
-        }
-
-        override fun isFixedViewType(): Boolean {
-            return isFixed ?: false
-        }
-    }
-    adapter.addProvider(provider, itemType)
-    init.invoke(provider)
-    return provider
+    crossinline init: (SmartProvider<ViewBinding, Any?, VB, D>.() -> Unit) = {},
+    crossinline create: OnProviderInitHolder<ViewBinding, Any?, VB, D> = {},
+    crossinline bind: OnProviderBindHolder<ViewBinding, Any?, VB, D>,
+): SmartProvider<ViewBinding, Any?, VB, D> {
+    return withType(isFixed, itemType, init, create, bind)
 }
 
 
 /**
  * Provider切换为Adapter
  */
-fun <VB : ViewBinding, D> SmartProvider<VB, D>.toAdapter(): SmartAdapter<ViewBinding, Any?> {
-    return this.adapter as SmartAdapter<ViewBinding, Any?>
+@Deprecated("该扩展方法已改为SmartProvider内置方法了,以后版本可能会移除该方法。", ReplaceWith("this.toAdapter()"))
+fun <VB : ViewBinding, D> SmartProvider<ViewBinding, Any?, VB, D>.toAdapter(): SmartAdapter<ViewBinding, Any?> {
+    return this.toAdapter()
 }
 
 
@@ -264,13 +247,13 @@ fun <T : SmartAdapter<*, *>> T.swipeDelete(
  * @param onMove 被拖拽的item多拽到其他item位置上是调用,该参数会替换掉现有的onMove逻辑
  * @param swap 当两个item交换时调用
  */
-fun <VB : ViewBinding, D> SmartProvider<VB, D>.swipeDelete(
+fun <AVB : ViewBinding, AD, PVB : ViewBinding, PD> SmartProvider<AVB, AD, PVB, PD>.swipeDelete(
     threshold: Float = 0.5f,
     flags: (recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder) -> Int = { _, holder -> if (holder.itemViewType == getItemViewType()) START or END else 0 },
     start: ((viewHolder: RecyclerView.ViewHolder?) -> Unit)? = null,
     end: ((recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder) -> Unit)? = null,
     swipe: ((viewHolder: RecyclerView.ViewHolder, direction: Int) -> Boolean)? = null,
-): SmartProvider<VB, D> {
+): SmartProvider<AVB, AD, PVB, PD> {
     adapter.addOnRecyclerViewChanges(object : XAdapter.OnRecyclerViewChanges {
         override fun onAttachedToRecyclerView(recyclerView: RecyclerView) {
             ItemTouchHelper(ItemSwipe(SwipeDelete(threshold, flags, start, end, swipe)))
@@ -337,7 +320,7 @@ fun <T : SmartAdapter<*, *>> T.dragSort(
  * @param onMove 被拖拽的item多拽到其他item位置上是调用,该参数会替换掉现有的onMove逻辑
  * @param swap 当两个item交换时调用
  */
-fun <VB : ViewBinding, D> SmartProvider<VB, D>.dragSort(
+fun <AVB : ViewBinding, AD, PVB : ViewBinding, PD> SmartProvider<AVB, AD, PVB, PD>.dragSort(
     threshold: Float = 0.1f,
     flags: (recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder) -> Int = { _, holder -> if (holder.itemViewType == getItemViewType()) ItemTouchHelper.UP or ItemTouchHelper.DOWN or ItemTouchHelper.START or ItemTouchHelper.END else 0 },
     start: ((viewHolder: RecyclerView.ViewHolder?) -> Unit)? = null,
@@ -354,7 +337,7 @@ fun <VB : ViewBinding, D> SmartProvider<VB, D>.dragSort(
         fromPosition: Int,
         toPosition: Int,
     ) -> Unit)? = null,
-): SmartProvider<VB, D> {
+): SmartProvider<AVB, AD, PVB, PD> {
     adapter.addOnRecyclerViewChanges(object : XAdapter.OnRecyclerViewChanges {
         override fun onAttachedToRecyclerView(recyclerView: RecyclerView) {
             ItemTouchHelper(ItemDrag(DragSort(threshold, flags, start, end, onMove, swap)))

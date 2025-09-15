@@ -13,11 +13,11 @@ import pw.xiaohaozi.xadapter.databinding.ItemHomeTitleBinding
 import pw.xiaohaozi.xadapter.enableEdgeToEdge
 import pw.xiaohaozi.xadapter.fragment.CheckFragment
 import pw.xiaohaozi.xadapter.fragment.ClickFragment
+import pw.xiaohaozi.xadapter.fragment.ConcatAdapterFragment
 import pw.xiaohaozi.xadapter.fragment.CoroutineScopeFragment
 import pw.xiaohaozi.xadapter.fragment.DataDifferFragment
 import pw.xiaohaozi.xadapter.fragment.DataOperationFragment
 import pw.xiaohaozi.xadapter.fragment.DragSortFragment
-import pw.xiaohaozi.xadapter.fragment.ConcatAdapterFragment
 import pw.xiaohaozi.xadapter.fragment.GroupFragment
 import pw.xiaohaozi.xadapter.fragment.ImageSelectFragment
 import pw.xiaohaozi.xadapter.fragment.LongClickFragment
@@ -30,8 +30,6 @@ import pw.xiaohaozi.xadapter.fragment.TextChangeFragment
 import pw.xiaohaozi.xadapter.info.HomeInfo
 import pw.xiaohaozi.xadapter.info.VerseInfo
 import pw.xiaohaozi.xadapter.smart.ext.createAdapter
-import pw.xiaohaozi.xadapter.smart.ext.toAdapter
-import pw.xiaohaozi.xadapter.smart.ext.withType
 
 
 class MainActivity : AppCompatActivity() {
