@@ -1,14 +1,15 @@
 package pw.xiaohaozi.xadapter.smart.adapter
 
+import android.util.Log
+import androidx.core.util.forEach
 import androidx.viewbinding.ViewBinding
 import pw.xiaohaozi.xadapter.smart.XAdapterException
 import pw.xiaohaozi.xadapter.smart.entity.DEFAULT_PAGE
 import pw.xiaohaozi.xadapter.smart.entity.EMPTY
 import pw.xiaohaozi.xadapter.smart.entity.FOOTER
 import pw.xiaohaozi.xadapter.smart.entity.HEADER
-import pw.xiaohaozi.xadapter.smart.ext.OnBindParams
 import pw.xiaohaozi.xadapter.smart.ext.OnProviderBindHolder
-import pw.xiaohaozi.xadapter.smart.ext.OnProviderInitHolder
+import pw.xiaohaozi.xadapter.smart.ext.OnProviderCreatedHolder
 import pw.xiaohaozi.xadapter.smart.holder.XHolder
 import pw.xiaohaozi.xadapter.smart.impl.AdapterSelectedImpl
 import pw.xiaohaozi.xadapter.smart.impl.EventImpl
@@ -19,6 +20,7 @@ import pw.xiaohaozi.xadapter.smart.proxy.EventProxy
 import pw.xiaohaozi.xadapter.smart.proxy.SelectedProxy
 import pw.xiaohaozi.xadapter.smart.proxy.SmartDataProxy
 import pw.xiaohaozi.xadapter.smart.proxy.XEmployer
+import pw.xiaohaozi.xadapter.smart.ext.OnBindParams as OnBindParams1
 
 /**
  * Adapter集
@@ -232,24 +234,24 @@ open class SmartAdapter<VB : ViewBinding, D>(
      * 多布局切换
      * 返回Provider
      */
-    inline fun <PVB : VB, PD : D> withType(
+    inline fun <pvb : VB, pd : D> withType(
         isFixed: Boolean? = null,
         itemType: Int? = null,
-        crossinline init: (SmartProvider<VB, D, PVB, PD>.() -> Unit) = {},
-        crossinline create: OnProviderInitHolder<VB, D, PVB, PD> = {},
-        crossinline bind: OnProviderBindHolder<VB, D, PVB, PD>,
-    ): SmartProvider<VB, D, PVB, PD> {
-        val provider = object : SmartProvider<VB, D, PVB, PD>(this) {
+        crossinline init: (SmartProvider<VB, D, pvb, pd>.() -> Unit) = {},
+        crossinline created: OnProviderCreatedHolder<VB, D, pvb, pd> = {},
+        crossinline bind: OnProviderBindHolder<VB, D, pvb, pd>,
+    ): SmartProvider<VB, D, pvb, pd> {
+        val provider = object : SmartProvider<VB, D, pvb, pd>(this) {
 
-            override fun onCreated(holder: XHolder<PVB>) {
-                create.invoke(this, holder)
+            override fun onCreated(holder: XHolder<pvb>) {
+                created.invoke(this, holder)
             }
 
-            override fun onBind(holder: XHolder<PVB>, data: PD, position: Int) {
+            override fun onBind(holder: XHolder<pvb>, data: pd, position: Int) {
             }
 
-            override fun onBind(holder: XHolder<PVB>, data: PD, position: Int, payloads: List<Any?>) {
-                bind.invoke(this, OnBindParams(holder, data, position, payloads))
+            override fun onBind(holder: XHolder<pvb>, data: pd, position: Int, payloads: List<Any?>) {
+                bind.invoke(this, OnBindParams1(holder, data, position, payloads))
             }
 
             override fun isFixedViewType(): Boolean {
@@ -257,9 +259,8 @@ open class SmartAdapter<VB : ViewBinding, D>(
             }
 
         }
-        this.addProvider(provider, itemType)
+        addProvider(provider, itemType)
         init.invoke(provider)
         return provider
     }
-
 }

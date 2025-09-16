@@ -1,5 +1,7 @@
 package pw.xiaohaozi.xadapter.smart.ext
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.lifecycle.LifecycleOwner
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.ItemTouchHelper.DOWN
@@ -24,7 +26,7 @@ import pw.xiaohaozi.xadapter.smart.widgets.SwipeItemLayout
  * 创建Adapter
  *****************************************************/
 typealias OnAdapterInitHolder<VB, D> = SmartAdapter<VB, D>.(holder: XHolder<VB>) -> Unit
-typealias OnProviderInitHolder<AVB, AD, VB, D> = SmartProvider<AVB, AD, VB, D>.(holder: XHolder<VB>) -> Unit
+typealias OnProviderCreatedHolder<AVB, AD, VB, D> = SmartProvider<AVB, AD, VB, D>.(holder: XHolder<VB>) -> Unit
 typealias OnAdapterBindHolder<VB, D> = SmartAdapter<VB, D>.(params: OnBindParams<VB, D>) -> Unit
 typealias OnProviderBindHolder<AVB, AD, VB, D> = SmartProvider<AVB, AD, VB, D>.(params: OnBindParams<VB, D>) -> Unit
 typealias OnCustomType<VB, D> = (SmartAdapter<VB, D>.(data: D, position: Int) -> Int?)
@@ -72,6 +74,7 @@ inline fun <VB : ViewBinding, D> createAdapter(
     return adapter
 }
 
+
 /**
  * 创建单布局Adapter
  */
@@ -86,6 +89,7 @@ inline fun <VB : ViewBinding, D> LifecycleOwner.createLifecycleAdapter(
     adapter.bindLifecycle(this)
     return adapter
 }
+
 
 /**
  * 创建通用Adapter，单布局和多布局都可以使用，建议创建多布局时使用。
@@ -133,52 +137,6 @@ fun LifecycleOwner.createLifecycleAdapter(
     val adapter = createAdapter(onItemId, custom)
     adapter.bindLifecycle(this)
     return adapter
-}
-
-/**
- * 多布局切换
- * 返回Provider
- */
-@Deprecated(
-    "该扩展方法已改为SmartAdapter内置方法了,以后版本可能会移除该方法。",
-    ReplaceWith("withType(isFixed, itemType, init, create, bind)")
-)
-inline fun <VB : ViewBinding, D : Any?> SmartAdapter<ViewBinding, Any?>.withType(
-    isFixed: Boolean? = null,
-    itemType: Int? = null,
-    crossinline init: (SmartProvider<ViewBinding, Any?, VB, D>.() -> Unit) = {},
-    crossinline create: OnProviderInitHolder<ViewBinding, Any?, VB, D> = {},
-    crossinline bind: OnProviderBindHolder<ViewBinding, Any?, VB, D>,
-): SmartProvider<ViewBinding, Any?, VB, D> {
-    return withType(isFixed, itemType, init, create, bind)
-}
-
-
-/**
- * 多布局切换
- * 返回Provider
- */
-@Deprecated(
-    "该扩展方法已改为SmartProvider内置方法了,以后版本可能会移除该方法。",
-    ReplaceWith("withType(isFixed, itemType, init, create, bind)")
-)
-inline fun <reified VB : ViewBinding, D : Any?> SmartProvider<ViewBinding, Any?, VB, D>.withType(
-    isFixed: Boolean? = null,
-    itemType: Int? = null,
-    crossinline init: (SmartProvider<ViewBinding, Any?, VB, D>.() -> Unit) = {},
-    crossinline create: OnProviderInitHolder<ViewBinding, Any?, VB, D> = {},
-    crossinline bind: OnProviderBindHolder<ViewBinding, Any?, VB, D>,
-): SmartProvider<ViewBinding, Any?, VB, D> {
-    return withType(isFixed, itemType, init, create, bind)
-}
-
-
-/**
- * Provider切换为Adapter
- */
-@Deprecated("该扩展方法已改为SmartProvider内置方法了,以后版本可能会移除该方法。", ReplaceWith("this.toAdapter()"))
-fun <VB : ViewBinding, D> SmartProvider<ViewBinding, Any?, VB, D>.toAdapter(): SmartAdapter<ViewBinding, Any?> {
-    return this.toAdapter()
 }
 
 

@@ -4,10 +4,10 @@ import androidx.viewbinding.ViewBinding
 import pw.xiaohaozi.xadapter.smart.adapter.SmartAdapter
 import pw.xiaohaozi.xadapter.smart.ext.OnBindParams
 import pw.xiaohaozi.xadapter.smart.ext.OnProviderBindHolder
+import pw.xiaohaozi.xadapter.smart.ext.OnProviderCreatedHolder
 import pw.xiaohaozi.xadapter.smart.holder.XHolder
 import pw.xiaohaozi.xadapter.smart.impl.EventImpl
 import pw.xiaohaozi.xadapter.smart.proxy.EventProxy
-import pw.xiaohaozi.xadapter.smart.ext.OnProviderInitHolder as OnProviderInitHolder1
 
 /**
  *
@@ -17,20 +17,20 @@ import pw.xiaohaozi.xadapter.smart.ext.OnProviderInitHolder as OnProviderInitHol
  * github：https://github.com/xiaohaozi9825
  * 创建时间：2024/6/9 22:08
  */
-abstract class SmartProvider<AVB : ViewBinding, AD, VB : ViewBinding, D>(
+abstract class SmartProvider<AVB : ViewBinding, AD, PVB : ViewBinding, PD>(
     override val adapter: SmartAdapter<AVB, AD>, //
-    private val listener: EventImpl<SmartProvider<AVB, AD, VB, D>, VB, D> = EventImpl(),//
-) : XProvider<VB, D>(adapter), EventProxy<SmartProvider<AVB, AD, VB, D>, VB, D> by listener {
+    private val listener: EventImpl<SmartProvider<AVB, AD, PVB, PD>, PVB, PD> = EventImpl(),//
+) : XProvider<PVB, PD>(adapter), EventProxy<SmartProvider<AVB, AD, PVB, PD>, PVB, PD> by listener {
     init {
         initProxy()
     }
 
 
-    override var employer: SmartProvider<AVB, AD, VB, D>
+    override var employer: SmartProvider<AVB, AD, PVB, PD>
         get() = this
         set(value) {}
 
-    override fun initProxy(employer: SmartProvider<AVB, AD, VB, D>) {
+    override fun initProxy(employer: SmartProvider<AVB, AD, PVB, PD>) {
         listener.initProxy(employer)
     }
 
@@ -41,31 +41,31 @@ abstract class SmartProvider<AVB : ViewBinding, AD, VB : ViewBinding, D>(
     override fun isFixedViewType() = false
 
 
-    fun getSmartAdapter(): SmartAdapter<ViewBinding, Any?> {
-        return adapter as SmartAdapter<ViewBinding, Any?>
+    fun getSmartAdapter(): SmartAdapter<AVB, AD> {
+        return adapter
     }
 
     /**
      * 多布局切换
      * 返回Provider
      */
-    inline fun <PVB : AVB, PD : AD> withType(
+    inline fun <pvb : AVB, pd : AD> withType(
         isFixed: Boolean? = null,
         itemType: Int? = null,
-        crossinline init: (SmartProvider<AVB, AD, PVB, PD>.() -> Unit) = {},
-        crossinline create: OnProviderInitHolder1<AVB, AD, PVB, PD> = {},
-        crossinline bind: OnProviderBindHolder<AVB, AD, PVB, PD>,
-    ): SmartProvider<AVB, AD, PVB, PD> {
-        val provider = object : SmartProvider<AVB, AD, PVB, PD>(adapter) {
+        crossinline init: (SmartProvider<AVB, AD, pvb, pd>.() -> Unit) = {},
+        crossinline created: OnProviderCreatedHolder<AVB, AD, pvb, pd> = {},
+        crossinline bind: OnProviderBindHolder<AVB, AD, pvb, pd>,
+    ): SmartProvider<AVB, AD, pvb, pd> {
+        val provider = object : SmartProvider<AVB, AD, pvb, pd>(adapter) {
 
-            override fun onCreated(holder: XHolder<PVB>) {
-                create.invoke(this, holder)
+            override fun onCreated(holder: XHolder<pvb>) {
+                created.invoke(this, holder)
             }
 
-            override fun onBind(holder: XHolder<PVB>, data: PD, position: Int) {
+            override fun onBind(holder: XHolder<pvb>, data: pd, position: Int) {
             }
 
-            override fun onBind(holder: XHolder<PVB>, data: PD, position: Int, payloads: List<Any?>) {
+            override fun onBind(holder: XHolder<pvb>, data: pd, position: Int, payloads: List<Any?>) {
                 bind.invoke(this, OnBindParams(holder, data, position, payloads))
             }
 
@@ -74,7 +74,7 @@ abstract class SmartProvider<AVB : ViewBinding, AD, VB : ViewBinding, D>(
             }
 
         }
-        this.getSmartAdapter().addProvider(provider, itemType)
+        adapter.addProvider(provider, itemType)
         init.invoke(provider)
         return provider
     }

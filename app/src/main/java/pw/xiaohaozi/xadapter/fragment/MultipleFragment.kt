@@ -26,7 +26,7 @@ import pw.xiaohaozi.xadapter.smart.provider.SmartProvider
  */
 class MultipleFragment : Fragment() {
     private lateinit var binding: FragmentRecyclerBinding
-    private val adapter = functionTest()
+    private val adapter = function1()
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -43,21 +43,6 @@ class MultipleFragment : Fragment() {
         adapter.refresh(list)
     }
 
-    private fun functionTest(): SmartAdapter<ViewBinding, Any> {
-        return createTypeAdapter<ViewBinding, Any>()
-            .withType<ItemVerseBinding, VerseInfo> { (holder, data, position) ->
-                holder.binding.tvContent.text = data.content
-                holder.binding.tvAuthor.text = data.author
-            }
-            .setOnClickListener { holder, data, position, view ->
-                Toast.makeText(requireActivity(), "点击事件", Toast.LENGTH_SHORT).show()
-
-            }
-            .withType<ItemImageCardBinding, Int> { (holder, data, position) ->
-                holder.binding.image.setImageResource(data)
-            }
-            .toAdapter()
-    }
 
     /**
      * 方法1
