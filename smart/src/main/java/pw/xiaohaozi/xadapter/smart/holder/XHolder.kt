@@ -1,7 +1,6 @@
 package pw.xiaohaozi.xadapter.smart.holder
 
 
-import android.util.Log
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.RecyclerView.NO_POSITION
 import androidx.viewbinding.ViewBinding
@@ -21,7 +20,7 @@ import kotlin.coroutines.CoroutineContext
  * 创建时间：2022/8/10 20:09
  */
 open class XHolder<VB : ViewBinding>(val binding: VB) : RecyclerView.ViewHolder(binding.root), CoroutineScope {
-    val TAG = "XHolder"
+    private val TAG = "XHolder"
     var xAdapter: XAdapter<*, *>? = null
         internal set
     var data: Any? = null

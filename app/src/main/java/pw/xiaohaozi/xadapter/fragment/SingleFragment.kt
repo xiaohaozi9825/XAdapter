@@ -63,7 +63,7 @@ class SingleFragment : Fragment() {
         //①创建Adapter
         val SmartAdapter = SmartAdapter<ItemVerseBinding, VerseInfo>()
         //②创建Provider
-        val provider = object : SmartProvider<ItemVerseBinding, VerseInfo>(SmartAdapter) {
+        val provider = object : SmartProvider<ItemVerseBinding, VerseInfo,ItemVerseBinding, VerseInfo>(SmartAdapter) {
             override fun onCreated(holder: XHolder<ItemVerseBinding>) {
 
             }

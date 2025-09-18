@@ -18,8 +18,7 @@ import pw.xiaohaozi.xadapter.info.VerseInfo
 import pw.xiaohaozi.xadapter.smart.adapter.SmartAdapter
 import pw.xiaohaozi.xadapter.smart.ext.createAdapter
 import pw.xiaohaozi.xadapter.smart.ext.swipeDelete
-import pw.xiaohaozi.xadapter.smart.ext.toAdapter
-import pw.xiaohaozi.xadapter.smart.ext.withType
+
 
 /**
  * 单布局
@@ -57,8 +56,8 @@ class SwipeDeleteFragment : Fragment() {
                 it.holder.binding.image.load(it.data)
             }
             .toAdapter()
-            .addHeader<ItemHomeHeaderBinding> { }
-            .addFooter<ItemHomeFooterBinding> { }
+            .addHeader<ItemHomeHeaderBinding> { holder, data -> }
+            .addFooter<ItemHomeFooterBinding> { holder, data -> }
 //            .swipeDelete()//对整个adapter执行侧滑操作
 
     }

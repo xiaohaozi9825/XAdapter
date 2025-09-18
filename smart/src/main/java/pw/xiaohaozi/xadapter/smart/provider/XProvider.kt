@@ -22,12 +22,27 @@ import kotlin.coroutines.CoroutineContext
  * 创建时间：2024/6/8 14:29
  */
 abstract class XProvider<VB : ViewBinding, D>(override val adapter: XAdapter<*, *>) : TypeProvider<VB, D>, CoroutineScope {
-    val TAG = "XProvider"
+    private val TAG = "XProvider"
     override val coroutineContext: CoroutineContext
         get() = adapter.coroutineContext
 
     abstract fun onCreated(holder: XHolder<VB>)
+
+    /**
+     * 数据绑定
+     * @param holder viewHolder
+     * @param data 当前数据
+     * @param position 在adapter中的索引。注意：有特殊布局的时候，不要直接用该position获取dataList中的数据，需要用getDataPosition(position)方法转换。
+     */
     abstract fun onBind(holder: XHolder<VB>, data: D, position: Int)
+
+    /**
+     * 数据绑定
+     * @param holder viewHolder
+     * @param data 当前数据
+     * @param position 在adapter中的索引。注意：有特殊布局的时候，不要直接用该position获取dataList中的数据，需要用getDataPosition(position)方法转换。
+     * @param payloads 局部刷新使用
+     */
     open fun onBind(holder: XHolder<VB>, data: D, position: Int, payloads: List<Any?>) {
         onBind(holder, data, position)
     }
@@ -90,7 +105,7 @@ abstract class XProvider<VB : ViewBinding, D>(override val adapter: XAdapter<*, 
     private fun smartCreateViewBinding(parent: ViewGroup): VB {
         val genericSuperclass =
             this.javaClass.genericSuperclass as? ParameterizedType ?: throw RuntimeException("必须明确指定VB泛型类型")
-        val find = genericSuperclass.actualTypeArguments.find {
+        val find = genericSuperclass.actualTypeArguments.findLast {
             (it as? Class<*>)?.run { ViewBinding::class.java.isAssignableFrom(this) } ?: false
         }
         return smartCreateViewBinding(

@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.viewbinding.ViewBinding
@@ -15,8 +16,8 @@ import pw.xiaohaozi.xadapter.info.VerseInfo
 import pw.xiaohaozi.xadapter.smart.adapter.SmartAdapter
 import pw.xiaohaozi.xadapter.smart.entity.XMultiItemEntity
 import pw.xiaohaozi.xadapter.smart.ext.createAdapter
-import pw.xiaohaozi.xadapter.smart.ext.toAdapter
-import pw.xiaohaozi.xadapter.smart.ext.withType
+import pw.xiaohaozi.xadapter.smart.ext.createTypeAdapter
+
 import pw.xiaohaozi.xadapter.smart.holder.XHolder
 import pw.xiaohaozi.xadapter.smart.provider.SmartProvider
 
@@ -42,6 +43,7 @@ class MultipleFragment : Fragment() {
         adapter.refresh(list)
     }
 
+
     /**
      * 方法1
      * 使用XAdapter拓展方法创建
@@ -63,7 +65,7 @@ class MultipleFragment : Fragment() {
         //①创建Adapter
         val smartAdapter = SmartAdapter<ViewBinding, Any?>()
         //②创建Provider
-        val provider1 = object : SmartProvider<ItemImageCardBinding, Int>(smartAdapter) {
+        val provider1 = object : SmartProvider<ViewBinding, Any?, ItemImageCardBinding, Int>(smartAdapter) {
             override fun onCreated(holder: XHolder<ItemImageCardBinding>) {
 
             }
@@ -78,7 +80,7 @@ class MultipleFragment : Fragment() {
 
 
         }
-        val provider2 = object : SmartProvider<ItemVerseBinding, VerseInfo?>(smartAdapter) {
+        val provider2 = object : SmartProvider<ViewBinding, Any?, ItemVerseBinding, VerseInfo?>(smartAdapter) {
             override fun onCreated(holder: XHolder<ItemVerseBinding>) {
 
             }
@@ -135,7 +137,7 @@ class MultipleFragment : Fragment() {
         }.withType<ItemVerseBinding, VerseInfo> { (holder, data, position) ->
             holder.binding.tvContent.text = data.content
             holder.binding.tvAuthor.text = data.author
-        }.withType<ItemImageCardBinding, Int>(itemType = 9) { (holder, data, position)  ->
+        }.withType<ItemImageCardBinding, Int>(itemType = 9) { (holder, data, position) ->
             holder.binding.image.setImageResource(data)
         }.toAdapter()
 
@@ -144,11 +146,11 @@ class MultipleFragment : Fragment() {
     private fun function4(): SmartAdapter<ViewBinding, Any?> {
         //泛型VB 确定布局文件，泛型D确定数据类型，回调函数中绑定数据
         return createAdapter()
-            .withType<ItemVerseBinding, MultipleVerseInfo>(itemType = 5) { (holder, data, position)  ->
+            .withType<ItemVerseBinding, MultipleVerseInfo>(itemType = 5) { (holder, data, position) ->
                 holder.binding.tvContent.text = data.verseInfo.content
                 holder.binding.tvAuthor.text = data.verseInfo.author
             }
-            .withType<ItemImageCardBinding, MultipleInt>(itemType = 8) { (holder, data, position)  ->
+            .withType<ItemImageCardBinding, MultipleInt>(itemType = 8) { (holder, data, position) ->
                 holder.binding.image.setImageResource(data.res)
             }
             .toAdapter()

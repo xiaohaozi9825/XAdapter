@@ -18,8 +18,6 @@ import pw.xiaohaozi.xadapter.info.VerseInfo
 import pw.xiaohaozi.xadapter.smart.adapter.SmartAdapter
 import pw.xiaohaozi.xadapter.smart.ext.createAdapter
 import pw.xiaohaozi.xadapter.smart.ext.dragSort
-import pw.xiaohaozi.xadapter.smart.ext.toAdapter
-import pw.xiaohaozi.xadapter.smart.ext.withType
 
 
 class DragSortFragment : Fragment() {
@@ -54,8 +52,8 @@ class DragSortFragment : Fragment() {
                 it.holder.binding.image.load(it.data)
             }
             .toAdapter()
-            .addHeader<ItemHomeHeaderBinding> { }
-            .addFooter<ItemHomeFooterBinding> { }
+            .addHeader<ItemHomeHeaderBinding> { holder, data -> }
+            .addFooter<ItemHomeFooterBinding> { holder, data -> }
 //            .dragSort()//对整个adapter执行拖拽功能
 
     }

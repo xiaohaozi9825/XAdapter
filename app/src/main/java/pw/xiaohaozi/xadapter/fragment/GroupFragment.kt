@@ -12,8 +12,7 @@ import pw.xiaohaozi.xadapter.databinding.FragmentRecyclerBinding
 import pw.xiaohaozi.xadapter.databinding.ItemHomeTitleBinding
 import pw.xiaohaozi.xadapter.databinding.ItemImageAutoHeightBinding
 import pw.xiaohaozi.xadapter.smart.ext.createAdapter
-import pw.xiaohaozi.xadapter.smart.ext.toAdapter
-import pw.xiaohaozi.xadapter.smart.ext.withType
+
 
 /**
  * item选择

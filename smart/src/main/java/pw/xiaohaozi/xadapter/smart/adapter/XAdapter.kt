@@ -42,10 +42,7 @@ import kotlin.coroutines.CoroutineContext
  * 创建时间：2024/6/8 14:59
  */
 open class XAdapter<VB : ViewBinding, D> : Adapter<XHolder<VB>>(), CoroutineScope {
-    companion object {
-        const val TAG = "XAdapter"
-    }
-
+    private val TAG = "XAdapter"
 
     var recyclerView: RecyclerView? = null
     var lifecycleOwner: LifecycleOwner? = null
@@ -104,10 +101,6 @@ open class XAdapter<VB : ViewBinding, D> : Adapter<XHolder<VB>>(), CoroutineScop
 
     override fun onBindViewHolder(holder: XHolder<VB>, position: Int, payloads: MutableList<Any>) {
         bindViewHolder(holder, position, payloads)
-    }
-
-    override fun getItemId(position: Int): Long {
-        return super.getItemId(position)
     }
 
     private fun bindViewHolder(holder: XHolder<VB>, position: Int, payloads: MutableList<Any>?) {
@@ -174,7 +167,7 @@ open class XAdapter<VB : ViewBinding, D> : Adapter<XHolder<VB>>(), CoroutineScop
      */
     fun getData(position: Int): Any? {
         val headerCount = if (hasHeader) getHeaderProviderCount() else 0
-        val dataSize = getData().size
+        val dataSize = getDataList().size
         if (defaultPageTriple != null) {
             return when {
                 hasHeader && hasFooter -> {
@@ -261,7 +254,7 @@ open class XAdapter<VB : ViewBinding, D> : Adapter<XHolder<VB>>(), CoroutineScop
             footers[footerPosition].third
         } else {
             val dataPosition = getDataPosition(position)
-            getData()[dataPosition]
+            getDataList()[dataPosition]
         }
     }
 
