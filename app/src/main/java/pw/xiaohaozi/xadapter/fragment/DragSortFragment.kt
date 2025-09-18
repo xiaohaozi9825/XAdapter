@@ -20,7 +20,6 @@ import pw.xiaohaozi.xadapter.smart.ext.createAdapter
 import pw.xiaohaozi.xadapter.smart.ext.dragSort
 
 
-
 class DragSortFragment : Fragment() {
     private lateinit var binding: FragmentRecyclerBinding
 
@@ -53,8 +52,8 @@ class DragSortFragment : Fragment() {
                 it.holder.binding.image.load(it.data)
             }
             .toAdapter()
-            .addHeader<ItemHomeHeaderBinding> { }
-            .addFooter<ItemHomeFooterBinding> { }
+            .addHeader<ItemHomeHeaderBinding> { holder, data -> }
+            .addFooter<ItemHomeFooterBinding> { holder, data -> }
 //            .dragSort()//对整个adapter执行拖拽功能
 
     }

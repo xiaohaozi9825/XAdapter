@@ -56,8 +56,8 @@ class SwipeDeleteFragment : Fragment() {
                 it.holder.binding.image.load(it.data)
             }
             .toAdapter()
-            .addHeader<ItemHomeHeaderBinding> { }
-            .addFooter<ItemHomeFooterBinding> { }
+            .addHeader<ItemHomeHeaderBinding> { holder, data -> }
+            .addFooter<ItemHomeFooterBinding> { holder, data -> }
 //            .swipeDelete()//对整个adapter执行侧滑操作
 
     }

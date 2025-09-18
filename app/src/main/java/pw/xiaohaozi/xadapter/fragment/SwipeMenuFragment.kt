@@ -20,7 +20,6 @@ import pw.xiaohaozi.xadapter.smart.ext.createAdapter
 import pw.xiaohaozi.xadapter.smart.ext.swipeMenu
 
 
-
 /**
  * 单布局
  */
@@ -66,8 +65,8 @@ class SwipeMenuFragment : Fragment() {
                 it.holder.binding.image.load(it.data)
             }
             .toAdapter()
-            .addHeader<ItemHomeHeaderBinding> { }
-            .addFooter<ItemHomeFooterBinding> { }
+            .addHeader<ItemHomeHeaderBinding> { holder, data -> }
+            .addFooter<ItemHomeFooterBinding> { holder, data -> }
             .swipeMenu()
 
     }

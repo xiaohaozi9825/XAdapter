@@ -42,10 +42,7 @@ import kotlin.coroutines.CoroutineContext
  * 创建时间：2024/6/8 14:59
  */
 open class XAdapter<VB : ViewBinding, D> : Adapter<XHolder<VB>>(), CoroutineScope {
-    companion object {
-        const val TAG = "XAdapter"
-    }
-
+    private val TAG = "XAdapter"
 
     var recyclerView: RecyclerView? = null
     var lifecycleOwner: LifecycleOwner? = null

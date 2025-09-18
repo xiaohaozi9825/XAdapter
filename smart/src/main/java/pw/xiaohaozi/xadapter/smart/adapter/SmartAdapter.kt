@@ -83,7 +83,7 @@ open class SmartAdapter<VB : ViewBinding, D>(
         tag: String = "",
         noinline init: (SmartProvider<VB, D, vb, HEADER>.() -> Unit)? = null,
         noinline create: (SmartProvider<VB, D, vb, HEADER>.(holder: XHolder<vb>) -> Unit)? = null,
-        noinline bind: (SmartProvider<VB, D, vb, HEADER>.(holder: XHolder<vb>) -> Unit)? = null,
+        noinline bind: (SmartProvider<VB, D, vb, HEADER>.(holder: XHolder<vb>, data: HEADER) -> Unit)? = null,
     ): SmartAdapter<VB, D> {
         val provider = object : SmartProvider<VB, D, vb, HEADER>(this) {
 
@@ -92,7 +92,7 @@ open class SmartAdapter<VB : ViewBinding, D>(
             }
 
             override fun onBind(holder: XHolder<vb>, data: HEADER, position: Int) {
-                bind?.invoke(this, holder)
+                bind?.invoke(this, holder, data)
             }
 
             override fun isFixedViewType(): Boolean {
@@ -126,7 +126,7 @@ open class SmartAdapter<VB : ViewBinding, D>(
         tag: String = "",
         noinline init: (SmartProvider<VB, D, vb, FOOTER>.() -> Unit)? = null,
         noinline create: (SmartProvider<VB, D, vb, FOOTER>.(holder: XHolder<vb>) -> Unit)? = null,
-        noinline bind: (SmartProvider<VB, D, vb, FOOTER>.(holder: XHolder<vb>) -> Unit)? = null,
+        noinline bind: (SmartProvider<VB, D, vb, FOOTER>.(holder: XHolder<vb>,data: FOOTER) -> Unit)? = null,
     ): SmartAdapter<VB, D> {
         val provider = object : SmartProvider<VB, D, vb, FOOTER>(this) {
 
@@ -135,7 +135,7 @@ open class SmartAdapter<VB : ViewBinding, D>(
             }
 
             override fun onBind(holder: XHolder<vb>, data: FOOTER, position: Int) {
-                bind?.invoke(this, holder)
+                bind?.invoke(this, holder, data)
             }
 
             override fun isFixedViewType(): Boolean {
@@ -207,7 +207,7 @@ open class SmartAdapter<VB : ViewBinding, D>(
         tag: Any = "",
         noinline init: (SmartProvider<VB, D, vb, DEFAULT_PAGE>.() -> Unit)? = null,
         noinline create: (SmartProvider<VB, D, vb, DEFAULT_PAGE>.(holder: XHolder<vb>) -> Unit)? = null,
-        noinline bind: (SmartProvider<VB, D, vb, DEFAULT_PAGE>.(holder: XHolder<vb>) -> Unit)? = null,
+        noinline bind: (SmartProvider<VB, D, vb, DEFAULT_PAGE>.(holder: XHolder<vb>, data: DEFAULT_PAGE) -> Unit)? = null,
     ): SmartAdapter<VB, D> {
         val provider = object : SmartProvider<VB, D, vb, DEFAULT_PAGE>(this) {
 
@@ -216,7 +216,7 @@ open class SmartAdapter<VB : ViewBinding, D>(
             }
 
             override fun onBind(holder: XHolder<vb>, data: DEFAULT_PAGE, position: Int) {
-                bind?.invoke(this, holder)
+                bind?.invoke(this, holder, data)
             }
 
             override fun onCreated(holder: XHolder<vb>) {

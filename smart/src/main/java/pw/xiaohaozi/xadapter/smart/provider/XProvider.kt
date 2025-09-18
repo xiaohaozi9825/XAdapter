@@ -22,7 +22,7 @@ import kotlin.coroutines.CoroutineContext
  * 创建时间：2024/6/8 14:29
  */
 abstract class XProvider<VB : ViewBinding, D>(override val adapter: XAdapter<*, *>) : TypeProvider<VB, D>, CoroutineScope {
-    val TAG = "XProvider"
+    private val TAG = "XProvider"
     override val coroutineContext: CoroutineContext
         get() = adapter.coroutineContext
 
@@ -90,7 +90,7 @@ abstract class XProvider<VB : ViewBinding, D>(override val adapter: XAdapter<*, 
     private fun smartCreateViewBinding(parent: ViewGroup): VB {
         val genericSuperclass =
             this.javaClass.genericSuperclass as? ParameterizedType ?: throw RuntimeException("必须明确指定VB泛型类型")
-        val find = genericSuperclass.actualTypeArguments.find {
+        val find = genericSuperclass.actualTypeArguments.findLast {
             (it as? Class<*>)?.run { ViewBinding::class.java.isAssignableFrom(this) } ?: false
         }
         return smartCreateViewBinding(
