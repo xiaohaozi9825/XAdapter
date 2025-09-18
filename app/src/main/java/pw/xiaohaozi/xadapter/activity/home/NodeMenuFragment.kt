@@ -1,11 +1,11 @@
 package pw.xiaohaozi.xadapter.activity.home
 
 import android.os.Bundle
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.fragment.app.Fragment
 import pw.xiaohaozi.xadapter.activity.toEmptyActivity
 import pw.xiaohaozi.xadapter.databinding.FragmentMenuBinding
 import pw.xiaohaozi.xadapter.databinding.ItemHomeBinding
@@ -14,15 +14,13 @@ import pw.xiaohaozi.xadapter.databinding.ItemHomeTitleBinding
 import pw.xiaohaozi.xadapter.info.HomeInfo
 import pw.xiaohaozi.xadapter.nodeMenuList
 import pw.xiaohaozi.xadapter.smart.ext.createAdapter
-import pw.xiaohaozi.xadapter.smart.ext.toAdapter
-import pw.xiaohaozi.xadapter.smart.ext.withType
 
 
 class NodeMenuFragment : Fragment() {
     private lateinit var binding: FragmentMenuBinding
 
     private val adapter = createAdapter()
-        .addHeader<ItemHomeHeaderBinding> { }
+        .addHeader<ItemHomeHeaderBinding> { holder, data ->  }
         .withType<ItemHomeTitleBinding, String>(isFixed = true) { (holder, data) ->
             holder.binding.tvTitle.text = data
         }
