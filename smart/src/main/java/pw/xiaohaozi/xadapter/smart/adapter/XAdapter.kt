@@ -103,10 +103,6 @@ open class XAdapter<VB : ViewBinding, D> : Adapter<XHolder<VB>>(), CoroutineScop
         bindViewHolder(holder, position, payloads)
     }
 
-    override fun getItemId(position: Int): Long {
-        return super.getItemId(position)
-    }
-
     private fun bindViewHolder(holder: XHolder<VB>, position: Int, payloads: MutableList<Any>?) {
         Log.i(TAG, "bindViewHolder: ")
         if (position < 0) return
@@ -171,7 +167,7 @@ open class XAdapter<VB : ViewBinding, D> : Adapter<XHolder<VB>>(), CoroutineScop
      */
     fun getData(position: Int): Any? {
         val headerCount = if (hasHeader) getHeaderProviderCount() else 0
-        val dataSize = getData().size
+        val dataSize = getDataList().size
         if (defaultPageTriple != null) {
             return when {
                 hasHeader && hasFooter -> {
@@ -258,7 +254,7 @@ open class XAdapter<VB : ViewBinding, D> : Adapter<XHolder<VB>>(), CoroutineScop
             footers[footerPosition].third
         } else {
             val dataPosition = getDataPosition(position)
-            getData()[dataPosition]
+            getDataList()[dataPosition]
         }
     }
 

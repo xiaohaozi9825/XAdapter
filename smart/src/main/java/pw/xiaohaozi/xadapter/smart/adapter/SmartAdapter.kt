@@ -1,13 +1,12 @@
 package pw.xiaohaozi.xadapter.smart.adapter
 
-import android.util.Log
-import androidx.core.util.forEach
 import androidx.viewbinding.ViewBinding
 import pw.xiaohaozi.xadapter.smart.XAdapterException
 import pw.xiaohaozi.xadapter.smart.entity.DEFAULT_PAGE
 import pw.xiaohaozi.xadapter.smart.entity.EMPTY
 import pw.xiaohaozi.xadapter.smart.entity.FOOTER
 import pw.xiaohaozi.xadapter.smart.entity.HEADER
+import pw.xiaohaozi.xadapter.smart.ext.OnBindParams
 import pw.xiaohaozi.xadapter.smart.ext.OnProviderBindHolder
 import pw.xiaohaozi.xadapter.smart.ext.OnProviderCreatedHolder
 import pw.xiaohaozi.xadapter.smart.holder.XHolder
@@ -20,7 +19,6 @@ import pw.xiaohaozi.xadapter.smart.proxy.EventProxy
 import pw.xiaohaozi.xadapter.smart.proxy.SelectedProxy
 import pw.xiaohaozi.xadapter.smart.proxy.SmartDataProxy
 import pw.xiaohaozi.xadapter.smart.proxy.XEmployer
-import pw.xiaohaozi.xadapter.smart.ext.OnBindParams as OnBindParams1
 
 /**
  * Adapter集
@@ -36,9 +34,9 @@ open class SmartAdapter<VB : ViewBinding, D>(
     val selectedProxy: SelectedProxy<SmartAdapter<VB, D>, VB, D> = AdapterSelectedImpl()//
 ) : XAdapter<VB, D>(),//继承Adapter
     XEmployer, //宿主
-    SmartDataProxy<SmartAdapter<VB, D>, VB, D> by dataProxy,//数据
-    EventProxy<SmartAdapter<VB, D>, VB, D> by eventProxy,//
-    SelectedProxy<SmartAdapter<VB, D>, VB, D> by selectedProxy //
+    SmartDataProxy<SmartAdapter<VB, D>, VB, D> by dataProxy,//数据操作
+    EventProxy<SmartAdapter<VB, D>, VB, D> by eventProxy,//时间监听
+    SelectedProxy<SmartAdapter<VB, D>, VB, D> by selectedProxy //选择操作
 {
     init {
         initProxy()
@@ -251,7 +249,7 @@ open class SmartAdapter<VB : ViewBinding, D>(
             }
 
             override fun onBind(holder: XHolder<pvb>, data: pd, position: Int, payloads: List<Any?>) {
-                bind.invoke(this, OnBindParams1(holder, data, position, payloads))
+                bind.invoke(this, OnBindParams(holder, data, position, payloads))
             }
 
             override fun isFixedViewType(): Boolean {

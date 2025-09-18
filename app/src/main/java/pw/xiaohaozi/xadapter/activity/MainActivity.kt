@@ -36,7 +36,7 @@ class MainActivity : AppCompatActivity() {
     private val binding by lazy { ActivityMainBinding.inflate(layoutInflater) }
 
     private val adapter = createAdapter()
-        .addHeader<ItemHomeHeaderBinding> { }
+        .addHeader<ItemHomeHeaderBinding> {holder, data ->  }
         .withType<ItemHomeTitleBinding, String>(isFixed = true) { (holder, data) ->
             holder.binding.tvTitle.text = data
         }

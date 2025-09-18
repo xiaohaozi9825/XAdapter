@@ -27,7 +27,22 @@ abstract class XProvider<VB : ViewBinding, D>(override val adapter: XAdapter<*, 
         get() = adapter.coroutineContext
 
     abstract fun onCreated(holder: XHolder<VB>)
+
+    /**
+     * 数据绑定
+     * @param holder viewHolder
+     * @param data 当前数据
+     * @param position 在adapter中的索引。注意：有特殊布局的时候，不要直接用该position获取dataList中的数据，需要用getDataPosition(position)方法转换。
+     */
     abstract fun onBind(holder: XHolder<VB>, data: D, position: Int)
+
+    /**
+     * 数据绑定
+     * @param holder viewHolder
+     * @param data 当前数据
+     * @param position 在adapter中的索引。注意：有特殊布局的时候，不要直接用该position获取dataList中的数据，需要用getDataPosition(position)方法转换。
+     * @param payloads 局部刷新使用
+     */
     open fun onBind(holder: XHolder<VB>, data: D, position: Int, payloads: List<Any?>) {
         onBind(holder, data, position)
     }
