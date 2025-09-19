@@ -16,7 +16,7 @@ import pw.xiaohaozi.xadapter.smart.proxy.XEmployer
  * 创建时间：2024/6/8 14:30
  */
 interface TypeProvider<VB : ViewBinding, D> : XEmployer {
-    val adapter: XAdapter<*, *>
+    val adapter: XAdapter<*, *, *>
 
     /**
      * ViewHolder创建成功
@@ -45,6 +45,7 @@ interface TypeProvider<VB : ViewBinding, D> : XEmployer {
      * ViewHolder附着到Window
      */
     fun onHolderAttachedToWindow(holder: XHolder<VB>)
+
     /**
      * ViewHolder 离开 Window
      */
@@ -55,6 +56,7 @@ interface TypeProvider<VB : ViewBinding, D> : XEmployer {
      * 给RecyclerView 设置 Adapter 时回调
      */
     fun onAdapterAttachedToRecyclerView(recyclerView: RecyclerView)
+
     /**
      * Adapter 离开 RecyclerView
      * 给RecyclerView 设置其他（或null） Adapter 时回调。Activity销毁时并不会回调
@@ -66,6 +68,7 @@ interface TypeProvider<VB : ViewBinding, D> : XEmployer {
      * 一般Adapter设置该监听时，RecyclerView已经附着到了Window上了，所以该方法可能不会被回调。
      */
     fun onRecyclerViewAttachedToWindow(recyclerView: RecyclerView)
+
     /**
      * RecyclerView 离开 Window
      * Activity 被销毁时会调用，可以在此处进行一些资源释放工作

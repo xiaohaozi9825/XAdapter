@@ -33,7 +33,7 @@ import java.lang.reflect.ParameterizedType
  */
 class EventImpl<Employer : XProxy<Employer>, VB : ViewBinding, D> : EventProxy<Employer, VB, D> {
     override lateinit var employer: Employer
-    private val adapter: XAdapter<*, *> by lazy {
+    private val adapter: XAdapter<*, *,*> by lazy {
         when (val e = employer) {
             is XEmployer -> e.getEmployerAdapter()
             else -> throw XAdapterException("找不到对应的Adapter对象")

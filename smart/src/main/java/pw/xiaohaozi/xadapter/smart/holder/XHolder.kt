@@ -21,7 +21,7 @@ import kotlin.coroutines.CoroutineContext
  */
 open class XHolder<VB : ViewBinding>(val binding: VB) : RecyclerView.ViewHolder(binding.root), CoroutineScope {
     private val TAG = "XHolder"
-    var xAdapter: XAdapter<*, *>? = null
+    var xAdapter: XAdapter<*, *, *>? = null
         internal set
     var data: Any? = null
         internal set
