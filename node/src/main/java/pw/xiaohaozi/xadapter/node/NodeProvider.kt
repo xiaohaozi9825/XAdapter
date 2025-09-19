@@ -2,7 +2,10 @@ package pw.xiaohaozi.xadapter.node
 
 import androidx.viewbinding.ViewBinding
 import pw.xiaohaozi.xadapter.node.entity.NodeEntity
-import pw.xiaohaozi.xadapter.smart.adapter.SmartAdapter
+import pw.xiaohaozi.xadapter.node.ext.OnProviderBindHolder
+import pw.xiaohaozi.xadapter.node.ext.OnProviderInitHolder
+import pw.xiaohaozi.xadapter.smart.ext.OnBindParams
+import pw.xiaohaozi.xadapter.smart.holder.XHolder
 import pw.xiaohaozi.xadapter.smart.impl.EventImpl
 import pw.xiaohaozi.xadapter.smart.provider.XProvider
 import pw.xiaohaozi.xadapter.smart.proxy.EventProxy
@@ -15,23 +18,19 @@ import pw.xiaohaozi.xadapter.smart.proxy.EventProxy
  * github：https://github.com/xiaohaozi9825
  * 创建时间：2024/6/9 22:08
  */
-abstract class NodeProvider<VB : ViewBinding, D >(
-    private val _adapter: NodeAdapter<*, *>,
-    private val listener: EventImpl<NodeProvider<VB, D>, VB, D> = EventImpl(),//
-) : XProvider<VB, D>(_adapter), EventProxy<NodeProvider<VB, D>, VB, D> by listener {
+abstract class NodeProvider<AVB : ViewBinding, AD : NodeEntity<*, *>, VB : AVB, D : AD>(
+    override val adapter: NodeAdapter<AVB, AD>,
+    private val listener: EventImpl<NodeProvider<AVB, AD, VB, D>, VB, D> = EventImpl(),//
+) : XProvider<VB, D>(adapter), EventProxy<NodeProvider<AVB, AD, VB, D>, VB, D> by listener {
     init {
         initProxy()
     }
 
-    override val adapter: NodeAdapter<ViewBinding, NodeEntity<*, *>>
-        get() = (_adapter as NodeAdapter<ViewBinding, NodeEntity<*, *>>)
-
-
-    override var employer: NodeProvider<VB, D>
+    override var employer: NodeProvider<AVB, AD, VB, D>
         get() = this
         set(value) {}
 
-    override fun initProxy(employer: NodeProvider<VB, D>) {
+    override fun initProxy(employer: NodeProvider<AVB, AD, VB, D>) {
         listener.initProxy(employer)
     }
 
@@ -40,5 +39,50 @@ abstract class NodeProvider<VB : ViewBinding, D >(
     }
 
     override fun isFixedViewType() = false
+
+
+
+
+    /**
+     * 多布局切换
+     * 返回Provider
+     */
+    inline fun <vb : AVB, d : AD> withType(
+        isFixed: Boolean? = null,
+        itemType: Int? = null,
+        crossinline init: (NodeProvider<AVB, AD, vb, d>.() -> Unit) = {},
+        crossinline create: OnProviderInitHolder<AVB, AD, vb, d> = {},
+        crossinline bind: OnProviderBindHolder<AVB, AD, vb, d>,
+    ): NodeProvider<AVB, AD, vb, d> {
+        val provider = object : NodeProvider<AVB, AD, vb, d>(adapter) {
+
+            override fun onCreated(holder: XHolder<vb>) {
+                create.invoke(this, holder)
+            }
+
+            override fun onBind(holder: XHolder<vb>, data: d, position: Int) {
+
+            }
+
+            override fun onBind(holder: XHolder<vb>, data: d, position: Int, payloads: List<Any?>) {
+                bind.invoke(this, OnBindParams(holder, data, position, payloads))
+            }
+
+            override fun isFixedViewType(): Boolean {
+                return isFixed ?: false
+            }
+        }
+        adapter.addProvider(provider, itemType)
+        init.invoke(provider)
+        return provider
+    }
+
+
+    /**
+     * Provider切换为Adapter
+     */
+    fun toAdapter(): NodeAdapter<AVB, AD> {
+        return this.adapter
+    }
 
 }

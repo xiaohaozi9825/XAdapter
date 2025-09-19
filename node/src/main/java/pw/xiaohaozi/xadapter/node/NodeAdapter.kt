@@ -5,10 +5,18 @@ import android.util.Log
 import androidx.viewbinding.ViewBinding
 import pw.xiaohaozi.xadapter.node.entity.ExpandedNodeEntity
 import pw.xiaohaozi.xadapter.node.entity.NodeEntity
+import pw.xiaohaozi.xadapter.node.ext.OnProviderBindHolder
+import pw.xiaohaozi.xadapter.node.ext.OnProviderInitHolder
 import pw.xiaohaozi.xadapter.smart.XAdapterException
+import pw.xiaohaozi.xadapter.smart.adapter.SmartAdapter
 import pw.xiaohaozi.xadapter.smart.adapter.XAdapter
+import pw.xiaohaozi.xadapter.smart.entity.HEADER
+import pw.xiaohaozi.xadapter.smart.ext.OnBindParams
 import pw.xiaohaozi.xadapter.smart.ext.removeRange
+import pw.xiaohaozi.xadapter.smart.holder.XHolder
 import pw.xiaohaozi.xadapter.smart.impl.EventImpl
+import pw.xiaohaozi.xadapter.smart.provider.SmartProvider
+import pw.xiaohaozi.xadapter.smart.provider.XProvider
 import pw.xiaohaozi.xadapter.smart.proxy.EventProxy
 import pw.xiaohaozi.xadapter.smart.proxy.XEmployer
 
@@ -403,6 +411,73 @@ open class NodeAdapter<VB : ViewBinding, D : NodeEntity<*, *>>(
             //更新列表
             notifyItemRangeRemoved(position + 1, count)
         }
+    }
+
+    /**
+     * 多布局切换
+     * 返回Provider
+     */
+    inline fun <vb : VB, d : D> withType(
+        isFixed: Boolean? = null,
+        itemType: Int? = null,
+        crossinline init: (NodeProvider<VB, D, vb, d>.() -> Unit) = {},
+        crossinline create: OnProviderInitHolder<VB, D, vb, d> = {},
+        crossinline bind: OnProviderBindHolder<VB, D, vb, d>,
+    ): NodeProvider<VB, D, vb, d> {
+        val provider = object : NodeProvider<VB, D, vb, d>(this) {
+
+            override fun onCreated(holder: XHolder<vb>) {
+                create.invoke(this, holder)
+            }
+
+            override fun onBind(holder: XHolder<vb>, data: d, position: Int) {
+            }
+
+            override fun onBind(holder: XHolder<vb>, data: d, position: Int, payloads: List<Any?>) {
+                bind.invoke(this, OnBindParams(holder, data, position, payloads))
+            }
+
+            override fun isFixedViewType(): Boolean {
+                return isFixed ?: false
+            }
+
+        }
+        this.addProvider(provider, itemType)
+        init.invoke(provider)
+        return provider
+    }
+    /**
+     * 添加头布局
+     * 改方法可动态设置，设置后直接展示。
+     *
+     * @param tag 备用字段，可用于标记，或数据存储与传递
+     * @param init 初始化时回调，可在此设置事件监听操作
+     * @param create 创建ViewHolder后调用，可用于初始化item
+     * @param bind 绑定视图时调用
+     */
+    inline fun <reified vb : ViewBinding> addHeader(
+        tag: String = "",
+        noinline init: (XProvider<vb, HEADER>.() -> Unit)? = null,
+        noinline create: (XProvider<vb, HEADER>.(holder: XHolder<vb>) -> Unit)? = null,
+        noinline bind: (XProvider<vb, HEADER>.(holder: XHolder<vb>, data: HEADER) -> Unit)? = null,
+    ): NodeAdapter<VB, D> {
+        val provider = object : XProvider<vb, HEADER>(this) {
+
+            override fun onCreated(holder: XHolder<vb>) {
+                create?.invoke(this, holder)
+            }
+
+            override fun onBind(holder: XHolder<vb>, data: HEADER, position: Int) {
+                bind?.invoke(this, holder, data)
+            }
+
+            override fun isFixedViewType(): Boolean {
+                return true
+            }
+        }
+        addHeaderProvider(provider, HEADER(tag))
+        init?.invoke(provider)
+        return this
     }
 
     //更改所有子节点的展开状态

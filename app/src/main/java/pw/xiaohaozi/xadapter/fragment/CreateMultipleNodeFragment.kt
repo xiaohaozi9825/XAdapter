@@ -8,29 +8,17 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.viewbinding.ViewBinding
-import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import com.google.gson.JsonDeserializationContext
 import com.google.gson.JsonDeserializer
 import com.google.gson.JsonElement
 import com.google.gson.JsonParseException
-import com.google.gson.annotations.SerializedName
 import com.google.gson.reflect.TypeToken
-import pw.xiaohaozi.xadapter.R
 import pw.xiaohaozi.xadapter.databinding.FragmentRecyclerBinding
-import pw.xiaohaozi.xadapter.databinding.ItemCheckCheckboxBinding
-import pw.xiaohaozi.xadapter.databinding.ItemCheckRadiobuttonBinding
 import pw.xiaohaozi.xadapter.databinding.ItemNodeBinding
-import pw.xiaohaozi.xadapter.node.NodeAdapter
 import pw.xiaohaozi.xadapter.node.entity.ExpandedNodeEntity
 import pw.xiaohaozi.xadapter.node.entity.NodeEntity
 import pw.xiaohaozi.xadapter.node.ext.nodeAdapter
-import pw.xiaohaozi.xadapter.node.ext.toAdapter
-import pw.xiaohaozi.xadapter.node.ext.withType
-import pw.xiaohaozi.xadapter.smart.adapter.SmartAdapter
-import pw.xiaohaozi.xadapter.smart.ext.createAdapter
-import pw.xiaohaozi.xadapterdemo.utils.GsonUtil.toJson
 import java.lang.reflect.Type
 
 

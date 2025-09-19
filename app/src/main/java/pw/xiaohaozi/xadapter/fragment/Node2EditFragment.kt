@@ -13,14 +13,14 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.viewbinding.ViewBinding
 import pw.xiaohaozi.xadapter.R
 import pw.xiaohaozi.xadapter.databinding.FragmentNodeEditBinding
+import pw.xiaohaozi.xadapter.databinding.ItemHomeHeaderBinding
 import pw.xiaohaozi.xadapter.databinding.ItemNodeEditBinding
 import pw.xiaohaozi.xadapter.dialog.InputDialog
 import pw.xiaohaozi.xadapter.node.NodeAdapter
 import pw.xiaohaozi.xadapter.node.entity.ExpandedNodeEntity
 import pw.xiaohaozi.xadapter.node.entity.NodeEntity
 import pw.xiaohaozi.xadapter.node.ext.nodeAdapter
-import pw.xiaohaozi.xadapter.node.ext.toAdapter
-import pw.xiaohaozi.xadapter.node.ext.withType
+
 
 
 /**
@@ -150,6 +150,9 @@ class Node2EditFragment : Fragment() {
                 if (position == -1) return@setOnClickListener
                 //移除指定位置节点
                 adapter.removeNodePosition(position)
+            }
+            .addHeader<ItemHomeHeaderBinding> { holder, data ->
+
             }
         return adapter
     }

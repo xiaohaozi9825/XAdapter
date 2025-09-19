@@ -19,8 +19,7 @@ import pw.xiaohaozi.xadapter.node.entity.ExpandedNodeEntity
 import pw.xiaohaozi.xadapter.node.NodeAdapter
 import pw.xiaohaozi.xadapter.node.entity.NodeEntity
 import pw.xiaohaozi.xadapter.node.ext.nodeAdapter
-import pw.xiaohaozi.xadapter.node.ext.toAdapter
-import pw.xiaohaozi.xadapter.node.ext.withType
+
 
 
 /**

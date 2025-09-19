@@ -26,12 +26,11 @@ import pw.xiaohaozi.xadapter.smart.widgets.SwipeItemLayout
  * 创建Adapter
  *****************************************************/
 typealias OnAdapterInitHolder<VB, D> = NodeAdapter<VB, D>.(holder: XHolder<VB>) -> Unit
-typealias OnProviderInitHolder<VB, D> = NodeProvider<VB, D>.(holder: XHolder<VB>) -> Unit
+typealias OnProviderInitHolder<AVB, AD, VB, D> = NodeProvider<AVB, AD, VB, D>.(holder: XHolder<VB>) -> Unit
 typealias OnAdapterBindHolder<VB, D> = NodeAdapter<VB, D>.(params: OnBindParams<VB, D>) -> Unit
-typealias OnProviderBindHolder<VB, D> = NodeProvider<VB, D>.(params: OnBindParams<VB, D>) -> Unit
+typealias OnProviderBindHolder<AVB, AD, VB, D> = NodeProvider<AVB, AD, VB, D>.(params: OnBindParams<VB, D>) -> Unit
 typealias OnCustomType = (NodeAdapter<ViewBinding, NodeEntity<*, *>>.(data: NodeEntity<*, *>?, position: Int) -> Int?)
 typealias OnItemId<VB, D> = (NodeAdapter<VB, D>.(position: Int) -> Long)
-
 
 
 /**
@@ -40,7 +39,7 @@ typealias OnItemId<VB, D> = (NodeAdapter<VB, D>.(position: Int) -> Long)
 inline fun <VB : ViewBinding, D : NodeEntity<*, *>> nodeAdapter(
     itemType: Int = 0,
     crossinline onItemId: OnItemId<VB, D> = { NO_ID },
-    crossinline init: (NodeProvider<VB, D>.() -> Unit) = {},
+    crossinline init: (NodeProvider<VB, D, VB, D>.() -> Unit) = {},
     crossinline create: OnAdapterInitHolder<VB, D> = {},
     crossinline bind: OnAdapterBindHolder<VB, D>,
 ): NodeAdapter<VB, D> {
@@ -49,7 +48,7 @@ inline fun <VB : ViewBinding, D : NodeEntity<*, *>> nodeAdapter(
             return onItemId.invoke(this, position)
         }
     }
-    val provider = object : NodeProvider<VB, D>(adapter) {
+    val provider = object : NodeProvider<VB, D, VB, D>(adapter) {
 
         override fun onCreated(holder: XHolder<VB>) {
             create.invoke(adapter, holder)
@@ -70,17 +69,17 @@ inline fun <VB : ViewBinding, D : NodeEntity<*, *>> nodeAdapter(
 /**
  * 创建单布局Adapter
  */
-inline fun <VB : ViewBinding, D : NodeEntity<*, *>> LifecycleOwner.nodeLifecycleAdapter(
-    itemType: Int = 0,
-    crossinline onItemId: OnItemId<VB, D> = { NO_ID },
-    crossinline init: (NodeProvider<VB, D>.() -> Unit) = {},
-    crossinline create: OnAdapterInitHolder<VB, D> = {},
-    crossinline bind: OnAdapterBindHolder<VB, D>,
-): NodeAdapter<VB, D> {
-    val adapter = nodeAdapter(itemType, onItemId, init, create, bind)
-    adapter.bindLifecycle(this)
-    return adapter
-}
+//inline fun <VB : ViewBinding, D : NodeEntity<*, *>> LifecycleOwner.nodeLifecycleAdapter(
+//    itemType: Int = 0,
+//    crossinline onItemId: OnItemId<VB, D> = { NO_ID },
+//    crossinline init: (NodeProvider<VB, D>.() -> Unit) = {},
+//    crossinline create: OnAdapterInitHolder<VB, D> = {},
+//    crossinline bind: OnAdapterBindHolder<VB, D>,
+//): NodeAdapter<VB, D> {
+//    val adapter = nodeAdapter(itemType, onItemId, init, create, bind)
+//    adapter.bindLifecycle(this)
+//    return adapter
+//}
 
 /**
  * 创建NodeAdapter，单布局和多布局都可以使用，建议创建多布局时使用。
@@ -105,92 +104,15 @@ fun nodeAdapter(
     return adapter
 }
 
-fun LifecycleOwner.nodeLifecycleAdapter(
-    custom: OnCustomType? = null,
-    onItemId: OnItemId<ViewBinding, NodeEntity<*, *>> = { NO_ID }
-): NodeAdapter<ViewBinding, NodeEntity<*, *>> {
-    val adapter = nodeAdapter(onItemId, custom)
-    adapter.bindLifecycle(this)
-    return adapter
-}
+//fun LifecycleOwner.nodeLifecycleAdapter(
+//    custom: OnCustomType? = null,
+//    onItemId: OnItemId<ViewBinding, NodeEntity<*, *>> = { NO_ID }
+//): NodeAdapter<ViewBinding, NodeEntity<*, *>> {
+//    val adapter = nodeAdapter(onItemId, custom)
+//    adapter.bindLifecycle(this)
+//    return adapter
+//}
 
-/**
- * 多布局切换
- * 返回Provider
- */
-inline fun <VB : ViewBinding, D : NodeEntity<*, *>?> NodeAdapter<ViewBinding, NodeEntity<*, *>>.withType(
-    isFixed: Boolean? = null,
-    itemType: Int? = null,
-    crossinline init: (NodeProvider<VB, D>.() -> Unit) = {},
-    crossinline create: OnProviderInitHolder<VB, D> = {},
-    crossinline bind: OnProviderBindHolder<VB, D>,
-): NodeProvider<VB, D> {
-    val provider = object : NodeProvider<VB, D>(this) {
-
-        override fun onCreated(holder: XHolder<VB>) {
-            create.invoke(this, holder)
-        }
-
-        override fun onBind(holder: XHolder<VB>, data: D, position: Int) {
-        }
-
-        override fun onBind(holder: XHolder<VB>, data: D, position: Int, payloads: List<Any?>) {
-            bind.invoke(this, OnBindParams(holder, data, position, payloads))
-        }
-
-        override fun isFixedViewType(): Boolean {
-            return isFixed ?: false
-        }
-
-    }
-    this.addProvider(provider, itemType)
-    init.invoke(provider)
-    return provider
-}
-
-
-/**
- * 多布局切换
- * 返回Provider
- */
-inline fun <reified VB : ViewBinding, D : NodeEntity<*, *>?> NodeProvider<out ViewBinding, out NodeEntity<*, *>?>.withType(
-    isFixed: Boolean? = null,
-    itemType: Int? = null,
-    crossinline init: (NodeProvider<VB, D>.() -> Unit) = {},
-    crossinline create: OnProviderInitHolder<VB, D> = {},
-    crossinline bind: OnProviderBindHolder<VB, D>,
-): NodeProvider<VB, D> {
-    val provider = object : NodeProvider<VB, D>(adapter) {
-
-        override fun onCreated(holder: XHolder<VB>) {
-            create.invoke(this, holder)
-        }
-
-        override fun onBind(holder: XHolder<VB>, data: D, position: Int) {
-
-        }
-
-        override fun onBind(holder: XHolder<VB>, data: D, position: Int, payloads: List<Any?>) {
-            bind.invoke(this, OnBindParams(holder, data, position, payloads))
-//            bind.invoke(this, OnBind(holder, data, position, payloads))
-        }
-
-        override fun isFixedViewType(): Boolean {
-            return isFixed ?: false
-        }
-    }
-    adapter.addProvider(provider, itemType)
-    init.invoke(provider)
-    return provider
-}
-
-
-/**
- * Provider切换为Adapter
- */
-fun <VB : ViewBinding, D : NodeEntity<*, *>> NodeProvider<VB, D>.toAdapter(): NodeAdapter<ViewBinding, NodeEntity<*, *>> {
-    return this.adapter as NodeAdapter<ViewBinding, NodeEntity<*, *>>
-}
 
 
 /*****************************************************
@@ -258,134 +180,107 @@ fun <T : NodeAdapter<*, *>> T.swipeDelete(
  * @param onMove 被拖拽的item多拽到其他item位置上是调用,该参数会替换掉现有的onMove逻辑
  * @param swap 当两个item交换时调用
  */
-fun <VB : ViewBinding, D> NodeProvider<VB, D>.swipeDelete(
-    threshold: Float = 0.5f,
-    flags: (recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder) -> Int = { _, holder -> if (holder.itemViewType == getItemViewType()) START or END else 0 },
-    start: ((viewHolder: RecyclerView.ViewHolder?) -> Unit)? = null,
-    end: ((recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder) -> Unit)? = null,
-    swipe: ((viewHolder: RecyclerView.ViewHolder, direction: Int) -> Boolean)? = null,
-): NodeProvider<VB, D> {
-    adapter.addOnRecyclerViewChanges(object : XAdapter.OnRecyclerViewChanges {
-        override fun onAttachedToRecyclerView(recyclerView: RecyclerView) {
-            ItemTouchHelper(ItemSwipe(SwipeDelete(threshold, flags, start, end, swipe)))
-                .attachToRecyclerView(recyclerView)
-        }
-
-        override fun onDetachedFromRecyclerView(recyclerView: RecyclerView) {
-
-        }
-    })
-    return this
-}
-
-/**
- * 拖拽排序
- *
- * @param threshold 设置用户在拖拽视图时应该移动视图的比例。在视图移动到这个位置之后，ItemTouchHelper开始检查视图下方是否有可能的删除。一个浮点值，表示视图大小的百分比。缺省值为。1f。
- * @param flags 触发方向
- * @param start 开始拖拽
- * @param end 结束拖拽（松开手就会调用）
- * @param onMove 被拖拽的item多拽到其他item位置上是调用,该参数会替换掉现有的onMove逻辑
- * @param swap 当两个item交换时调用
- */
-fun <T : NodeAdapter<*, *>> T.dragSort(
-    threshold: Float = 0.1f,
-    flags: (recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder) -> Int = { _, _ -> UP or DOWN or START or END },
-    start: ((viewHolder: RecyclerView.ViewHolder?) -> Unit)? = null,
-    end: ((recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder) -> Unit)? = null,
-    onMove: ((
-        recyclerView: RecyclerView,
-        source: RecyclerView.ViewHolder,
-        target: RecyclerView.ViewHolder
-    ) -> Boolean)? = null,
-    swap: ((
-        recyclerView: RecyclerView,
-        source: RecyclerView.ViewHolder,
-        target: RecyclerView.ViewHolder,
-        fromPosition: Int,
-        toPosition: Int,
-    ) -> Unit)? = null,
-): T {
-    addOnRecyclerViewChanges(object : XAdapter.OnRecyclerViewChanges {
-        override fun onAttachedToRecyclerView(recyclerView: RecyclerView) {
-            ItemTouchHelper(ItemDrag(DragSort(threshold, flags, start, end, onMove, swap)))
-                .attachToRecyclerView(recyclerView)
-        }
-
-        override fun onDetachedFromRecyclerView(recyclerView: RecyclerView) {
-
-        }
-    })
-
-    return this
-}
-
-
-/**
- * 拖拽排序
- *
- * @param threshold 设置用户在拖拽视图时应该移动视图的比例。在视图移动到这个位置之后，ItemTouchHelper开始检查视图下方是否有可能的删除。一个浮点值，表示视图大小的百分比。缺省值为。1f。
- * @param flags 触发方向
- * @param start 开始拖拽
- * @param end 结束拖拽（松开手就会调用）
- * @param onMove 被拖拽的item多拽到其他item位置上是调用,该参数会替换掉现有的onMove逻辑
- * @param swap 当两个item交换时调用
- */
-fun <VB : ViewBinding, D> NodeProvider<VB, D>.dragSort(
-    threshold: Float = 0.1f,
-    flags: (recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder) -> Int = { _, holder -> if (holder.itemViewType == getItemViewType()) ItemTouchHelper.UP or ItemTouchHelper.DOWN or ItemTouchHelper.START or ItemTouchHelper.END else 0 },
-    start: ((viewHolder: RecyclerView.ViewHolder?) -> Unit)? = null,
-    end: ((recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder) -> Unit)? = null,
-    onMove: ((
-        recyclerView: RecyclerView,
-        source: RecyclerView.ViewHolder,
-        target: RecyclerView.ViewHolder
-    ) -> Boolean)? = null,
-    swap: ((
-        recyclerView: RecyclerView,
-        source: RecyclerView.ViewHolder,
-        target: RecyclerView.ViewHolder,
-        fromPosition: Int,
-        toPosition: Int,
-    ) -> Unit)? = null,
-): NodeProvider<VB, D> {
-    adapter.addOnRecyclerViewChanges(object : XAdapter.OnRecyclerViewChanges {
-        override fun onAttachedToRecyclerView(recyclerView: RecyclerView) {
-            ItemTouchHelper(ItemDrag(DragSort(threshold, flags, start, end, onMove, swap)))
-                .attachToRecyclerView(recyclerView)
-        }
-
-        override fun onDetachedFromRecyclerView(recyclerView: RecyclerView) {
-
-        }
-    })
-    return this
-}
-
-
-//
-///**
-// * 设置为单选
-// * 此方法不会触发点击事件，需要手动编写点击事件与选择事件
-// */
-//fun <A : NodeAdapter<VB, D>, VB : ViewBinding, D> A.radio(): A {
-//    this.setMaxSelectedCount(1)
-//        .allowCancel(false)
-//    return this
-//}
-//
-///**
-// * 设置为单选
-// * 此方法会触发点击事件，改方法会设置选择事件，并回调回来
-// */
-//fun <A : NodeAdapter<VB, D>, VB : ViewBinding, D> A.radio(
-//    @IdRes id: Int? = null,
-//    listener: A.(holder: NodeHolder<VB>?, data: D?, position: Int, index: Int, view: View?) -> Unit
-//): A {
-//    this.setMaxSelectedCount(1)
-//        .allowCancel(false)
-//        .setOnSelectedListener(id) { holder, data, position, index, view ->
-//            listener.invoke(this@radio, holder, data, position, index, view)
+//fun <VB : ViewBinding, D> NodeProvider<VB, D>.swipeDelete(
+//    threshold: Float = 0.5f,
+//    flags: (recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder) -> Int = { _, holder -> if (holder.itemViewType == getItemViewType()) START or END else 0 },
+//    start: ((viewHolder: RecyclerView.ViewHolder?) -> Unit)? = null,
+//    end: ((recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder) -> Unit)? = null,
+//    swipe: ((viewHolder: RecyclerView.ViewHolder, direction: Int) -> Boolean)? = null,
+//): NodeProvider<VB, D> {
+//    adapter.addOnRecyclerViewChanges(object : XAdapter.OnRecyclerViewChanges {
+//        override fun onAttachedToRecyclerView(recyclerView: RecyclerView) {
+//            ItemTouchHelper(ItemSwipe(SwipeDelete(threshold, flags, start, end, swipe)))
+//                .attachToRecyclerView(recyclerView)
 //        }
+//
+//        override fun onDetachedFromRecyclerView(recyclerView: RecyclerView) {
+//
+//        }
+//    })
 //    return this
 //}
+
+/**
+ * 拖拽排序
+ *
+ * @param threshold 设置用户在拖拽视图时应该移动视图的比例。在视图移动到这个位置之后，ItemTouchHelper开始检查视图下方是否有可能的删除。一个浮点值，表示视图大小的百分比。缺省值为。1f。
+ * @param flags 触发方向
+ * @param start 开始拖拽
+ * @param end 结束拖拽（松开手就会调用）
+ * @param onMove 被拖拽的item多拽到其他item位置上是调用,该参数会替换掉现有的onMove逻辑
+ * @param swap 当两个item交换时调用
+ */
+//fun <T : NodeAdapter<*, *>> T.dragSort(
+//    threshold: Float = 0.1f,
+//    flags: (recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder) -> Int = { _, _ -> UP or DOWN or START or END },
+//    start: ((viewHolder: RecyclerView.ViewHolder?) -> Unit)? = null,
+//    end: ((recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder) -> Unit)? = null,
+//    onMove: ((
+//        recyclerView: RecyclerView,
+//        source: RecyclerView.ViewHolder,
+//        target: RecyclerView.ViewHolder
+//    ) -> Boolean)? = null,
+//    swap: ((
+//        recyclerView: RecyclerView,
+//        source: RecyclerView.ViewHolder,
+//        target: RecyclerView.ViewHolder,
+//        fromPosition: Int,
+//        toPosition: Int,
+//    ) -> Unit)? = null,
+//): T {
+//    addOnRecyclerViewChanges(object : XAdapter.OnRecyclerViewChanges {
+//        override fun onAttachedToRecyclerView(recyclerView: RecyclerView) {
+//            ItemTouchHelper(ItemDrag(DragSort(threshold, flags, start, end, onMove, swap)))
+//                .attachToRecyclerView(recyclerView)
+//        }
+//
+//        override fun onDetachedFromRecyclerView(recyclerView: RecyclerView) {
+//
+//        }
+//    })
+//
+//    return this
+//}
+
+
+/**
+ * 拖拽排序
+ *
+ * @param threshold 设置用户在拖拽视图时应该移动视图的比例。在视图移动到这个位置之后，ItemTouchHelper开始检查视图下方是否有可能的删除。一个浮点值，表示视图大小的百分比。缺省值为。1f。
+ * @param flags 触发方向
+ * @param start 开始拖拽
+ * @param end 结束拖拽（松开手就会调用）
+ * @param onMove 被拖拽的item多拽到其他item位置上是调用,该参数会替换掉现有的onMove逻辑
+ * @param swap 当两个item交换时调用
+ */
+//fun <VB : ViewBinding, D> NodeProvider<VB, D>.dragSort(
+//    threshold: Float = 0.1f,
+//    flags: (recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder) -> Int = { _, holder -> if (holder.itemViewType == getItemViewType()) ItemTouchHelper.UP or ItemTouchHelper.DOWN or ItemTouchHelper.START or ItemTouchHelper.END else 0 },
+//    start: ((viewHolder: RecyclerView.ViewHolder?) -> Unit)? = null,
+//    end: ((recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder) -> Unit)? = null,
+//    onMove: ((
+//        recyclerView: RecyclerView,
+//        source: RecyclerView.ViewHolder,
+//        target: RecyclerView.ViewHolder
+//    ) -> Boolean)? = null,
+//    swap: ((
+//        recyclerView: RecyclerView,
+//        source: RecyclerView.ViewHolder,
+//        target: RecyclerView.ViewHolder,
+//        fromPosition: Int,
+//        toPosition: Int,
+//    ) -> Unit)? = null,
+//): NodeProvider<VB, D> {
+//    adapter.addOnRecyclerViewChanges(object : XAdapter.OnRecyclerViewChanges {
+//        override fun onAttachedToRecyclerView(recyclerView: RecyclerView) {
+//            ItemTouchHelper(ItemDrag(DragSort(threshold, flags, start, end, onMove, swap)))
+//                .attachToRecyclerView(recyclerView)
+//        }
+//
+//        override fun onDetachedFromRecyclerView(recyclerView: RecyclerView) {
+//
+//        }
+//    })
+//    return this
+//}
+
