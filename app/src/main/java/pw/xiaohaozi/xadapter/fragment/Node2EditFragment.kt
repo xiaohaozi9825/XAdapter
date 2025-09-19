@@ -78,11 +78,11 @@ class Node2EditFragment : Fragment() {
                     .setMsg(data.text)
                     .onConfirm { _, content: String ->
                         //①数据属性变化
-//                        data.text = content
-//                        getNodeAdapter().updateNode(data)
+                        data.text = content
+                        adapter.updateNode(data)
                         //②数据引用变化
-                        val newNode = NodeInfo1(data.no, content, mutableListOf(NodeInfo2("22","二级菜单", mutableListOf())))
-                        adapter.replaceNode(data, newNode)
+//                        val newNode = NodeInfo1(data.no, content, mutableListOf(NodeInfo2("22","二级菜单", mutableListOf())))
+//                        adapter.replaceNode(data, newNode)
                     }
                     .onCancel {}
                     .show()
@@ -162,7 +162,7 @@ class Node2EditFragment : Fragment() {
         NodeInfo1("1", "Node1", mutableListOf(NodeInfo2(" 10", "Node2", mutableListOf(NodeInfo3("  100", "Node3"))))),
     )
 
-    class NodeInfo1(val no: String, val text: String, private val childList: MutableList<NodeInfo2>) :
+    class NodeInfo1(val no: String, var text: String, private val childList: MutableList<NodeInfo2>) :
         NodeEntity<Unit, NodeInfo2>, ExpandedNodeEntity {
         override var xParentNodeEntity: Unit? = null
         override var xNodeGrade: Int? = null

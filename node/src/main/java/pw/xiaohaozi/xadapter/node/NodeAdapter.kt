@@ -8,15 +8,11 @@ import pw.xiaohaozi.xadapter.node.entity.NodeEntity
 import pw.xiaohaozi.xadapter.node.ext.OnProviderBindHolder
 import pw.xiaohaozi.xadapter.node.ext.OnProviderInitHolder
 import pw.xiaohaozi.xadapter.smart.XAdapterException
-import pw.xiaohaozi.xadapter.smart.adapter.SmartAdapter
 import pw.xiaohaozi.xadapter.smart.adapter.XAdapter
-import pw.xiaohaozi.xadapter.smart.entity.HEADER
 import pw.xiaohaozi.xadapter.smart.ext.OnBindParams
 import pw.xiaohaozi.xadapter.smart.ext.removeRange
 import pw.xiaohaozi.xadapter.smart.holder.XHolder
 import pw.xiaohaozi.xadapter.smart.impl.EventImpl
-import pw.xiaohaozi.xadapter.smart.provider.SmartProvider
-import pw.xiaohaozi.xadapter.smart.provider.XProvider
 import pw.xiaohaozi.xadapter.smart.proxy.EventProxy
 import pw.xiaohaozi.xadapter.smart.proxy.XEmployer
 
@@ -33,11 +29,11 @@ import pw.xiaohaozi.xadapter.smart.proxy.XEmployer
  * 创建时间：2024/12/25 10:58
  */
 open class NodeAdapter<VB : ViewBinding, D : NodeEntity<*, *>>(
-    val eventProxy: EventProxy<NodeAdapter<VB, D>, VB, D> = EventImpl(),//
-) : XAdapter<VB, D>(),
+    private val eventProxy: EventProxy<NodeAdapter<VB, D>, VB, D> = EventImpl(),//
+) : XAdapter<VB, D, NodeAdapter<VB, D>>(),
     XEmployer, //宿主
     EventProxy<NodeAdapter<VB, D>, VB, D> by eventProxy {
-    val TAG = "NodeAdapter"
+    private val TAG = "NodeAdapter"
 
     init {
         initProxy()
@@ -57,7 +53,7 @@ open class NodeAdapter<VB : ViewBinding, D : NodeEntity<*, *>>(
         eventProxy.initProxy(employer)
     }
 
-    override fun getEmployerAdapter(): XAdapter<VB, D> {
+    override fun getEmployerAdapter(): NodeAdapter<VB, D> {
         return this
     }
 
@@ -95,25 +91,27 @@ open class NodeAdapter<VB : ViewBinding, D : NodeEntity<*, *>>(
     fun addNode(node: D, index: Int? = null) {
         if (index == null) source?.add(node) else source?.add(index, node)
         val flatten = node.flattenAndAssociationNode()
-        val startIndex = if (index == null) getDataList().size else findAdapterPosition(node)
+        val startIndex = if (index == null) getDataList().size else findDataPosition(node)
         if (startIndex < 0 || startIndex > itemCount) return
         getDataList().addAll(startIndex, flatten)
-        notifyItemRangeInserted(startIndex, flatten.size)
+        val adapterPosition = getAdapterPosition(startIndex)
+        notifyItemRangeInserted(adapterPosition, flatten.size)
     }
 
 
     /**
      * 增加node
-     * @param node
+     * @param nodes
      */
     fun <L : Collection<D>> addNode(nodes: L, index: Int? = null) {
         if (nodes.isEmpty()) return
         if (index == null) source?.addAll(nodes) else source?.addAll(index, nodes)
         val flatten = nodes.flattenAndAssociationNode()
-        val startIndex = if (index == null) getDataList().size else findAdapterPosition(nodes.first())
+        val startIndex = if (index == null) getDataList().size else findDataPosition(nodes.first())
         if (startIndex < 0 || startIndex > itemCount) return
         getDataList().addAll(startIndex, flatten)
-        notifyItemRangeInserted(startIndex, flatten.size)
+        val adapterPosition = getAdapterPosition(startIndex)
+        notifyItemRangeInserted(adapterPosition, flatten.size)
     }
 
 
@@ -123,18 +121,20 @@ open class NodeAdapter<VB : ViewBinding, D : NodeEntity<*, *>>(
      * @param node
      */
     fun addChildNode(parent: D, node: D, index: Int? = null) {
+        @Suppress("UNCHECKED_CAST")
         val childList = parent.getChildNodeEntityList() as? MutableList<D> ?: return
         val parentIndex = getDataList().indexOf(parent)
         if (index == null) childList.add(node) else childList.add(index, node)
         //如果父节点未展示，则无需刷新UI，为减少递归，这里提前判断
         val startIndex = if (parentIndex < 0) -1
-        else findAdapterPosition(node)
+        else findDataPosition(node)
         Log.i(TAG, "addChildNode: startIndex = $startIndex")
         //不符合条件，则不刷新UI
         if (startIndex < 0 || startIndex > itemCount) return
         val flatten = node.flattenAndAssociationNode(parent, parent.getNodeEntityGrade() + 1)
         getDataList().addAll(startIndex, flatten)
-        notifyItemRangeInserted(startIndex, flatten.size)
+        val adapterPosition = getAdapterPosition(startIndex)
+        notifyItemRangeInserted(adapterPosition, flatten.size)
     }
 
     /**
@@ -142,18 +142,20 @@ open class NodeAdapter<VB : ViewBinding, D : NodeEntity<*, *>>(
      * @param index 相对与根节点
      * @param nodes
      */
+    @Suppress("UNCHECKED_CAST")
     fun <L : Collection<D>> addChildNode(parent: D, nodes: L, index: Int? = null) {
         val childList = parent.getChildNodeEntityList() as? MutableList<D> ?: return
         val parentIndex = getDataList().indexOf(parent)
         if (index == null) childList.addAll(nodes) else childList.addAll(index, nodes)
         //如果父节点未展示，则无需刷新UI，为减少递归，这里提前判断
         val startIndex = if (parentIndex < 0) -1
-        else findAdapterPosition(nodes.first())
+        else findDataPosition(nodes.first())
         //不符合条件，则不刷新UI
         if (startIndex < 0 || startIndex > itemCount) return
         val flatten = nodes.flattenAndAssociationNode()
         getDataList().addAll(startIndex, flatten)
-        notifyItemRangeInserted(startIndex, flatten.size)
+        val adapterPosition = getAdapterPosition(startIndex)
+        notifyItemRangeInserted(adapterPosition, flatten.size)
     }
 
 
@@ -164,8 +166,9 @@ open class NodeAdapter<VB : ViewBinding, D : NodeEntity<*, *>>(
         else parent.getChildNodeEntityList()?.remove(node)
         val position = getDataList().indexOf(node)
         if (getDataList().removeAll(flatten)) {
-            if (position >= 0) {
-                notifyItemRangeRemoved(position, flatten.size)
+            if (position != -1) {
+                val adapterPosition = getAdapterPosition(position)
+                notifyItemRangeRemoved(adapterPosition, flatten.size)
             }
         }
     }
@@ -194,12 +197,14 @@ open class NodeAdapter<VB : ViewBinding, D : NodeEntity<*, *>>(
         parent.getChildNodeEntityList()?.remove(node)
         val position = getDataList().indexOf(node)
         if (getDataList().removeAll(flatten)) {
-            if (position >= 0) {
-                notifyItemRangeRemoved(position, flatten.size)
+            if (position != -1) {
+                val adapterPosition = getAdapterPosition(position)
+                notifyItemRangeRemoved(adapterPosition, flatten.size)
             }
         }
     }
 
+    @Suppress("UNCHECKED_CAST")
     fun removeChildNodeAt(parent: D, index: Int) {
         val node = parent.getChildNodeEntityList()?.get(index) as? D ?: return
         removeChildNode(parent, node)
@@ -218,8 +223,10 @@ open class NodeAdapter<VB : ViewBinding, D : NodeEntity<*, *>>(
         }
     }
 
-    fun removeNodePosition(position: Int) {
-        val node = getDataList()[position] as? D ?: return
+    @Suppress("UNCHECKED_CAST")
+    fun removeNodePosition(adapterPosition: Int) {
+        val dataPosition = getDataPosition(adapterPosition)
+        val node = getDataList()[dataPosition] as? D ?: return
         val parent = node.getParentNodeEntity() as? D
         if (parent == null) removeNode(node)
         else removeChildNode(parent, node)
@@ -240,17 +247,20 @@ open class NodeAdapter<VB : ViewBinding, D : NodeEntity<*, *>>(
      * @param oldNode 旧数据
      * @param newNode 新数据
      */
+    @Suppress("UNCHECKED_CAST")
     fun updateNode(oldNode: D, newNode: D, payload: Any? = null) {
         val parent = oldNode.getParentNodeEntity() as? D
         //如果是一级目录，则更新源数据；否则更新子节点
         if (parent == null) {
             val dataList = getDataList()
-            val position = dataList.indexOf(oldNode)//在recyclerView中的位置
-            val childIndex = source?.indexOf(oldNode) ?: return//在子节点中的位置
+            val dataPosition = dataList.indexOf(oldNode)//在recyclerView中的位置
+            val adapterPosition = getAdapterPosition(dataPosition)
+            val childIndex = source?.indexOf(oldNode)//在子节点中的位置
+            if (childIndex == null || childIndex == -1) return
             source!![childIndex] = newNode//交换数据
-            if (position >= 0 && position < dataList.size) {
-                dataList[position] = newNode
-                notifyItemChanged(position, payload)
+            if (dataPosition >= 0 && dataPosition < dataList.size) {
+                dataList[dataPosition] = newNode
+                notifyItemChanged(adapterPosition, payload)
             }
         } else {
             updateChildNode(parent, oldNode, newNode, payload)
@@ -264,16 +274,18 @@ open class NodeAdapter<VB : ViewBinding, D : NodeEntity<*, *>>(
      * @param oldNode 旧数据
      * @param newNode 新数据
      */
+    @Suppress("UNCHECKED_CAST")
     fun updateChildNode(parent: D, oldNode: D, newNode: D, payload: Any? = null) {
         val childList = parent.getChildNodeEntityList() as? MutableList<D> ?: return
         val dataList = getDataList()
         val position = dataList.indexOf(oldNode)//在recyclerView中的位置
         val childIndex = childList.indexOf(oldNode)//在子节点中的位置
-        if (parent != null && (newNode as? NodeEntity<NodeEntity<*, *>, *> != null)) newNode.xParentNodeEntity = parent
+        if (newNode as? NodeEntity<NodeEntity<*, *>, *> != null) newNode.xParentNodeEntity = parent
         childList[childIndex] = newNode//交换数据
         if (position >= 0 && position < dataList.size) {
             dataList[position] = newNode
-            notifyItemChanged(position, payload)
+            val adapterPosition = getAdapterPosition(position)
+            notifyItemChanged(adapterPosition, payload)
         }
     }
 
@@ -282,6 +294,7 @@ open class NodeAdapter<VB : ViewBinding, D : NodeEntity<*, *>>(
      * 该方法会对所有子节点更新
      *
      */
+    @Suppress("UNCHECKED_CAST")
     fun replaceNode(oldNode: D, newNode: D) {
         val parent = oldNode.getParentNodeEntity() as? D
         //如果是一级目录，则更新源数据；否则更新子节点
@@ -301,13 +314,13 @@ open class NodeAdapter<VB : ViewBinding, D : NodeEntity<*, *>>(
     }
 
     /**
-     * 查找当前元素在Adapter中理论上所在的位置。
+     * 查找当前元素在Adapter数据集合中理论上所在的位置。
      * 此方法是通过对源数据扁平化计算得出来的，即使未添加到adapter.datas中也能计算；但该方法对性能有一定损耗。
      * 如果确定该node已经存在adapter中，可以使用getData().indexOf()方法获取所在位置。
      * @param node 需要查找的元素
      * @return 在Adapter中对应的position，-1表示不在列表中
      */
-    fun findAdapterPosition(node: D): Int {
+    fun findDataPosition(node: D): Int {
         return source?.flatten { if (it is ExpandedNodeEntity) it.isExpanded() else true }?.indexOf(node) ?: -1
     }
     /**********************************************************************************************************/
@@ -315,7 +328,6 @@ open class NodeAdapter<VB : ViewBinding, D : NodeEntity<*, *>>(
     /**********************************************************************************************************/
     /**
      * 展开
-     * @param node 需要展开的节点
      * @param isChangeChildExpand 是否更改所有子节点的展开状态
      */
     fun expand(isChangeChildExpand: Boolean = false) {
@@ -331,7 +343,6 @@ open class NodeAdapter<VB : ViewBinding, D : NodeEntity<*, *>>(
 
     /**
      * 收起
-     * @param node 需要收起的节点
      * @param isChangeChildExpand 是否更改所有子节点展开状态
      */
     fun collapse(isChangeChildExpand: Boolean = false) {
@@ -349,6 +360,7 @@ open class NodeAdapter<VB : ViewBinding, D : NodeEntity<*, *>>(
      * @param position 需要展开的节点
      * @param isExpandChild 是否展开所有子元素
      */
+    @Suppress("UNCHECKED_CAST")
     fun expand(position: Int, isExpandChild: Boolean = false, payload: Any? = null) {
         val dataPosition = getDataPosition(position)
         //拿到对应的节点
@@ -386,6 +398,7 @@ open class NodeAdapter<VB : ViewBinding, D : NodeEntity<*, *>>(
      * @param position 需要收起的节点，对应adapterPosition
      * @param isCollapseChild 是否将子元素的状态都置为收起
      */
+    @Suppress("UNCHECKED_CAST")
     fun collapse(position: Int, isCollapseChild: Boolean = false, payload: Any? = null) {
         val dataPosition = getDataPosition(position)
         //拿到对应的节点
@@ -446,39 +459,6 @@ open class NodeAdapter<VB : ViewBinding, D : NodeEntity<*, *>>(
         init.invoke(provider)
         return provider
     }
-    /**
-     * 添加头布局
-     * 改方法可动态设置，设置后直接展示。
-     *
-     * @param tag 备用字段，可用于标记，或数据存储与传递
-     * @param init 初始化时回调，可在此设置事件监听操作
-     * @param create 创建ViewHolder后调用，可用于初始化item
-     * @param bind 绑定视图时调用
-     */
-    inline fun <reified vb : ViewBinding> addHeader(
-        tag: String = "",
-        noinline init: (XProvider<vb, HEADER>.() -> Unit)? = null,
-        noinline create: (XProvider<vb, HEADER>.(holder: XHolder<vb>) -> Unit)? = null,
-        noinline bind: (XProvider<vb, HEADER>.(holder: XHolder<vb>, data: HEADER) -> Unit)? = null,
-    ): NodeAdapter<VB, D> {
-        val provider = object : XProvider<vb, HEADER>(this) {
-
-            override fun onCreated(holder: XHolder<vb>) {
-                create?.invoke(this, holder)
-            }
-
-            override fun onBind(holder: XHolder<vb>, data: HEADER, position: Int) {
-                bind?.invoke(this, holder, data)
-            }
-
-            override fun isFixedViewType(): Boolean {
-                return true
-            }
-        }
-        addHeaderProvider(provider, HEADER(tag))
-        init?.invoke(provider)
-        return this
-    }
 
     //更改所有子节点的展开状态
     private fun NodeEntity<*, *>.changeChildExpandStatus() {
@@ -504,6 +484,7 @@ open class NodeAdapter<VB : ViewBinding, D : NodeEntity<*, *>>(
     }
 
     //数据扁平化处理并建立父子关联关系
+    @Suppress("UNCHECKED_CAST")
     private fun D.flattenAndAssociationNode(
         parent: NodeEntity<*, *>? = null,
         grade: Int = 1
@@ -528,6 +509,7 @@ open class NodeAdapter<VB : ViewBinding, D : NodeEntity<*, *>>(
 
     //数据扁平化处理，不修改元素内容
     //isGrandson:是否对所有后代扁平化处理
+    @Suppress("UNCHECKED_CAST")
     private fun D.flatten(block: (node: D) -> Boolean): MutableList<D> {
         val temp = mutableListOf<D>()//创建一个临时数组
         temp += this//将当前值保存到数组中，不管是否能展开子元素，当前元素都会在数组中返回
@@ -540,7 +522,7 @@ open class NodeAdapter<VB : ViewBinding, D : NodeEntity<*, *>>(
         return temp
     }
 
-
+    @Suppress("UNCHECKED_CAST")
     private fun Collection<D>.flatten(block: (node: D) -> Boolean): MutableList<D> {
         val temp = mutableListOf<D>()
         for (childNode in this) {//遍历列表，得到子节点
