@@ -1,5 +1,6 @@
 package pw.xiaohaozi.xadapter.smart.impl
 
+import android.annotation.SuppressLint
 import androidx.annotation.IntRange
 import androidx.recyclerview.widget.AsyncDifferConfig
 import androidx.recyclerview.widget.AsyncListDiffer
@@ -25,9 +26,9 @@ import java.util.*
  */
 class SmartDataImpl<Employer : XProxy<Employer>, VB : ViewBinding, D> : SmartDataProxy<Employer, VB, D> {
     override lateinit var employer: Employer
-    private val adapter: XAdapter<*, D> by lazy {
+    private val adapter: XAdapter<*, D, *> by lazy {
         when (val e = employer) {
-            is XEmployer -> e.getEmployerAdapter() as XAdapter<*, D>
+            is XEmployer -> e.getEmployerAdapter() as XAdapter<*, D, *>
             else -> throw XAdapterException("找不到对应的Adapter对象")
         }
     }
@@ -138,6 +139,7 @@ class SmartDataImpl<Employer : XProxy<Employer>, VB : ViewBinding, D> : SmartDat
      * 移除部分数据
      * @param list 这些数据必须是 datas 中存在的
      */
+    @SuppressLint("NotifyDataSetChanged")
     override fun <L : Collection<D>> remove(list: L) {
         if (adapter.isDifferMode()) throw XAdapterException("Differ模式不能使用改方法操作数据，更新数据请使用submitList()方法")
         if (list.isEmpty()) return
@@ -165,13 +167,14 @@ class SmartDataImpl<Employer : XProxy<Employer>, VB : ViewBinding, D> : SmartDat
      *
      * @param list 如果list是MutableList类型，则data==list；否则data！=list
      */
+    @SuppressLint("NotifyDataSetChanged")
     override fun <L : MutableList<D>> setList(list: L) {
         if (adapter.isDifferMode()) throw XAdapterException("Differ模式不能使用改方法操作数据，更新数据请使用submitList()方法")
         adapter.setDataList(list)
         adapter.notifyDataSetChanged()
         notifyChanged(null)
     }
-
+    @SuppressLint("NotifyDataSetChanged")
     override fun <L : Collection<D>> refresh(list: L) {
         if (adapter.isDifferMode()) throw XAdapterException("Differ模式不能使用改方法操作数据，更新数据请使用submitList()方法")
         getData().clear()
@@ -242,7 +245,7 @@ class SmartDataImpl<Employer : XProxy<Employer>, VB : ViewBinding, D> : SmartDat
         val toAdapterPosition = adapter.getAdapterPosition(toPosition)
 
         adapter.notifyItemMoved(fromAdapterPosition, toAdapterPosition)
-        notifyItemRangeMoved(fromAdapterPosition, toAdapterPosition, toAdapterPosition - fromAdapterPosition,null)
+        notifyItemRangeMoved(fromAdapterPosition, toAdapterPosition, toAdapterPosition - fromAdapterPosition, null)
     }
 
 
@@ -322,7 +325,7 @@ class SmartDataImpl<Employer : XProxy<Employer>, VB : ViewBinding, D> : SmartDat
 
 
     class XAdapterListUpdateCallback<D>(
-        private val adapter: XAdapter<*, D>,
+        private val adapter: XAdapter<*, D, *>,
         private val callbacks: LinkedList<ObservableList.OnListChangedCallback<MutableList<D>>?>
     ) : ListUpdateCallback {
 

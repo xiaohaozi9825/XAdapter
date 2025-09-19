@@ -17,8 +17,10 @@ import pw.xiaohaozi.xadapter.smart.dragswipe.DragSort
 import pw.xiaohaozi.xadapter.smart.dragswipe.ItemDrag
 import pw.xiaohaozi.xadapter.smart.dragswipe.ItemSwipe
 import pw.xiaohaozi.xadapter.smart.dragswipe.SwipeDelete
+import pw.xiaohaozi.xadapter.smart.entity.HEADER
 import pw.xiaohaozi.xadapter.smart.holder.XHolder
 import pw.xiaohaozi.xadapter.smart.provider.SmartProvider
+import pw.xiaohaozi.xadapter.smart.provider.XProvider
 import pw.xiaohaozi.xadapter.smart.widgets.SwipeItemLayout
 
 

@@ -21,7 +21,7 @@ import kotlin.coroutines.CoroutineContext
  * github：https://github.com/xiaohaozi9825
  * 创建时间：2024/6/8 14:29
  */
-abstract class XProvider<VB : ViewBinding, D>(override val adapter: XAdapter<*, *>) : TypeProvider<VB, D>, CoroutineScope {
+abstract class XProvider<VB : ViewBinding, D>(override val adapter: XAdapter<*, *, *>) : TypeProvider<VB, D>, CoroutineScope {
     private val TAG = "XProvider"
     override val coroutineContext: CoroutineContext
         get() = adapter.coroutineContext
@@ -47,7 +47,7 @@ abstract class XProvider<VB : ViewBinding, D>(override val adapter: XAdapter<*, 
         onBind(holder, data, position)
     }
 
-    override fun getEmployerAdapter(): XAdapter<*, *> {
+    override fun getEmployerAdapter(): XAdapter<*, *, *> {
         return adapter
     }
 
@@ -57,14 +57,17 @@ abstract class XProvider<VB : ViewBinding, D>(override val adapter: XAdapter<*, 
     }
 
     override fun onCreatedViewHolder(holder: XHolder<*>) {
+        @Suppress("UNCHECKED_CAST")
         onCreated(holder as XHolder<VB>)
     }
 
     override fun onBindViewHolder(holder: XHolder<*>, data: Any?, position: Int) {
+        @Suppress("UNCHECKED_CAST")
         onBind(holder as XHolder<VB>, data as D, position)
     }
 
     override fun onBindViewHolder(holder: XHolder<*>, data: Any?, position: Int, payloads: List<Any?>) {
+        @Suppress("UNCHECKED_CAST")
         onBind(holder as XHolder<VB>, data as D, position, payloads)
     }
 
@@ -101,7 +104,6 @@ abstract class XProvider<VB : ViewBinding, D>(override val adapter: XAdapter<*, 
 
     //反射创建ViewBinding实例
     //A : Adapter<*>, VH : Holder<VB>, VB : ViewBinding, D
-    @Suppress("UNCHECKED_CAST")
     private fun smartCreateViewBinding(parent: ViewGroup): VB {
         val genericSuperclass =
             this.javaClass.genericSuperclass as? ParameterizedType ?: throw RuntimeException("必须明确指定VB泛型类型")

@@ -12,5 +12,5 @@ import pw.xiaohaozi.xadapter.smart.adapter.XAdapter
  * 创建时间：2024/6/9 9:26
  */
 interface XEmployer {
-    fun getEmployerAdapter(): XAdapter<*, *>
+    fun getEmployerAdapter(): XAdapter<*, *, *>
 }

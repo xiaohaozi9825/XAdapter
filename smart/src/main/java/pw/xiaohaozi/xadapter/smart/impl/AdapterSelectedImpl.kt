@@ -38,7 +38,7 @@ open class AdapterSelectedImpl<Employer : XProxy<Employer>, VB : ViewBinding, D>
     override lateinit var employer: Employer
     private val selectedCache: SelectedList<D> by lazy { SelectedList() }
 
-    private val adapter: XAdapter<*, *> by lazy {
+    private val adapter: XAdapter<*, *, *> by lazy {
         when (val e = employer) {
             is XEmployer -> e.getEmployerAdapter()
             else -> throw NullPointerException("找不到对应的Adapter对象")
