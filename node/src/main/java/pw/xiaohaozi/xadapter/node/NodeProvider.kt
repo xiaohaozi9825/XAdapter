@@ -41,13 +41,11 @@ abstract class NodeProvider<AVB : ViewBinding, AD : NodeEntity<*, *>, VB : AVB, 
     override fun isFixedViewType() = false
 
 
-
-
     /**
      * 多布局切换
      * 返回Provider
      */
-    inline fun <vb : AVB, d : AD> withType(
+    inline fun <reified vb : AVB, reified d : AD> withType(
         isFixed: Boolean? = null,
         itemType: Int? = null,
         crossinline init: (NodeProvider<AVB, AD, vb, d>.() -> Unit) = {},

@@ -429,11 +429,12 @@ open class NodeAdapter<VB : ViewBinding, D : NodeEntity<*, *>>(
     /**
      * 多布局切换
      * 返回Provider
+     * 该方法必须指定泛型，不支持自动推断类型
      */
-    inline fun <vb : VB, d : D> withType(
+    inline fun <reified vb : VB,reified d : D> withType(
         isFixed: Boolean? = null,
         itemType: Int? = null,
-        crossinline init: (NodeProvider<VB, D, vb, d>.() -> Unit) = {},
+        init: (NodeProvider<VB, D, vb, d>.() -> Unit) = {},
         crossinline create: OnProviderInitHolder<VB, D, vb, d> = {},
         crossinline bind: OnProviderBindHolder<VB, D, vb, d>,
     ): NodeProvider<VB, D, vb, d> {

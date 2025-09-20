@@ -67,10 +67,10 @@ open class SmartAdapter<VB : ViewBinding, D>(
      * 多布局切换
      * 返回Provider
      */
-    inline fun <pvb : VB, pd : D> withType(
+    inline fun <reified pvb : VB, reified pd : D> withType(
         isFixed: Boolean? = null,
         itemType: Int? = null,
-        crossinline init: (SmartProvider<VB, D, pvb, pd>.() -> Unit) = {},
+        init: (SmartProvider<VB, D, pvb, pd>.() -> Unit) = {},
         crossinline created: OnProviderCreatedHolder<VB, D, pvb, pd> = {},
         crossinline bind: OnProviderBindHolder<VB, D, pvb, pd>,
     ): SmartProvider<VB, D, pvb, pd> {

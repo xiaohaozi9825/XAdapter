@@ -2,7 +2,6 @@ package pw.xiaohaozi.xadapter.fragment
 
 import android.graphics.Typeface
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -17,10 +16,11 @@ import pw.xiaohaozi.xadapter.databinding.ItemHomeHeaderBinding
 import pw.xiaohaozi.xadapter.databinding.ItemNodeEditBinding
 import pw.xiaohaozi.xadapter.dialog.InputDialog
 import pw.xiaohaozi.xadapter.node.NodeAdapter
+import pw.xiaohaozi.xadapter.node.NodeProvider
 import pw.xiaohaozi.xadapter.node.entity.ExpandedNodeEntity
 import pw.xiaohaozi.xadapter.node.entity.NodeEntity
 import pw.xiaohaozi.xadapter.node.ext.nodeAdapter
-
+import pw.xiaohaozi.xadapter.smart.holder.XHolder
 
 
 /**
@@ -57,104 +57,173 @@ class Node2EditFragment : Fragment() {
         val adapter = nodeAdapter()
             .withType<ItemNodeEditBinding, NodeInfo1> { (holder, data) ->
                 //创建一级菜单
-                holder.binding
-                    .apply { tvContent.text = data.no + "、" + data.text }
-                    .apply { tvContent.setTypeface(Typeface.DEFAULT_BOLD) }
-                    .apply { btnAdd.isVisible = true }
-//                    .apply { btnEdit.isVisible = false }
-                    .apply { ivArrow.isInvisible = false }
-                    .apply { ivArrow.rotation = if (data.isExpanded()) 0f else -90f }
+                bindNode1(holder, data)
             }.setOnClickListener { holder, data, position, view ->
-                if (data.isExpanded()) adapter.collapse(position)
-                else adapter.expand(position, true)
+                expandOrCollapseNode1(data, position)
             }.setOnClickListener(R.id.btn_add) { holder, data, position, view ->
                 //点击一级菜单，添加二级菜单数据
-                val size = data.getChildNodeEntityList().size
-                adapter.addChildNode(data, NodeInfo2(" ${data.no}$size", "Node2", mutableListOf()))
-                if (!data.isExpanded()) adapter.expand(position)
-            }.setOnClickListener(R.id.btn_edit){holder, data, position, view ->
-                InputDialog(requireActivity())
-                    .setTitle("编辑内容")
-                    .setMsg(data.text)
-                    .onConfirm { _, content: String ->
-                        //①数据属性变化
-                        data.text = content
-                        adapter.updateNode(data)
-                        //②数据引用变化
-//                        val newNode = NodeInfo1(data.no, content, mutableListOf(NodeInfo2("22","二级菜单", mutableListOf())))
-//                        adapter.replaceNode(data, newNode)
-                    }
-                    .onCancel {}
-                    .show()
+                addNode2(data, position)
+            }.setOnClickListener(R.id.btn_edit) { holder, data, position, view ->
+                editNode1(data)
             }.withType<ItemNodeEditBinding, NodeInfo2> { (holder, data) ->
-                //创建二级菜单
-                holder.binding
-                    .apply { tvContent.text = data.no + "、" + data.text }
-                    .apply { tvContent.setTypeface(Typeface.DEFAULT) }
-                    .apply { btnAdd.isVisible = true }
-//                    .apply { btnEdit.isVisible = false }
-                    .apply { ivArrow.isInvisible = false }
-                    .apply { ivArrow.rotation = if (data.isExpanded()) 0f else -90f }
+                bindNode2(holder, data)
             }.setOnClickListener { holder, data, position, view ->
-                if (data.isExpanded()) adapter.collapse(position, true)
-                else adapter.expand(position)
+                expandOrCollapseNode2(data, position)
             }.setOnClickListener(R.id.btn_add) { holder, data, position, view ->
-                val size = data.getChildNodeEntityList().size
-                adapter.addChildNode(
-                    data,
-                    NodeInfo3("  ${data.no}${size}", "Node3"),
-                    //size//在末尾添加数据，该参数可不传
-                )
-                if (!data.isExpanded()) adapter.expand(position)
-            }.setOnClickListener(R.id.btn_edit){holder, data, position, view ->
-                InputDialog(requireActivity())
-                    .setTitle("编辑内容")
-                    .setMsg(data.text)
-                    .onConfirm { _, content: String ->
-                        //①数据属性变化
-//                        data.text = content
-//                        getNodeAdapter().updateNode(data)
-                        //②数据引用变化
-                        val newNode = NodeInfo2(data.no, content, mutableListOf(NodeInfo3("33","三级菜单")))
-                        adapter.replaceNode(data, newNode)
-                    }
-                    .onCancel {}
-                    .show()
+                addNode3(data, position)
+            }.setOnClickListener(R.id.btn_edit) { holder, data, position, view ->
+                editNode2(data)
             }.withType<ItemNodeEditBinding, NodeInfo3> { (holder, data) ->
                 //创建三级菜单
-                holder.binding
-                    .apply { tvContent.text = data.no + "、" + data.text }
-                    .apply { tvContent.setTypeface(null, Typeface.ITALIC) }
-                    .apply { btnAdd.isVisible = false }
-//                    .apply { btnEdit.isVisible = true }
-                    .apply { ivArrow.isInvisible = true }
+                bindNode3(holder, data)
             }
             .setOnClickListener(R.id.btn_edit) { holder, data, position, view ->
-                InputDialog(requireActivity())
-                    .setTitle("编辑内容")
-                    .setMsg(data.text)
-                    .onConfirm { _, content: String ->
-                        //①数据属性变化
-//                        data.text = content
-//                        getNodeAdapter().updateNode(data)
-                        //②数据引用变化
-                        val newNode = NodeInfo3(data.no, content)
-                        adapter.updateNode(data, newNode)
-                    }
-                    .onCancel {}
-                    .show()
+                editNode3(data)
             }
             .toAdapter()
             .setOnClickListener(R.id.btn_delete) { holder, data, position, view ->
-                //设置全局点击事件
-                if (position == -1) return@setOnClickListener
-                //移除指定位置节点
-                adapter.removeNodePosition(position)
+                removeNodeAtPosition(position)//设置全局点击事件
             }
             .addHeader<ItemHomeHeaderBinding> { holder, data ->
 
             }
         return adapter
+    }
+
+    private fun removeNodeAtPosition(position: Int) {
+        if (position == -1) return
+        //移除指定位置节点
+        adapter.removeNodePosition(position)
+    }
+
+    private fun NodeProvider<ViewBinding, NodeEntity<*, *>, ItemNodeEditBinding, NodeInfo3>.editNode3(
+        data: NodeInfo3
+    ) {
+        InputDialog(requireActivity())
+            .setTitle("编辑内容")
+            .setMsg(data.text)
+            .onConfirm { _, content: String ->
+                //①数据属性变化
+                //                        data.text = content
+                //                        getNodeAdapter().updateNode(data)
+                //②数据引用变化
+                val newNode = NodeInfo3(data.no, content)
+                adapter.updateNode(data, newNode)
+            }
+            .onCancel {}
+            .show()
+    }
+
+    private fun bindNode3(
+        holder: XHolder<ItemNodeEditBinding>,
+        data: NodeInfo3
+    ) {
+        holder.binding
+            .apply { tvContent.text = data.no + "、" + data.text }
+            .apply { tvContent.setTypeface(null, Typeface.ITALIC) }
+            .apply { btnAdd.isVisible = false }
+            //                    .apply { btnEdit.isVisible = true }
+            .apply { ivArrow.isInvisible = true }
+    }
+
+    private fun NodeProvider<ViewBinding, NodeEntity<*, *>, ItemNodeEditBinding, NodeInfo2>.editNode2(
+        data: NodeInfo2
+    ) {
+        InputDialog(requireActivity())
+            .setTitle("编辑内容")
+            .setMsg(data.text)
+            .onConfirm { _, content: String ->
+                //①数据属性变化
+                //                        data.text = content
+                //                        getNodeAdapter().updateNode(data)
+                //②数据引用变化
+                val newNode = NodeInfo2(data.no, content, mutableListOf(NodeInfo3("33", "三级菜单")))
+                adapter.replaceNode(data, newNode)
+            }
+            .onCancel {}
+            .show()
+    }
+
+    private fun NodeProvider<ViewBinding, NodeEntity<*, *>, ItemNodeEditBinding, NodeInfo2>.addNode3(
+        data: NodeInfo2,
+        position: Int
+    ) {
+        val size = data.getChildNodeEntityList().size
+        adapter.addChildNode(
+            data,
+            NodeInfo3("  ${data.no}${size}", "Node3"),
+            //size//在末尾添加数据，该参数可不传
+        )
+        if (!data.isExpanded()) adapter.expand(position)
+    }
+
+    private fun NodeProvider<ViewBinding, NodeEntity<*, *>, ItemNodeEditBinding, NodeInfo2>.expandOrCollapseNode2(
+        data: NodeInfo2,
+        position: Int
+    ) {
+        if (data.isExpanded()) adapter.collapse(position, true)
+        else adapter.expand(position)
+    }
+
+    private fun bindNode2(
+        holder: XHolder<ItemNodeEditBinding>,
+        data: NodeInfo2
+    ) {
+        holder.binding
+            .apply { tvContent.text = data.no + "、" + data.text }
+            .apply { tvContent.setTypeface(Typeface.DEFAULT) }
+            .apply { btnAdd.isVisible = true }
+            //                    .apply { btnEdit.isVisible = false }
+            .apply { ivArrow.isInvisible = false }
+            .apply { ivArrow.rotation = if (data.isExpanded()) 0f else -90f }
+    }
+
+    private fun NodeProvider<ViewBinding, NodeEntity<*, *>, ItemNodeEditBinding, NodeInfo1>.editNode1(
+        data: NodeInfo1
+    ) {
+        InputDialog(requireActivity())
+            .setTitle("编辑内容")
+            .setMsg(data.text)
+            .onConfirm { _, content: String ->
+                //①数据属性变化
+                data.text = content
+                adapter.updateNode(data)
+                //②数据引用变化
+                //                        val newNode = NodeInfo1(data.no, content, mutableListOf(NodeInfo2("22","二级菜单", mutableListOf())))
+                //                        adapter.replaceNode(data, newNode)
+            }
+            .onCancel {}
+            .show()
+    }
+
+    private fun NodeProvider<ViewBinding, NodeEntity<*, *>, ItemNodeEditBinding, NodeInfo1>.addNode2(
+        data: NodeInfo1,
+        position: Int
+    ) {
+        val size = data.getChildNodeEntityList().size
+        adapter.addChildNode(data, NodeInfo2(" ${data.no}$size", "Node2", mutableListOf()))
+        if (!data.isExpanded()) adapter.expand(position)
+    }
+
+    private fun bindNode1(
+        holder: XHolder<ItemNodeEditBinding>,
+        data: NodeInfo1
+    ) {
+        holder.binding.apply {
+            tvContent.text = data.no + "、" + data.text
+            tvContent.setTypeface(Typeface.DEFAULT_BOLD)
+            btnAdd.isVisible = true
+            ivArrow.isInvisible = false
+            ivArrow.rotation = if (data.isExpanded()) 0f else -90f
+        }
+    }
+
+    private fun NodeProvider<ViewBinding, NodeEntity<*, *>, ItemNodeEditBinding, NodeInfo1>.expandOrCollapseNode1(
+        data: NodeInfo1,
+        position: Int
+    ) {
+        if (data.isExpanded()) adapter.collapse(position)
+        else adapter.expand(position, true)
     }
 
     val dataList = mutableListOf(

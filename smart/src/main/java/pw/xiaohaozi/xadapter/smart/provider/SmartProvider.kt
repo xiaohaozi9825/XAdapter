@@ -49,10 +49,10 @@ abstract class SmartProvider<AVB : ViewBinding, AD, PVB : ViewBinding, PD>(
      * 多布局切换
      * 返回Provider
      */
-    inline fun <pvb : AVB, pd : AD> withType(
+    inline fun <reified pvb : AVB, reified pd : AD> withType(
         isFixed: Boolean? = null,
         itemType: Int? = null,
-        crossinline init: (SmartProvider<AVB, AD, pvb, pd>.() -> Unit) = {},
+        init: (SmartProvider<AVB, AD, pvb, pd>.() -> Unit) = {},
         crossinline created: OnProviderCreatedHolder<AVB, AD, pvb, pd> = {},
         crossinline bind: OnProviderBindHolder<AVB, AD, pvb, pd>,
     ): SmartProvider<AVB, AD, pvb, pd> {

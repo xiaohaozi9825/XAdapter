@@ -45,14 +45,13 @@ data class OnBindParams<VB : ViewBinding, D>(
 /**
  * 创建单布局Adapter
  */
-inline fun <VB : ViewBinding, D> createAdapter(
+inline fun <reified VB : ViewBinding, reified D> createAdapter(
     itemType: Int = 0,
     crossinline onItemId: OnItemId<VB, D> = { NO_ID },
     crossinline init: (SmartProvider<VB, D, VB, D>.() -> Unit) = {},
     crossinline create: OnAdapterInitHolder<VB, D> = {},
     crossinline bind: OnAdapterBindHolder<VB, D>,
 ): SmartAdapter<VB, D> {
-//    val adapter = SmartAdapter<VB, D>()
     val adapter = object : SmartAdapter<VB, D>() {
         override fun getItemId(position: Int): Long {
             return onItemId.invoke(this, position)
@@ -80,14 +79,14 @@ inline fun <VB : ViewBinding, D> createAdapter(
 /**
  * 创建单布局Adapter
  */
-inline fun <VB : ViewBinding, D> LifecycleOwner.createLifecycleAdapter(
+inline fun <reified VB : ViewBinding, reified D> LifecycleOwner.createLifecycleAdapter(
     itemType: Int = 0,
     crossinline onItemId: OnItemId<VB, D> = { NO_ID },
     crossinline init: (SmartProvider<VB, D, VB, D>.() -> Unit) = {},
     crossinline create: OnAdapterInitHolder<VB, D> = {},
     crossinline bind: OnAdapterBindHolder<VB, D>,
 ): SmartAdapter<VB, D> {
-    val adapter = createAdapter(itemType, onItemId, init, create, bind)
+    val adapter = createAdapter<VB, D>(itemType, onItemId, init, create, bind)
     adapter.bindLifecycle(this)
     return adapter
 }
@@ -99,9 +98,9 @@ inline fun <VB : ViewBinding, D> LifecycleOwner.createLifecycleAdapter(
  *
  * @param custom 动态生成 itemType
  */
-fun <VB : ViewBinding, D> createTypeAdapter(
-    onItemId: OnItemId<VB, D>? = null,
-    custom: OnCustomType<VB, D>? = null,
+inline fun <reified VB : ViewBinding, reified D> createTypeAdapter(
+    noinline onItemId: OnItemId<VB, D>? = null,
+    noinline custom: OnCustomType<VB, D>? = null,
 ): SmartAdapter<VB, D> {
     val adapter = object : SmartAdapter<VB, D>() {
         override fun getItemId(position: Int): Long {
@@ -120,14 +119,14 @@ fun createAdapter(
     onItemId: OnItemId<ViewBinding, Any?>? = null,
     custom: OnCustomType<ViewBinding, Any?>? = null,
 ): SmartAdapter<ViewBinding, Any?> {
-    return createTypeAdapter(onItemId, custom)
+    return createTypeAdapter<ViewBinding, Any?>(onItemId, custom)
 }
 
-fun <VB : ViewBinding, D> LifecycleOwner.createLifecycleTypeAdapter(
-    custom: OnCustomType<VB, D>? = null,
-    onItemId: OnItemId<VB, D> = { NO_ID }
+inline fun <reified VB : ViewBinding, reified D> LifecycleOwner.createLifecycleTypeAdapter(
+    noinline custom: OnCustomType<VB, D>? = null,
+    noinline onItemId: OnItemId<VB, D> = { NO_ID }
 ): SmartAdapter<VB, D> {
-    val adapter = createTypeAdapter(onItemId, custom)
+    val adapter = createTypeAdapter<VB, D>(onItemId, custom)
     adapter.bindLifecycle(this)
     return adapter
 }
