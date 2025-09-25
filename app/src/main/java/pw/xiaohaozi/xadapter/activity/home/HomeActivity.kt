@@ -13,6 +13,8 @@ import pw.xiaohaozi.xadapter.databinding.ActivityHomeBinding
 import pw.xiaohaozi.xadapter.databinding.ItemHomeBottomButtonBinding
 import pw.xiaohaozi.xadapter.enableEdgeToEdge
 import pw.xiaohaozi.xadapter.smart.ext.createAdapter
+import pw.xiaohaozi.xadapter.smart.ext.singleSelect
+import pw.xiaohaozi.xadapterdemo.utils.anima
 
 
 class HomeActivity : AppCompatActivity() {
@@ -30,19 +32,23 @@ class HomeActivity : AppCompatActivity() {
     }
 
     private fun initBottomNav() {
-        val adapter = createAdapter<ItemHomeBottomButtonBinding, NevButton> {
+        val adapter = createAdapter<ItemHomeBottomButtonBinding, NevButton>(create = {
+            it.binding.root.anima()
+        }) {
             it.holder.binding.apply {
                 if (!it.payloads.contains("select")) {
                     tvTitle.text = it.data.title
                     ivIcon.setImageResource(it.data.icon)
                 }
                 if (isSelected(it.data)) {
-                    tvTitle.setTextColor(Color.parseColor("#AA0000"))
+                    tvTitle.setTextColor(resources.getColor(R.color.theme))
+                    ivIcon.setColorFilter(resources.getColor(R.color.theme))
                 } else {
                     tvTitle.setTextColor(Color.parseColor("#AAAAAA"))
+                    ivIcon.setColorFilter(Color.parseColor("#AAAAAA"))
                 }
             }
-        }.setOnItemSelectListener(payload = "select") { data, position, index, fromUser ->
+        }.singleSelect(payload = "select") { data, position, index, fromUser ->
             if (isSelected(data)) {
                 //切换页面
                 val fragmentManager: FragmentManager = supportFragmentManager
@@ -51,7 +57,7 @@ class HomeActivity : AppCompatActivity() {
 //                 transaction.addToBackStack(null)
                 transaction.commit()
             }
-        }.setMaxSelectCount(1)
+        }
 
         binding.rvBottom.adapter = adapter
         adapter.refresh(bottomList)
@@ -59,11 +65,11 @@ class HomeActivity : AppCompatActivity() {
     }
 
     private val bottomList = mutableListOf(
-        NevButton(R.mipmap.ic_launcher, "首页", HomeFragment::class.java),
-        NevButton(R.mipmap.ic_launcher, "Smart", SmartMenuFragment::class.java),
-        NevButton(R.mipmap.ic_launcher, "Node", NodeMenuFragment::class.java),
-        NevButton(R.mipmap.ic_launcher, "示例", ExampleMenuFragment::class.java),
-        NevButton(R.mipmap.ic_launcher, "文档", DocumentFragment::class.java),
+        NevButton(R.drawable.ic_home, "首页", HomeFragment::class.java),
+        NevButton(R.drawable.ic_more, "Smart", SmartMenuFragment::class.java),
+        NevButton(R.drawable.ic_classification, "Node", NodeMenuFragment::class.java),
+        NevButton(R.drawable.ic_huititle, "示例", ExampleMenuFragment::class.java),
+        NevButton(R.drawable.ic_content, "文档", DocumentFragment::class.java),
     )
 
     data class NevButton(
