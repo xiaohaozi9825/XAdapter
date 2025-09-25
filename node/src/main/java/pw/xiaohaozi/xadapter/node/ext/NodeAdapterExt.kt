@@ -1,6 +1,5 @@
 package pw.xiaohaozi.xadapter.node.ext
 
-import androidx.lifecycle.LifecycleOwner
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.ItemTouchHelper.DOWN
 import androidx.recyclerview.widget.ItemTouchHelper.END
@@ -12,11 +11,11 @@ import androidx.viewbinding.ViewBinding
 import pw.xiaohaozi.xadapter.node.NodeAdapter
 import pw.xiaohaozi.xadapter.node.entity.NodeEntity
 import pw.xiaohaozi.xadapter.node.NodeProvider
+import pw.xiaohaozi.xadapter.node.dragswipe.DragSort
+import pw.xiaohaozi.xadapter.node.dragswipe.SwipeDelete
 import pw.xiaohaozi.xadapter.smart.adapter.XAdapter
-import pw.xiaohaozi.xadapter.smart.dragswipe.DragSort
 import pw.xiaohaozi.xadapter.smart.dragswipe.ItemDrag
 import pw.xiaohaozi.xadapter.smart.dragswipe.ItemSwipe
-import pw.xiaohaozi.xadapter.smart.dragswipe.SwipeDelete
 import pw.xiaohaozi.xadapter.smart.ext.OnBindParams
 import pw.xiaohaozi.xadapter.smart.holder.XHolder
 import pw.xiaohaozi.xadapter.smart.widgets.SwipeItemLayout
@@ -114,7 +113,6 @@ fun nodeAdapter(
 //}
 
 
-
 /*****************************************************
  * 其他操作
  *****************************************************/
@@ -180,107 +178,24 @@ fun <T : NodeAdapter<*, *>> T.swipeDelete(
  * @param onMove 被拖拽的item多拽到其他item位置上是调用,该参数会替换掉现有的onMove逻辑
  * @param swap 当两个item交换时调用
  */
-//fun <VB : ViewBinding, D> NodeProvider<VB, D>.swipeDelete(
-//    threshold: Float = 0.5f,
-//    flags: (recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder) -> Int = { _, holder -> if (holder.itemViewType == getItemViewType()) START or END else 0 },
-//    start: ((viewHolder: RecyclerView.ViewHolder?) -> Unit)? = null,
-//    end: ((recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder) -> Unit)? = null,
-//    swipe: ((viewHolder: RecyclerView.ViewHolder, direction: Int) -> Boolean)? = null,
-//): NodeProvider<VB, D> {
-//    adapter.addOnRecyclerViewChanges(object : XAdapter.OnRecyclerViewChanges {
-//        override fun onAttachedToRecyclerView(recyclerView: RecyclerView) {
-//            ItemTouchHelper(ItemSwipe(SwipeDelete(threshold, flags, start, end, swipe)))
-//                .attachToRecyclerView(recyclerView)
-//        }
-//
-//        override fun onDetachedFromRecyclerView(recyclerView: RecyclerView) {
-//
-//        }
-//    })
-//    return this
-//}
+fun <AVB : ViewBinding, AD : NodeEntity<*, *>, PVB : AVB, PD : AD> NodeProvider<AVB, AD, PVB, PD>.swipeDelete(
+    threshold: Float = 0.5f,
+    flags: (recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder) -> Int = { _, holder -> if (holder.itemViewType == getItemViewType()) START or END else 0 },
+    start: ((viewHolder: RecyclerView.ViewHolder?) -> Unit)? = null,
+    end: ((recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder) -> Unit)? = null,
+    swipe: ((viewHolder: RecyclerView.ViewHolder, direction: Int) -> Boolean)? = null,
+): NodeProvider<AVB, AD, PVB, PD> {
+    adapter.addOnRecyclerViewChanges(object : XAdapter.OnRecyclerViewChanges {
+        override fun onAttachedToRecyclerView(recyclerView: RecyclerView) {
+            ItemTouchHelper(ItemSwipe(SwipeDelete(threshold, flags, start, end, swipe)))
+                .attachToRecyclerView(recyclerView)
+        }
 
-/**
- * 拖拽排序
- *
- * @param threshold 设置用户在拖拽视图时应该移动视图的比例。在视图移动到这个位置之后，ItemTouchHelper开始检查视图下方是否有可能的删除。一个浮点值，表示视图大小的百分比。缺省值为。1f。
- * @param flags 触发方向
- * @param start 开始拖拽
- * @param end 结束拖拽（松开手就会调用）
- * @param onMove 被拖拽的item多拽到其他item位置上是调用,该参数会替换掉现有的onMove逻辑
- * @param swap 当两个item交换时调用
- */
-//fun <T : NodeAdapter<*, *>> T.dragSort(
-//    threshold: Float = 0.1f,
-//    flags: (recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder) -> Int = { _, _ -> UP or DOWN or START or END },
-//    start: ((viewHolder: RecyclerView.ViewHolder?) -> Unit)? = null,
-//    end: ((recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder) -> Unit)? = null,
-//    onMove: ((
-//        recyclerView: RecyclerView,
-//        source: RecyclerView.ViewHolder,
-//        target: RecyclerView.ViewHolder
-//    ) -> Boolean)? = null,
-//    swap: ((
-//        recyclerView: RecyclerView,
-//        source: RecyclerView.ViewHolder,
-//        target: RecyclerView.ViewHolder,
-//        fromPosition: Int,
-//        toPosition: Int,
-//    ) -> Unit)? = null,
-//): T {
-//    addOnRecyclerViewChanges(object : XAdapter.OnRecyclerViewChanges {
-//        override fun onAttachedToRecyclerView(recyclerView: RecyclerView) {
-//            ItemTouchHelper(ItemDrag(DragSort(threshold, flags, start, end, onMove, swap)))
-//                .attachToRecyclerView(recyclerView)
-//        }
-//
-//        override fun onDetachedFromRecyclerView(recyclerView: RecyclerView) {
-//
-//        }
-//    })
-//
-//    return this
-//}
+        override fun onDetachedFromRecyclerView(recyclerView: RecyclerView) {
 
+        }
+    })
+    return this
+}
 
-/**
- * 拖拽排序
- *
- * @param threshold 设置用户在拖拽视图时应该移动视图的比例。在视图移动到这个位置之后，ItemTouchHelper开始检查视图下方是否有可能的删除。一个浮点值，表示视图大小的百分比。缺省值为。1f。
- * @param flags 触发方向
- * @param start 开始拖拽
- * @param end 结束拖拽（松开手就会调用）
- * @param onMove 被拖拽的item多拽到其他item位置上是调用,该参数会替换掉现有的onMove逻辑
- * @param swap 当两个item交换时调用
- */
-//fun <VB : ViewBinding, D> NodeProvider<VB, D>.dragSort(
-//    threshold: Float = 0.1f,
-//    flags: (recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder) -> Int = { _, holder -> if (holder.itemViewType == getItemViewType()) ItemTouchHelper.UP or ItemTouchHelper.DOWN or ItemTouchHelper.START or ItemTouchHelper.END else 0 },
-//    start: ((viewHolder: RecyclerView.ViewHolder?) -> Unit)? = null,
-//    end: ((recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder) -> Unit)? = null,
-//    onMove: ((
-//        recyclerView: RecyclerView,
-//        source: RecyclerView.ViewHolder,
-//        target: RecyclerView.ViewHolder
-//    ) -> Boolean)? = null,
-//    swap: ((
-//        recyclerView: RecyclerView,
-//        source: RecyclerView.ViewHolder,
-//        target: RecyclerView.ViewHolder,
-//        fromPosition: Int,
-//        toPosition: Int,
-//    ) -> Unit)? = null,
-//): NodeProvider<VB, D> {
-//    adapter.addOnRecyclerViewChanges(object : XAdapter.OnRecyclerViewChanges {
-//        override fun onAttachedToRecyclerView(recyclerView: RecyclerView) {
-//            ItemTouchHelper(ItemDrag(DragSort(threshold, flags, start, end, onMove, swap)))
-//                .attachToRecyclerView(recyclerView)
-//        }
-//
-//        override fun onDetachedFromRecyclerView(recyclerView: RecyclerView) {
-//
-//        }
-//    })
-//    return this
-//}
 

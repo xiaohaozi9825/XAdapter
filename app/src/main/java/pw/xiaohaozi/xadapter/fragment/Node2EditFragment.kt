@@ -20,6 +20,7 @@ import pw.xiaohaozi.xadapter.node.NodeProvider
 import pw.xiaohaozi.xadapter.node.entity.ExpandedNodeEntity
 import pw.xiaohaozi.xadapter.node.entity.NodeEntity
 import pw.xiaohaozi.xadapter.node.ext.nodeAdapter
+import pw.xiaohaozi.xadapter.node.ext.swipeDelete
 import pw.xiaohaozi.xadapter.smart.holder.XHolder
 
 
@@ -56,37 +57,32 @@ class Node2EditFragment : Fragment() {
     fun function(): NodeAdapter<ViewBinding, NodeEntity<*, *>> {
         val adapter = nodeAdapter()
             .withType<ItemNodeEditBinding, NodeInfo1> { (holder, data) ->
-                //创建一级菜单
                 bindNode1(holder, data)
-            }.setOnClickListener { holder, data, position, view ->
+            }.setOnClickListener(R.id.iv_arrow) { holder, data, position, view ->
                 expandOrCollapseNode1(data, position)
             }.setOnClickListener(R.id.btn_add) { holder, data, position, view ->
-                //点击一级菜单，添加二级菜单数据
-                addNode2(data, position)
+                addNode2(data, position) //点击一级菜单，添加二级菜单数据
             }.setOnClickListener(R.id.btn_edit) { holder, data, position, view ->
                 editNode1(data)
             }.withType<ItemNodeEditBinding, NodeInfo2> { (holder, data) ->
                 bindNode2(holder, data)
-            }.setOnClickListener { holder, data, position, view ->
+            }.setOnClickListener(R.id.iv_arrow) { holder, data, position, view ->
                 expandOrCollapseNode2(data, position)
             }.setOnClickListener(R.id.btn_add) { holder, data, position, view ->
                 addNode3(data, position)
             }.setOnClickListener(R.id.btn_edit) { holder, data, position, view ->
                 editNode2(data)
             }.withType<ItemNodeEditBinding, NodeInfo3> { (holder, data) ->
-                //创建三级菜单
                 bindNode3(holder, data)
-            }
-            .setOnClickListener(R.id.btn_edit) { holder, data, position, view ->
+            }.setOnClickListener(R.id.btn_edit) { holder, data, position, view ->
                 editNode3(data)
             }
             .toAdapter()
             .setOnClickListener(R.id.btn_delete) { holder, data, position, view ->
                 removeNodeAtPosition(position)//设置全局点击事件
             }
-            .addHeader<ItemHomeHeaderBinding> { holder, data ->
-
-            }
+            .addHeader<ItemHomeHeaderBinding>()
+            .swipeDelete()
         return adapter
     }
 
