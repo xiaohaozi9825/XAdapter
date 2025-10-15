@@ -84,14 +84,14 @@ open class NodeAdapter<VB : ViewBinding, D : NodeEntity<*, *>>(
     }
 
     /**
-     * 增加node
+     * 在根节点中添加一个节点
      * @param node
      * @param index 指定位置(相对数据源)，null 在末尾添加
      */
     fun addNode(node: D, index: Int? = null) {
         if (index == null) source?.add(node) else source?.add(index, node)
         val flatten = node.flattenAndAssociationNode()
-        val startIndex = if (index == null) getDataList().size else findDataPosition(node)
+        val startIndex = if (index == null) getDataList().size else findAdapterPosition(node)
         if (startIndex < 0 || startIndex > itemCount) return
         getDataList().addAll(startIndex, flatten)
         val adapterPosition = getAdapterPosition(startIndex)
@@ -100,14 +100,15 @@ open class NodeAdapter<VB : ViewBinding, D : NodeEntity<*, *>>(
 
 
     /**
-     * 增加node
+     * 在根节点中添加多个节点
      * @param nodes
+     * @param index 指定添加位置，不传则在末尾添加
      */
     fun <L : Collection<D>> addNode(nodes: L, index: Int? = null) {
         if (nodes.isEmpty()) return
         if (index == null) source?.addAll(nodes) else source?.addAll(index, nodes)
         val flatten = nodes.flattenAndAssociationNode()
-        val startIndex = if (index == null) getDataList().size else findDataPosition(nodes.first())
+        val startIndex = if (index == null) getDataList().size else findAdapterPosition(nodes.first())
         if (startIndex < 0 || startIndex > itemCount) return
         getDataList().addAll(startIndex, flatten)
         val adapterPosition = getAdapterPosition(startIndex)
@@ -116,9 +117,11 @@ open class NodeAdapter<VB : ViewBinding, D : NodeEntity<*, *>>(
 
 
     /**
-     * 在子节点中增加node
-     * @param index 相对与根节点
+     * 在parent节点中添加一个子节点node
+     * @param parent
      * @param node
+     * @param index node在parent中的位置
+     *
      */
     fun addChildNode(parent: D, node: D, index: Int? = null) {
         @Suppress("UNCHECKED_CAST")
@@ -127,7 +130,7 @@ open class NodeAdapter<VB : ViewBinding, D : NodeEntity<*, *>>(
         if (index == null) childList.add(node) else childList.add(index, node)
         //如果父节点未展示，则无需刷新UI，为减少递归，这里提前判断
         val startIndex = if (parentIndex < 0) -1
-        else findDataPosition(node)
+        else findAdapterPosition(node)
         Log.i(TAG, "addChildNode: startIndex = $startIndex")
         //不符合条件，则不刷新UI
         if (startIndex < 0 || startIndex > itemCount) return
@@ -138,9 +141,10 @@ open class NodeAdapter<VB : ViewBinding, D : NodeEntity<*, *>>(
     }
 
     /**
-     * 在子节点中增加node
-     * @param index 相对与根节点
+     * 在parent节点中添加多个子节点
+     * @param parent
      * @param nodes
+     * @param index nodes在parent中的位置
      */
     @Suppress("UNCHECKED_CAST")
     fun <L : Collection<D>> addChildNode(parent: D, nodes: L, index: Int? = null) {
@@ -149,7 +153,7 @@ open class NodeAdapter<VB : ViewBinding, D : NodeEntity<*, *>>(
         if (index == null) childList.addAll(nodes) else childList.addAll(index, nodes)
         //如果父节点未展示，则无需刷新UI，为减少递归，这里提前判断
         val startIndex = if (parentIndex < 0) -1
-        else findDataPosition(nodes.first())
+        else findAdapterPosition(nodes.first())
         //不符合条件，则不刷新UI
         if (startIndex < 0 || startIndex > itemCount) return
         val flatten = nodes.flattenAndAssociationNode()
@@ -158,7 +162,10 @@ open class NodeAdapter<VB : ViewBinding, D : NodeEntity<*, *>>(
         notifyItemRangeInserted(adapterPosition, flatten.size)
     }
 
-
+    /**
+     * 根节点中删除一个节点
+     * @param node 被删除的节点
+     */
     fun removeNode(node: D) {
         val flatten = node.flatten { if (it is ExpandedNodeEntity) it.isExpanded() else true }
         val parent = node.getParentNodeEntity() as? NodeEntity<*, *>
@@ -173,18 +180,30 @@ open class NodeAdapter<VB : ViewBinding, D : NodeEntity<*, *>>(
         }
     }
 
+    /**
+     * 根节点中删除指定位置的节点
+     * @param index 被删除的节点
+     */
     fun removeNodeAt(index: Int) {
         val node = source?.get(index) ?: return
         removeNode(node)
     }
 
+    /**
+     * 从start位置开始，删除count个节点
+     * @param start 开始位置
+     * @param count 删除数量
+     */
     fun removeNode(start: Int, count: Int) {
         for (index in start until start + count) {
             removeNodeAt(start)
         }
     }
 
-
+    /**
+     * 删除多个节点
+     * @param nodes 被删除的节点
+     */
     fun removeNodeList(nodes: List<D>) {
         //由于我们很难确定nodes中元素在recyclerView中是否是连续的，因此采用逐个删除的方法
         nodes.forEach {
@@ -192,6 +211,9 @@ open class NodeAdapter<VB : ViewBinding, D : NodeEntity<*, *>>(
         }
     }
 
+    /**
+     * 删除子节点
+     */
     fun removeChildNode(parent: D, node: D) {
         val flatten = node.flatten { if (it is ExpandedNodeEntity) it.isExpanded() else true }
         parent.getChildNodeEntityList()?.remove(node)
@@ -204,18 +226,27 @@ open class NodeAdapter<VB : ViewBinding, D : NodeEntity<*, *>>(
         }
     }
 
+    /**
+     * 删除子节点
+     */
     @Suppress("UNCHECKED_CAST")
     fun removeChildNodeAt(parent: D, index: Int) {
         val node = parent.getChildNodeEntityList()?.get(index) as? D ?: return
         removeChildNode(parent, node)
     }
 
+    /**
+     * 删除子节点
+     */
     fun removeChildNode(parent: D, start: Int, count: Int) {
         for (index in start until start + count) {
             removeChildNodeAt(parent, start)
         }
     }
 
+    /**
+     * 删除子节点
+     */
     fun removeChildNodeList(parent: D, nodes: List<D>) {
         //由于我们很难确定nodes中元素在recyclerView中是否是连续的，因此采用逐个删除的方法
         nodes.forEach {
@@ -223,6 +254,10 @@ open class NodeAdapter<VB : ViewBinding, D : NodeEntity<*, *>>(
         }
     }
 
+    /**
+     * 删除指定位置的节点，该位置是对应adapter中的位置，一般用于删除当前item
+     * @param adapterPosition 该节点在adapter中的位置
+     */
     @Suppress("UNCHECKED_CAST")
     fun removeNodePosition(adapterPosition: Int) {
         val dataPosition = getDataPosition(adapterPosition)
@@ -320,7 +355,7 @@ open class NodeAdapter<VB : ViewBinding, D : NodeEntity<*, *>>(
      * @param node 需要查找的元素
      * @return 在Adapter中对应的position，-1表示不在列表中
      */
-    fun findDataPosition(node: D): Int {
+    fun findAdapterPosition(node: D): Int {
         return source?.flatten { if (it is ExpandedNodeEntity) it.isExpanded() else true }?.indexOf(node) ?: -1
     }
     /**********************************************************************************************************/
@@ -431,7 +466,7 @@ open class NodeAdapter<VB : ViewBinding, D : NodeEntity<*, *>>(
      * 返回Provider
      * 该方法必须指定泛型，不支持自动推断类型
      */
-    inline fun <reified vb : VB,reified d : D> withType(
+    inline fun <reified vb : VB, reified d : D> withType(
         isFixed: Boolean? = null,
         itemType: Int? = null,
         init: (NodeProvider<VB, D, vb, d>.() -> Unit) = {},

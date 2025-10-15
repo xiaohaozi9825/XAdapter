@@ -1,164 +1,197 @@
-package pw.xiaohaozi.xadapter.fragment
+package pw.xiaohaozi.xadapter.fragment.smart
 
+import android.annotation.SuppressLint
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
 import androidx.fragment.app.Fragment
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.viewbinding.ViewBinding
+import androidx.lifecycle.lifecycleScope
+import com.scwang.smart.refresh.footer.ClassicsFooter
+import com.scwang.smart.refresh.header.ClassicsHeader
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import pw.xiaohaozi.xadapter.R
-import pw.xiaohaozi.xadapter.databinding.FragmentRecyclerBinding
-import pw.xiaohaozi.xadapter.databinding.ItemImageCardBinding
-import pw.xiaohaozi.xadapter.databinding.ItemVerseBinding
+import pw.xiaohaozi.xadapter.databinding.FragmentDataOperationBinding
+import pw.xiaohaozi.xadapter.databinding.ItemDataOperationBinding
+import pw.xiaohaozi.xadapter.databinding.ItemHomeFooterBinding
+import pw.xiaohaozi.xadapter.databinding.ItemHomeHeaderBinding
+import pw.xiaohaozi.xadapter.dialog.InputDialog
 import pw.xiaohaozi.xadapter.info.VerseInfo
 import pw.xiaohaozi.xadapter.smart.adapter.SmartAdapter
-import pw.xiaohaozi.xadapter.smart.entity.XMultiItemEntity
 import pw.xiaohaozi.xadapter.smart.ext.createAdapter
-import pw.xiaohaozi.xadapter.smart.ext.createTypeAdapter
+import pw.xiaohaozi.xadapter.smart.ext.dragSort
+import pw.xiaohaozi.xadapter.smart.ext.swipeDelete
+import pw.xiaohaozi.xadapter.smart.proxy.ObservableList
 
-import pw.xiaohaozi.xadapter.smart.holder.XHolder
-import pw.xiaohaozi.xadapter.smart.provider.SmartProvider
 
 /**
- * 多布局
+ * item选择
  */
-class MultipleFragment : Fragment() {
-    private lateinit var binding: FragmentRecyclerBinding
-    private val adapter = function1()
+class DataOperationFragment : Fragment() {
+    val TAG = "DataOperationFragment"
+    private lateinit var binding: FragmentDataOperationBinding
+    private val adapter = function()
+
+    var pos = 0
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        binding = FragmentRecyclerBinding.inflate(inflater)
-        binding.recycleView.layoutManager = LinearLayoutManager(requireContext())
-        binding.recycleView.adapter = adapter
+        binding = FragmentDataOperationBinding.inflate(inflater)
+        binding.llSelectedAll.setOnClickListener {
+            if (adapter.isSelectAll())
+                adapter.deselectAll()
+            else
+                adapter.selectAll()
+        }
+        binding.btnAddData.setOnClickListener {
+            val index = pos++ % list.size
+            val data = list[index]
+            adapter.add( data)
+//            val datas = mutableListOf<VerseInfo>()
+//            for (i in 0..2) {
+//                val index = pos++ % list.size
+//                datas.add(list[index])
+//            }
+//            adapter.add(0, datas)
+        }
 
+        binding.btnDeleteSelected.setOnClickListener {
+            adapter.remove(adapter.getSelectedList())
+//            adapter.remove(0,2)
+//            adapter.remove(adapter.datas[0])
+//            adapter.remove(adapter.datas.filterIndexed { index, verseInfo -> index < 2 })
+//            adapter.remove()
+        }
+
+        binding.rvList.adapter = adapter
+        adapter.addOnListChangedCallback(object : ObservableList.OnListChangedCallback<MutableList<VerseInfo>>() {
+            override fun onChanged(sender: MutableList<VerseInfo>, payload: Any?) {
+                binding.tvItemCount.text = "共${sender.size}条数据"
+            }
+
+            override fun onItemRangeChanged(sender: MutableList<VerseInfo>, positionStart: Int, itemCount: Int, payload: Any?) {
+                binding.tvItemCount.text = "共${sender.size}条数据"
+
+            }
+
+            override fun onItemRangeInserted(sender: MutableList<VerseInfo>, positionStart: Int, itemCount: Int, payload: Any?) {
+                binding.tvItemCount.text = "共${sender.size}条数据"
+            }
+
+            override fun onItemRangeMoved(sender: MutableList<VerseInfo>, fromPosition: Int, toPosition: Int, itemCount: Int, payload: Any?) {
+                binding.tvItemCount.text = "共${sender.size}条数据"
+            }
+
+
+            override fun onItemRangeRemoved(sender: MutableList<VerseInfo>, positionStart: Int, itemCount: Int, payload: Any?) {
+                binding.tvItemCount.text = "共${sender.size}条数据"
+            }
+
+            override fun onItemRangeRemoved(sender: MutableList<VerseInfo>, changeDatas: MutableList<VerseInfo>?, payload: Any?) {
+                binding.tvItemCount.text = "共${sender.size}条数据"
+            }
+        })
         return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        adapter.refresh(list)
+        val refreshLayout = binding.refreshLayout
+        refreshLayout.setRefreshHeader(ClassicsHeader(requireContext()))
+        refreshLayout.setRefreshFooter(ClassicsFooter(requireContext()))
+        refreshLayout.setOnRefreshListener { refreshlayout ->
+            lifecycleScope.launch {
+                delay(1000)
+                val datas = mutableListOf<VerseInfo>()
+                for (i in 0..5) {
+                    val index = pos++ % list.size
+                    datas.add(list[index])
+                }
+                adapter.setList(datas)
+                refreshlayout.finishRefresh()
+            }
+
+        }
+        refreshLayout.setOnLoadMoreListener { refreshlayout ->
+            lifecycleScope.launch {
+                delay(1000)
+                val datas = mutableListOf<VerseInfo>()
+                for (i in 0..5) {
+                    val index = pos++ % list.size
+                    datas.add(list[index])
+                }
+                adapter.add(datas)
+                refreshlayout.finishLoadMore()
+            }
+        }
     }
 
 
-    /**
-     * 方法1
-     * 使用XAdapter拓展方法创建
-     */
-    private fun function1(): SmartAdapter<ViewBinding, Any?> {
-        //泛型VB 确定布局文件，泛型D确定数据类型，回调函数中绑定数据
-        return createAdapter()
-            .withType<ItemVerseBinding, VerseInfo> { (holder, data, position) ->
+    @SuppressLint("SetTextI18n")
+    private fun function(): SmartAdapter<ItemDataOperationBinding, VerseInfo> {
+        return createAdapter<ItemDataOperationBinding, VerseInfo> { (holder, data,_,payloads) ->
+            Log.i(TAG, "function: ${payloads.joinToString()}")
+            if (payloads.isEmpty()){
                 holder.binding.tvContent.text = data.content
                 holder.binding.tvAuthor.text = data.author
-            }
-            .withType<ItemImageCardBinding, Int> { (holder, data, position) ->
-                holder.binding.image.setImageResource(data)
-            }
-            .toAdapter()
-    }
-
-    private fun function2(): SmartAdapter<ViewBinding, Any?> {
-        //①创建Adapter
-        val smartAdapter = SmartAdapter<ViewBinding, Any?>()
-        //②创建Provider
-        val provider1 = object : SmartProvider<ViewBinding, Any?, ItemImageCardBinding, Int>(smartAdapter) {
-            override fun onCreated(holder: XHolder<ItemImageCardBinding>) {
-
-            }
-
-            override fun onBind(
-                holder: XHolder<ItemImageCardBinding>,
-                data: Int,
-                position: Int
-            ) {
-                holder.binding.image.setImageResource(data)
-            }
-
-
-        }
-        val provider2 = object : SmartProvider<ViewBinding, Any?, ItemVerseBinding, VerseInfo?>(smartAdapter) {
-            override fun onCreated(holder: XHolder<ItemVerseBinding>) {
-
-            }
-
-            override fun onBind(
-                holder: XHolder<ItemVerseBinding>,
-                data: VerseInfo?,
-                position: Int
-            ) {
-                holder.binding.tvContent.text = data?.content
-                holder.binding.tvAuthor.text = data?.author
+                val index = this.getSelectedIndex(data)
+                if (index < 0) {
+                    holder.binding.tvSelectedIndex.text = ""
+                    holder.binding.tvSelectedIndex.setBackgroundResource(R.drawable.bg_not_selected)
+                } else {
+                    holder.binding.tvSelectedIndex.text = "${index + 1}"
+                    holder.binding.tvSelectedIndex.setBackgroundResource(R.drawable.bg_selected_position)
+                }
+            }else if (payloads.contains("SELECT_STATES")){
+                val index = this.getSelectedIndex(data)
+                if (index < 0) {
+                    holder.binding.tvSelectedIndex.text = ""
+                    holder.binding.tvSelectedIndex.setBackgroundResource(R.drawable.bg_not_selected)
+                } else {
+                    holder.binding.tvSelectedIndex.text = "${index + 1}"
+                    holder.binding.tvSelectedIndex.setBackgroundResource(R.drawable.bg_selected_position)
+                }
             }
 
         }
-        //③将Provider 添加到 Adapter中
-        //方式一：使用方法添加，viewType可不填
+            .addHeader<ItemHomeHeaderBinding>()
+            .addFooter<ItemHomeFooterBinding>()
+//            .setOnClickListener { holder, data, position, view ->
+//                setSelect(data, !isSelected(data))
+//            }
+            .setOnItemSelectListener(payload = "SELECT_STATES") { data, position, index, fromUser ->
 
-        smartAdapter.addProvider(provider2)
-        smartAdapter.addProvider(provider1)
-//
-        return smartAdapter
-        //方式一二：使用➕链接，viewType为空
-//        return xAdapter + provider2 + provider1
-
-    }
-
-    //多布局itemViewType与province对应的方式：
-    //1、根据数据类型自动查找对应的province。
-    // 优点：使用简单，数据类不需要实现任何接口，甚至可以是基本数据类型；
-    // 缺点：每个province泛型中的数据类型不能相同，否则无法正确匹配。
-
-    //2、数据类实现MultiItemEntity接口。
-    // 优点：匹配度高；
-    // 缺点：使用繁琐。数据类必须实现MultiItemEntity接口，且getItemViewType()方法返回值必须为正整数，同时在addProvince方法中形参itemType不能为空。
-
-    //3、使用adapter.customItemType（）方法动态确定itemViewType。
-    // 优点：可以允许province泛型中的数据类型相同，数据类无需实现MultiItemEntity接口；
-    // 缺点：使用繁琐。customItemType回调返回值必须为正整数，同时在addProvince方法中形参itemType不能为空。
-
-    //建议：
-    //如果多个布局的数据类型不一样，建议使用方法1；
-    //如果数据类型有相同的，但是数据类可以实现MultiItemEntity接口，建议使用方法2
-    //以上条件都不满足，那就使用方法3
-    //优先级：动态指定>MultiItemEntity>自动生成
-
-    //数据可空：
-    //最多只能存在一个province数据类型为可空类型，优先使用itemType==0 的province，如果没有，则找itemType最小的province
-    //如果使用了kotlin-reflect库，会查找data为空，且itemType最小的province
-
-    private fun function3(): SmartAdapter<ViewBinding, Any?> {
-        return createAdapter { data, position ->
-            if (data is Int) return@createAdapter 9
-            else null
-        }.withType<ItemVerseBinding, VerseInfo> { (holder, data, position) ->
-            holder.binding.tvContent.text = data.content
-            holder.binding.tvAuthor.text = data.author
-        }.withType<ItemImageCardBinding, Int>(itemType = 9) { (holder, data, position) ->
-            holder.binding.image.setImageResource(data)
-        }.toAdapter()
-
-    }
-
-    private fun function4(): SmartAdapter<ViewBinding, Any?> {
-        //泛型VB 确定布局文件，泛型D确定数据类型，回调函数中绑定数据
-        return createAdapter()
-            .withType<ItemVerseBinding, MultipleVerseInfo>(itemType = 5) { (holder, data, position) ->
-                holder.binding.tvContent.text = data.verseInfo.content
-                holder.binding.tvAuthor.text = data.verseInfo.author
             }
-            .withType<ItemImageCardBinding, MultipleInt>(itemType = 8) { (holder, data, position) ->
-                holder.binding.image.setImageResource(data.res)
+            .setOnSelectAllListener { selectedCache, isSelectedAll ->
+                if (binding.ivSelectedAll.isSelected != isSelectedAll) {
+                    binding.ivSelectedAll.isSelected = isSelectedAll
+                    binding.tvSelectedAll.text = if (isSelectedAll) "全不选" else "全选"
+                }
+                binding.tvSelectedCount.text = "已选${selectedCache.size}张"
             }
-            .toAdapter()
+            .setOnClickListener(R.id.iv_edit) { holder, data, position, view ->
+                InputDialog(requireActivity())
+                    .setTitle("修改诗句")
+                    .setMsg(data.content)
+                    .onConfirm { _, content: String ->
+                        data.content = content
+//                        adapter.update(data)
+//                        adapter.updateAt(getDataList().indexOf(data),data)
+                        adapter.updateAt(getDataList().indexOf(data),)
+                    }
+                    .onCancel {}
+                    .show()
+            }
+            .swipeDelete()
+            .dragSort()
 
     }
+
 
     private val list = arrayListOf(
-        R.mipmap.snow1,
         VerseInfo("1、何时杖尔看南雪，我与梅花两白头。", "——查辛香《清稗类钞·咏罗浮藤杖所作》"),
         VerseInfo("2、晚来天欲雪，能饮一杯无？", "——白居易《问刘十九》"),
         VerseInfo("3、昔去雪如花，今来花似雪。", "——范云《别诗》"),
@@ -169,7 +202,6 @@ class MultipleFragment : Fragment() {
         VerseInfo("8、乱山残雪夜，孤烛异乡人。", "——崔涂《除夜 / 巴山道中除夜书怀 / 除夜有怀》"),
         VerseInfo("9、渺万里层云，千山暮雪，只影向谁去？", "——元好问《摸鱼儿·雁丘词 /迈陂塘》"),
         VerseInfo("10、有梅无雪不精神，有雪无诗俗了人。", "——卢梅坡《雪梅·其二》"),
-        R.mipmap.snow2,
         VerseInfo("11、欲将轻骑逐，大雪满弓刀。", "——卢纶《和张仆射塞下曲·其三》"),
         VerseInfo("12、千里黄云白日曛，北风吹雁雪纷纷。", "——高适《别董大二首》"),
         VerseInfo("13、白雪却嫌春色晚，故穿庭树作飞花。", "——韩愈《春雪》"),
@@ -179,7 +211,6 @@ class MultipleFragment : Fragment() {
         VerseInfo("17、五月天山雪，无花只有寒。", "——李白《塞下曲六首·其一》"),
         VerseInfo("18、惨惨柴门风雪夜，此时有子不如无。", "——黄景仁《别老母》"),
         VerseInfo("19、北风卷地白草折，胡天八月即飞雪。", "——岑参《白雪歌送武判官归京》"),
-        R.mipmap.snow3,
         VerseInfo("20、欲渡黄河冰塞川，将登太行雪满山。", "——李白《行路难·其一》"),
         VerseInfo("21、今我来思，雨雪霏霏。", "——佚名《采薇》"),
         VerseInfo("22、雪消门外千山绿，花发江边二月晴。", "——欧阳修《春日西湖寄谢法曹歌》"),
@@ -263,35 +294,5 @@ class MultipleFragment : Fragment() {
         VerseInfo("100、将军玉帐貂鼠衣，手持酒杯看雪飞。", "——刘基《北风行》"),
     )
 
-    data class MultipleVerseInfo(val verseInfo: VerseInfo) : XMultiItemEntity {
-        override fun getItemViewType(): Int {
-            return 5
-        }
-    }
-
-    data class MultipleInt(val res: Int) : XMultiItemEntity {
-        override fun getItemViewType(): Int {
-            return 8
-        }
-    }
-
-    private val list2 = arrayListOf(
-        MultipleInt(R.mipmap.snow1),
-        MultipleVerseInfo(
-            VerseInfo(
-                "1、何时杖尔看南雪，我与梅花两白头。",
-                "——查辛香《清稗类钞·咏罗浮藤杖所作》"
-            )
-        ),
-        MultipleVerseInfo(VerseInfo("2、晚来天欲雪，能饮一杯无？", "——白居易《问刘十九》")),
-        MultipleVerseInfo(VerseInfo("3、昔去雪如花，今来花似雪。", "——范云《别诗》")),
-        MultipleVerseInfo(VerseInfo("4、柴门闻犬吠，风雪夜归人。", "——刘长卿《逢雪宿芙蓉山主人》")),
-        MultipleVerseInfo(
-            VerseInfo(
-                "5、忽如一夜春风来，千树万树梨花开。",
-                "——岑参《白雪歌送武判官归京》"
-            )
-        ),
-    )
 }
 

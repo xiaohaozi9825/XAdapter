@@ -1,4 +1,4 @@
-package pw.xiaohaozi.xadapter.fragment
+package pw.xiaohaozi.xadapter.fragment.smart
 
 import android.os.Bundle
 import android.view.LayoutInflater

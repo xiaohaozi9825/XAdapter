@@ -1,4 +1,4 @@
-package pw.xiaohaozi.xadapter.fragment
+package pw.xiaohaozi.xadapter.fragment.smart
 
 import android.annotation.SuppressLint
 import android.graphics.BitmapFactory
@@ -19,7 +19,6 @@ import pw.xiaohaozi.xadapter.databinding.FragmentSelectedBinding
 import pw.xiaohaozi.xadapter.databinding.ItemCameraBinding
 import pw.xiaohaozi.xadapter.databinding.ItemImageSelectedBinding
 import pw.xiaohaozi.xadapter.smart.adapter.SmartAdapter
-import pw.xiaohaozi.xadapter.smart.ext.createAdapter
 import pw.xiaohaozi.xadapter.smart.ext.createLifecycleAdapter
 
 

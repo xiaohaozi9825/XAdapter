@@ -1,4 +1,4 @@
-package pw.xiaohaozi.xadapter.fragment
+package pw.xiaohaozi.xadapter.fragment.smart
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -18,7 +18,7 @@ import pw.xiaohaozi.xadapter.smart.ext.createAdapter
 
 
 
-class ClickFragment : Fragment() {
+class LongClickFragment : Fragment() {
     private lateinit var binding: FragmentRecyclerBinding
 
     override fun onCreateView(
@@ -39,90 +39,91 @@ class ClickFragment : Fragment() {
 //        binding.recycleView.adapter = adapter1
 //        adapter1.reset(list1)
 
-        //多布局，为adapter设置点击事件
+        //多布局，为adapter设置长按事件
 //        val adapter2 = function2()
 //        binding.recycleView.adapter = adapter2
 //        adapter2.reset(list2)
 
-        //多布局，为provider设置点击事件
+        //多布局，为provider设置长按事件
 //        val adapter3 = function3()
 //        binding.recycleView.adapter = adapter3
 //        adapter3.reset(list2)
 
-        //多布局，为adapter和provider设置点击事件。provider优先级高于adapter，
-        // 同时设置，provider会覆盖adapter；未设置点击事件的provider会执行adapter的点击事件
+        //多布局，为adapter和provider设置长按事件。provider优先级高于adapter，
+        // 同时设置，provider会覆盖adapter；未设置长按事件的provider会执行adapter的长按事件
         val adapter4 = function4()
         binding.recycleView.adapter = adapter4
         adapter4.refresh(list2)
     }
 
-    /**
-     * 方法1
-     * 使用XAdapter拓展方法创建
-     */
+
     private fun function1(): SmartAdapter<ItemVerseBinding, VerseInfo> {
-        return createAdapter<ItemVerseBinding, VerseInfo> {(holder,data,position)->
+        return createAdapter<ItemVerseBinding, VerseInfo> { (holder, data) ->
             holder.binding.tvContent.text = data.content
             holder.binding.tvAuthor.text = data.author
-        }.setOnClickListener { holder, data, position, view ->
-            Toast.makeText(requireContext(), "点击了item ${data.content}", Toast.LENGTH_SHORT).show()
+        }.setOnLongClickListener() { holder, data, position, view ->
+            Toast.makeText(requireContext(), "长按了item ${data.content}", Toast.LENGTH_SHORT).show()
+            return@setOnLongClickListener false
         }
     }
 
     private fun function2(): SmartAdapter<ViewBinding, Any?> {
-        //泛型VB 确定布局文件，泛型D确定数据类型，回调函数中绑定数据
         return createAdapter()
-            .withType<ItemVerseBinding, VerseInfo> { (holder, data, position) ->
+            .withType<ItemVerseBinding, VerseInfo> { (holder, data) ->
                 holder.binding.tvContent.text = data.content
                 holder.binding.tvAuthor.text = data.author
             }
 
-            .withType<ItemImageCardBinding, Int> { (holder, data, position) ->
+            .withType<ItemImageCardBinding, Int> { (holder, data) ->
                 holder.binding.image.setImageResource(data)
             }
 
             .toAdapter()
-            .setOnClickListener { holder, data, position, view ->
-                Toast.makeText(requireContext(), "点击了item $position", Toast.LENGTH_SHORT).show()
+            .setOnLongClickListener() { holder, data, position, view ->
+                Toast.makeText(requireContext(), "长按了item $position", Toast.LENGTH_SHORT).show()
+                return@setOnLongClickListener false
             }
 
     }
 
     private fun function3(): SmartAdapter<ViewBinding, Any?> {
-        //泛型VB 确定布局文件，泛型D确定数据类型，回调函数中绑定数据
         return createAdapter()
-            .withType<ItemVerseBinding, VerseInfo> { (holder, data, position) ->
+            .withType<ItemVerseBinding, VerseInfo> { (holder, data) ->
                 holder.binding.tvContent.text = data.content
                 holder.binding.tvAuthor.text = data.author
             }
-            .setOnClickListener { holder, data, position, view ->
-                Toast.makeText(requireContext(), "点击了诗句 ${data.content}", Toast.LENGTH_SHORT).show()
+            .setOnLongClickListener() { holder, data, position, view ->
+                Toast.makeText(requireContext(), "长按了诗句 ${data.content}", Toast.LENGTH_SHORT).show()
+                return@setOnLongClickListener false
             }
-            .withType<ItemImageCardBinding, Int> { (holder, data, position) ->
+            .withType<ItemImageCardBinding, Int> { (holder, data) ->
                 holder.binding.image.setImageResource(data)
             }
-            .setOnClickListener { holder, data, position, view ->
-                Toast.makeText(requireContext(), "点击了图片 $data", Toast.LENGTH_SHORT).show()
+            .setOnLongClickListener() { holder, data, position, view ->
+                Toast.makeText(requireContext(), "长按了图片 $data", Toast.LENGTH_SHORT).show()
+                return@setOnLongClickListener false
             }
             .toAdapter()
 
     }
+
     private fun function4(): SmartAdapter<ViewBinding, Any?> {
-        //泛型VB 确定布局文件，泛型D确定数据类型，回调函数中绑定数据
         return createAdapter()
-            .withType<ItemVerseBinding, VerseInfo> { (holder, data, position) ->
+            .withType<ItemVerseBinding, VerseInfo> { (holder, data) ->
                 holder.binding.tvContent.text = data.content
                 holder.binding.tvAuthor.text = data.author
             }
-            .setOnClickListener { holder, data, position, view ->
-                Toast.makeText(requireContext(), "点击了诗句 ${data.content}", Toast.LENGTH_SHORT).show()
+            .setOnLongClickListener() { holder, data, position, view ->
+                Toast.makeText(requireContext(), "长按了诗句 ${data.content}", Toast.LENGTH_SHORT).show()
+                return@setOnLongClickListener false
             }
-            .withType<ItemImageCardBinding, Int> { (holder, data, position) ->
+            .withType<ItemImageCardBinding, Int> { (holder, data) ->
                 holder.binding.image.setImageResource(data)
             }
             .toAdapter()
-            .setOnClickListener { holder, data, position, view ->
-                Toast.makeText(requireContext(), "点击了item $data", Toast.LENGTH_SHORT).show()
+            .setOnLongClickListener() { holder, data, position, view ->
+                Toast.makeText(requireContext(), "长按了item $data", Toast.LENGTH_SHORT).show()
+                return@setOnLongClickListener false
             }
 
     }

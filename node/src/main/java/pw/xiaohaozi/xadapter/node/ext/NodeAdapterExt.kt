@@ -1,20 +1,16 @@
 package pw.xiaohaozi.xadapter.node.ext
 
 import androidx.recyclerview.widget.ItemTouchHelper
-import androidx.recyclerview.widget.ItemTouchHelper.DOWN
 import androidx.recyclerview.widget.ItemTouchHelper.END
 import androidx.recyclerview.widget.ItemTouchHelper.START
-import androidx.recyclerview.widget.ItemTouchHelper.UP
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.RecyclerView.NO_ID
 import androidx.viewbinding.ViewBinding
 import pw.xiaohaozi.xadapter.node.NodeAdapter
-import pw.xiaohaozi.xadapter.node.entity.NodeEntity
 import pw.xiaohaozi.xadapter.node.NodeProvider
-import pw.xiaohaozi.xadapter.node.dragswipe.DragSort
 import pw.xiaohaozi.xadapter.node.dragswipe.SwipeDelete
+import pw.xiaohaozi.xadapter.node.entity.NodeEntity
 import pw.xiaohaozi.xadapter.smart.adapter.XAdapter
-import pw.xiaohaozi.xadapter.smart.dragswipe.ItemDrag
 import pw.xiaohaozi.xadapter.smart.dragswipe.ItemSwipe
 import pw.xiaohaozi.xadapter.smart.ext.OnBindParams
 import pw.xiaohaozi.xadapter.smart.holder.XHolder

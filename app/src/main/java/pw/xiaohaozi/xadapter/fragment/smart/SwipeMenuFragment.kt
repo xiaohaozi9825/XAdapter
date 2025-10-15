@@ -1,188 +1,80 @@
-package pw.xiaohaozi.xadapter.fragment
+package pw.xiaohaozi.xadapter.fragment.smart
 
-import android.annotation.SuppressLint
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.lifecycleScope
-import androidx.recyclerview.widget.DiffUtil.ItemCallback
-import com.scwang.smart.refresh.footer.ClassicsFooter
-import com.scwang.smart.refresh.header.ClassicsHeader
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.viewbinding.ViewBinding
+import coil.load
 import pw.xiaohaozi.xadapter.R
-import pw.xiaohaozi.xadapter.databinding.FragmentDataOperationBinding
-import pw.xiaohaozi.xadapter.databinding.ItemDataOperationBinding
+import pw.xiaohaozi.xadapter.databinding.FragmentRecyclerBinding
 import pw.xiaohaozi.xadapter.databinding.ItemHomeFooterBinding
 import pw.xiaohaozi.xadapter.databinding.ItemHomeHeaderBinding
-import pw.xiaohaozi.xadapter.dialog.InputDialog
+import pw.xiaohaozi.xadapter.databinding.ItemImageCardBinding
+import pw.xiaohaozi.xadapter.databinding.ItemSwipeMenuBinding
 import pw.xiaohaozi.xadapter.info.VerseInfo
 import pw.xiaohaozi.xadapter.smart.adapter.SmartAdapter
 import pw.xiaohaozi.xadapter.smart.ext.createAdapter
-import pw.xiaohaozi.xadapter.smart.ext.dragSort
-import pw.xiaohaozi.xadapter.smart.ext.swipeDelete
-import pw.xiaohaozi.xadapter.smart.proxy.ObservableList
+import pw.xiaohaozi.xadapter.smart.ext.swipeMenu
 
 
 /**
- * item选择
+ * 单布局
  */
-class DataDifferFragment : Fragment() {
-    val TAG = "DataDifferFragment"
-    private lateinit var binding: FragmentDataOperationBinding
-    private val adapter = function()
-    var pos = 0
+class SwipeMenuFragment : Fragment() {
+    private lateinit var binding: FragmentRecyclerBinding
+
+    private val adapter = function1()
+
+
     override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
+        inflater: LayoutInflater,
+        container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        binding = FragmentDataOperationBinding.inflate(inflater)
-        binding.llSelectedAll.setOnClickListener {
-            if (adapter.isSelectAll())
-                adapter.deselectAll()
-            else
-                adapter.selectAll()
-        }
-        binding.btnAddData.setOnClickListener {
-            val index = pos++ % list.size
-            val data = list[index]
-            val dataList = ArrayList(adapter.getDataList())
-            dataList.add(data)
-            adapter.submitList(ArrayList(dataList))
-        }
-
-        binding.btnDeleteSelected.setOnClickListener {
-            val dataList = ArrayList(adapter.getDataList())
-            dataList.removeAll(adapter.getSelectedList().toSet())
-            adapter.submitList(ArrayList(dataList))
-
-        }
-        binding.rvList.adapter = adapter
-        adapter.addOnListChangedCallback(object : ObservableList.OnListChangedCallback<MutableList<VerseInfo>>() {
-            override fun onChanged(sender: MutableList<VerseInfo>, payload: Any?) {
-                binding.tvItemCount.text = "共${sender.size}条数据"
-            }
-
-            override fun onItemRangeChanged(sender: MutableList<VerseInfo>, positionStart: Int, itemCount: Int, payload: Any?) {
-                binding.tvItemCount.text = "共${sender.size}条数据"
-
-            }
-
-            override fun onItemRangeInserted(sender: MutableList<VerseInfo>, positionStart: Int, itemCount: Int, payload: Any?) {
-                binding.tvItemCount.text = "共${sender.size}条数据"
-            }
-
-            override fun onItemRangeMoved(sender: MutableList<VerseInfo>, fromPosition: Int, toPosition: Int, itemCount: Int, payload: Any?) {
-                binding.tvItemCount.text = "共${sender.size}条数据"
-            }
-
-            override fun onItemRangeRemoved(sender: MutableList<VerseInfo>, positionStart: Int, itemCount: Int, payload: Any?) {
-                binding.tvItemCount.text = "共${sender.size}条数据"
-            }
-
-            override fun onItemRangeRemoved(sender: MutableList<VerseInfo>, changeDatas: MutableList<VerseInfo>?, payload: Any?) {
-                binding.tvItemCount.text = "共${sender.size}条数据"
-            }
-        })
+        binding = FragmentRecyclerBinding.inflate(inflater)
+        binding.recycleView.layoutManager = LinearLayoutManager(requireContext())
+        binding.recycleView.adapter = adapter
+        adapter.refresh(list)
         return binding.root
     }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-        val refreshLayout = binding.refreshLayout
-        refreshLayout.setRefreshHeader(ClassicsHeader(requireContext()))
-        refreshLayout.setRefreshFooter(ClassicsFooter(requireContext()))
-        refreshLayout.setOnRefreshListener { refreshlayout ->
-            lifecycleScope.launch {
-                delay(1000)
-                val dataList = ArrayList(adapter.getDataList())
-                dataList.clear()
-                for (i in 0..5) {
-                    val index = pos++ % list.size
-                    dataList.add(list[index])
+    /**
+     * 方法1
+     * 使用XAdapter拓展方法创建
+     */
+    private fun function1(): SmartAdapter<ViewBinding, Any?> {
+        return createAdapter()
+            .withType<ItemSwipeMenuBinding, VerseInfo> { (holder, data) ->
+                holder.binding.tvContent.text = data.content
+                holder.binding.tvAuthor.text = data.author
+            }.setOnClickListener(R.id.tv_to_top) { holder, data, position, view ->
+                getSmartAdapter().apply {
+                    remove(data)
+                    add(0, data)
                 }
-                adapter.submitList(ArrayList(dataList))
-                refreshlayout.finishRefresh()
+                binding.recycleView.smoothScrollToPosition(0)
+            }.setOnClickListener(R.id.tv_delete) { holder, data, position, view ->
+                getSmartAdapter().apply {
+                    remove(data)
+                }
             }
+            .withType<ItemImageCardBinding, Int> {
+                it.holder.binding.image.load(it.data)
+            }
+            .toAdapter()
+            .addHeader<ItemHomeHeaderBinding> { holder, data -> }
+            .addFooter<ItemHomeFooterBinding> { holder, data -> }
+            .swipeMenu()
 
-        }
-        refreshLayout.setOnLoadMoreListener { refreshlayout ->
-            lifecycleScope.launch {
-                delay(1000)
-                val dataList = ArrayList(adapter.getDataList())
-                for (i in 0..5) {
-                    val index = pos++ % list.size
-                    dataList.add(list[index])
-                }
-                adapter.submitList(ArrayList(dataList))
-                refreshlayout.finishLoadMore()
-            }
-        }
     }
-
-    @SuppressLint("SetTextI18n")
-    private fun function(): SmartAdapter<ItemDataOperationBinding, VerseInfo> {
-        val itemCallback: ItemCallback<VerseInfo> = object : ItemCallback<VerseInfo>() {
-            override fun areItemsTheSame(oldItem: VerseInfo, newItem: VerseInfo): Boolean {
-                return oldItem == newItem
-            }
-
-            @SuppressLint("DiffUtilEquals")
-            override fun areContentsTheSame(oldItem: VerseInfo, newItem: VerseInfo): Boolean {
-                return oldItem == newItem
-            }
-        }
-        return createAdapter<ItemDataOperationBinding, VerseInfo> { (holder, data) ->
-            holder.binding.tvContent.text = data.content
-            holder.binding.tvAuthor.text = data.author
-            val index = this.getSelectedIndex(data)
-            if (index < 0) {
-                holder.binding.tvSelectedIndex.text = ""
-                holder.binding.tvSelectedIndex.setBackgroundResource(R.drawable.bg_not_selected)
-            } else {
-                holder.binding.tvSelectedIndex.text = "${index + 1}"
-                holder.binding.tvSelectedIndex.setBackgroundResource(R.drawable.bg_selected_position)
-            }
-        }
-            .addHeader<ItemHomeHeaderBinding>()
-            .addFooter<ItemHomeFooterBinding>()
-//            .setOnClickListener { holder, data, position, view ->
-//                setSelect(data, !isSelected(data))
-//            }
-            .setOnItemSelectListener { data, position, index, fromUser ->
-
-            }
-            .setOnSelectAllListener { selectedCache, isSelectedAll ->
-                if (binding.ivSelectedAll.isSelected != isSelectedAll) {
-                    binding.ivSelectedAll.isSelected = isSelectedAll
-                    binding.tvSelectedAll.text = if (isSelectedAll) "全不选" else "全选"
-                }
-                binding.tvSelectedCount.text = "已选${selectedCache.size}张"
-            }
-            .setOnClickListener(R.id.iv_edit) { holder, data, position, view ->
-                InputDialog(requireActivity())
-                    .setTitle("修改诗句")
-                    .setMsg(data.content)
-                    .onConfirm { _, content: String ->
-                        data.content = content
-//                        adapter.upDate(data)
-//                        adapter.upDate(position,data)
-                        adapter.updateAt(getDataList().indexOf(data))
-                    }
-                    .onCancel {}
-                    .show()
-            }
-            .setDiffer(itemCallback)
-            .swipeDelete()
-            .dragSort()
-    }
-
 
 
     private val list = arrayListOf(
         VerseInfo("1、何时杖尔看南雪，我与梅花两白头。", "——查辛香《清稗类钞·咏罗浮藤杖所作》"),
+        R.mipmap.t3,
         VerseInfo("2、晚来天欲雪，能饮一杯无？", "——白居易《问刘十九》"),
         VerseInfo("3、昔去雪如花，今来花似雪。", "——范云《别诗》"),
         VerseInfo("4、柴门闻犬吠，风雪夜归人。", "——刘长卿《逢雪宿芙蓉山主人》"),
@@ -283,6 +175,5 @@ class DataDifferFragment : Fragment() {
         VerseInfo("99、侵陵雪色还萱草，漏泄春光有柳条。", "——杜甫《腊日》"),
         VerseInfo("100、将军玉帐貂鼠衣，手持酒杯看雪飞。", "——刘基《北风行》"),
     )
-
 }
 

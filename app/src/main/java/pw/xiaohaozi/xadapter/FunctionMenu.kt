@@ -1,26 +1,35 @@
 package pw.xiaohaozi.xadapter
 
-import pw.xiaohaozi.xadapter.fragment.CheckFragment
-import pw.xiaohaozi.xadapter.fragment.ClickFragment
-import pw.xiaohaozi.xadapter.fragment.ConcatAdapterFragment
-import pw.xiaohaozi.xadapter.fragment.CoroutineScopeFragment
-import pw.xiaohaozi.xadapter.fragment.CreateMultipleNodeFragment
-import pw.xiaohaozi.xadapter.fragment.CreateNodeFragment
-import pw.xiaohaozi.xadapter.fragment.DataDifferFragment
-import pw.xiaohaozi.xadapter.fragment.DataOperationFragment
-import pw.xiaohaozi.xadapter.fragment.DragSortFragment
-import pw.xiaohaozi.xadapter.fragment.GroupFragment
-import pw.xiaohaozi.xadapter.fragment.ImageSelectFragment
-import pw.xiaohaozi.xadapter.fragment.LongClickFragment
-import pw.xiaohaozi.xadapter.fragment.MultipleFragment
-import pw.xiaohaozi.xadapter.fragment.Node2EditFragment
-import pw.xiaohaozi.xadapter.fragment.NodeEditFragment
-import pw.xiaohaozi.xadapter.fragment.NodeFragment
-import pw.xiaohaozi.xadapter.fragment.SingleFragment
-import pw.xiaohaozi.xadapter.fragment.SpecialLayoutFragment
-import pw.xiaohaozi.xadapter.fragment.SwipeDeleteFragment
-import pw.xiaohaozi.xadapter.fragment.SwipeMenuFragment
-import pw.xiaohaozi.xadapter.fragment.TextChangeFragment
+import pw.xiaohaozi.xadapter.fragment.node.AddNodeFragment
+import pw.xiaohaozi.xadapter.fragment.node.AddNodesFragment
+import pw.xiaohaozi.xadapter.fragment.smart.CheckFragment
+import pw.xiaohaozi.xadapter.fragment.smart.ClickFragment
+import pw.xiaohaozi.xadapter.fragment.smart.ConcatAdapterFragment
+import pw.xiaohaozi.xadapter.fragment.smart.CoroutineScopeFragment
+import pw.xiaohaozi.xadapter.fragment.node.CreateMultipleNodeFragment
+import pw.xiaohaozi.xadapter.fragment.node.CreateNodeFragment
+import pw.xiaohaozi.xadapter.fragment.node.EditNodeFragment
+import pw.xiaohaozi.xadapter.fragment.smart.DataDifferFragment
+import pw.xiaohaozi.xadapter.fragment.smart.DataOperationFragment
+import pw.xiaohaozi.xadapter.fragment.smart.DragSortFragment
+import pw.xiaohaozi.xadapter.fragment.smart.GroupFragment
+import pw.xiaohaozi.xadapter.fragment.smart.ImageSelectFragment
+import pw.xiaohaozi.xadapter.fragment.smart.LongClickFragment
+import pw.xiaohaozi.xadapter.fragment.smart.MultipleFragment
+import pw.xiaohaozi.xadapter.fragment.node.Node2EditFragment
+import pw.xiaohaozi.xadapter.fragment.node.NodeEditFragment
+import pw.xiaohaozi.xadapter.fragment.node.NodeFragment
+import pw.xiaohaozi.xadapter.fragment.node.RemoveAtNodeFragment
+import pw.xiaohaozi.xadapter.fragment.node.RemoveListNodeFragment
+import pw.xiaohaozi.xadapter.fragment.node.RemoveMultipleNodeFragment
+import pw.xiaohaozi.xadapter.fragment.node.RemoveNodeFragment
+import pw.xiaohaozi.xadapter.fragment.node.RemovePositionNodeFragment
+import pw.xiaohaozi.xadapter.fragment.node.ReplaceNodeFragment
+import pw.xiaohaozi.xadapter.fragment.smart.SingleFragment
+import pw.xiaohaozi.xadapter.fragment.smart.SpecialLayoutFragment
+import pw.xiaohaozi.xadapter.fragment.smart.SwipeDeleteFragment
+import pw.xiaohaozi.xadapter.fragment.smart.SwipeMenuFragment
+import pw.xiaohaozi.xadapter.fragment.smart.TextChangeFragment
 import pw.xiaohaozi.xadapter.info.HomeInfo
 
 //smart模块
@@ -57,22 +66,23 @@ val nodeMenuList = arrayListOf(
     HomeInfo("node编辑", "", R.mipmap.ic_launcher, NodeEditFragment::class.java),
     HomeInfo("node编辑2", "", R.mipmap.ic_launcher, Node2EditFragment::class.java),
     "Node创建",
-    HomeInfo("单类型Node创建", "", R.mipmap.ic_launcher,CreateNodeFragment::class.java),
-    HomeInfo("多类型Node创建", "", R.mipmap.ic_launcher,CreateMultipleNodeFragment::class.java),
+    HomeInfo("单类型创建", "单类型Node创建", R.mipmap.ic_launcher, CreateNodeFragment::class.java),
+    HomeInfo("多类型创建", "多类型Node创建", R.mipmap.ic_launcher, CreateMultipleNodeFragment::class.java),
     "Node展开与折叠",
-    HomeInfo("Node展开与折叠", "", R.mipmap.ic_launcher),
+    HomeInfo("展开与折叠", "Node展开与折叠", R.mipmap.ic_launcher),
 
     "Node数据操作",
-    HomeInfo("添加根Node", "", R.mipmap.ic_launcher),
-    HomeInfo("添加同级Node", "", R.mipmap.ic_launcher),
-    HomeInfo("添加子级Node", "", R.mipmap.ic_launcher),
+    HomeInfo("添加一个节点", "", R.mipmap.ic_launcher,AddNodeFragment::class.java),
+    HomeInfo("添加多个节点", "", R.mipmap.ic_launcher,AddNodesFragment::class.java),
 
-    HomeInfo("修改同级Node", "", R.mipmap.ic_launcher),
-    HomeInfo("修改子级Node", "", R.mipmap.ic_launcher),
-    HomeInfo("替换Node", "", R.mipmap.ic_launcher),
+    HomeInfo("修改节点", "修改指定节点内容", R.mipmap.ic_launcher,EditNodeFragment::class.java),//updateNode(node: D, payload: Any? = null)、updateNode(oldNode: D, newNode: D, payload: Any? = null)、updateChildNode(parent: D, oldNode: D, newNode: D, payload: Any? = null)
+    HomeInfo("替换Node", "替换节点以及子节点", R.mipmap.ic_launcher,ReplaceNodeFragment::class.java),//replaceNode(oldNode: D, newNode: D)
 
-    HomeInfo("删除同级Node", "", R.mipmap.ic_launcher),
-    HomeInfo("删除子级Node", "", R.mipmap.ic_launcher),
+    HomeInfo("删除一个节点", "删除一个根节点或子节点", R.mipmap.ic_launcher,RemoveNodeFragment::class.java),//removeNode(node: D) 、removeChildNode(parent: D, node: D)
+    HomeInfo("按索引删除节点", "", R.mipmap.ic_launcher,RemoveAtNodeFragment::class.java),//removeNodeAt(index: Int)、removeChildNodeAt(parent: D, index: Int)
+    HomeInfo("删除多个连续节点", "", R.mipmap.ic_launcher, RemoveMultipleNodeFragment::class.java),//removeNode(start: Int, count: Int)、removeChildNode(parent: D, start: Int, count: Int)
+    HomeInfo("删除多个不连续节点", "", R.mipmap.ic_launcher,RemoveListNodeFragment::class.java),//removeNodeList(nodes: List<D>)、 removeChildNodeList(parent: D, nodes: List<D>)
+    HomeInfo("按列表所在位置删除", "", R.mipmap.ic_launcher,RemovePositionNodeFragment::class.java),//removeNodePosition(adapterPosition: Int)、
 )
 
 //示例模块

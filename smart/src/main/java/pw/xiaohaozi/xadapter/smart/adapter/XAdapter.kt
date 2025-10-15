@@ -93,7 +93,7 @@ open class XAdapter<VB : ViewBinding, D, out R : XAdapter<VB, D, R>> : Adapter<X
 
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): XHolder<VB> {
-        val provide = providers[viewType]
+        val provide = providers[viewType] ?: throw XAdapterException("没有找到viewType = $viewType 的 provide，请检查adapter中各布局与数据集合中数据类型是否匹配。")
         val holder: XHolder<*> = provide.onCreateViewHolder(parent, viewType)
         onViewHolderChanges.tryNotify { onCreated(provide, holder) }
         provide.onCreatedViewHolder(holder)

@@ -1,13 +1,13 @@
-package pw.xiaohaozi.xadapter.fragment
+package pw.xiaohaozi.xadapter.fragment.smart
 
 import android.annotation.SuppressLint
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
+import androidx.recyclerview.widget.DiffUtil.ItemCallback
 import com.scwang.smart.refresh.footer.ClassicsFooter
 import com.scwang.smart.refresh.header.ClassicsHeader
 import kotlinx.coroutines.delay
@@ -29,11 +29,10 @@ import pw.xiaohaozi.xadapter.smart.proxy.ObservableList
 /**
  * item选择
  */
-class DataOperationFragment : Fragment() {
-    val TAG = "DataOperationFragment"
+class DataDifferFragment : Fragment() {
+    val TAG = "DataDifferFragment"
     private lateinit var binding: FragmentDataOperationBinding
     private val adapter = function()
-
     var pos = 0
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -49,23 +48,17 @@ class DataOperationFragment : Fragment() {
         binding.btnAddData.setOnClickListener {
             val index = pos++ % list.size
             val data = list[index]
-            adapter.add( data)
-//            val datas = mutableListOf<VerseInfo>()
-//            for (i in 0..2) {
-//                val index = pos++ % list.size
-//                datas.add(list[index])
-//            }
-//            adapter.add(0, datas)
+            val dataList = ArrayList(adapter.getDataList())
+            dataList.add(data)
+            adapter.submitList(ArrayList(dataList))
         }
 
         binding.btnDeleteSelected.setOnClickListener {
-            adapter.remove(adapter.getSelectedList())
-//            adapter.remove(0,2)
-//            adapter.remove(adapter.datas[0])
-//            adapter.remove(adapter.datas.filterIndexed { index, verseInfo -> index < 2 })
-//            adapter.remove()
-        }
+            val dataList = ArrayList(adapter.getDataList())
+            dataList.removeAll(adapter.getSelectedList().toSet())
+            adapter.submitList(ArrayList(dataList))
 
+        }
         binding.rvList.adapter = adapter
         adapter.addOnListChangedCallback(object : ObservableList.OnListChangedCallback<MutableList<VerseInfo>>() {
             override fun onChanged(sender: MutableList<VerseInfo>, payload: Any?) {
@@ -84,7 +77,6 @@ class DataOperationFragment : Fragment() {
             override fun onItemRangeMoved(sender: MutableList<VerseInfo>, fromPosition: Int, toPosition: Int, itemCount: Int, payload: Any?) {
                 binding.tvItemCount.text = "共${sender.size}条数据"
             }
-
 
             override fun onItemRangeRemoved(sender: MutableList<VerseInfo>, positionStart: Int, itemCount: Int, payload: Any?) {
                 binding.tvItemCount.text = "共${sender.size}条数据"
@@ -105,12 +97,13 @@ class DataOperationFragment : Fragment() {
         refreshLayout.setOnRefreshListener { refreshlayout ->
             lifecycleScope.launch {
                 delay(1000)
-                val datas = mutableListOf<VerseInfo>()
+                val dataList = ArrayList(adapter.getDataList())
+                dataList.clear()
                 for (i in 0..5) {
                     val index = pos++ % list.size
-                    datas.add(list[index])
+                    dataList.add(list[index])
                 }
-                adapter.setList(datas)
+                adapter.submitList(ArrayList(dataList))
                 refreshlayout.finishRefresh()
             }
 
@@ -118,51 +111,47 @@ class DataOperationFragment : Fragment() {
         refreshLayout.setOnLoadMoreListener { refreshlayout ->
             lifecycleScope.launch {
                 delay(1000)
-                val datas = mutableListOf<VerseInfo>()
+                val dataList = ArrayList(adapter.getDataList())
                 for (i in 0..5) {
                     val index = pos++ % list.size
-                    datas.add(list[index])
+                    dataList.add(list[index])
                 }
-                adapter.add(datas)
+                adapter.submitList(ArrayList(dataList))
                 refreshlayout.finishLoadMore()
             }
         }
     }
 
-
     @SuppressLint("SetTextI18n")
     private fun function(): SmartAdapter<ItemDataOperationBinding, VerseInfo> {
-        return createAdapter<ItemDataOperationBinding, VerseInfo> { (holder, data,_,payloads) ->
-            Log.i(TAG, "function: ${payloads.joinToString()}")
-            if (payloads.isEmpty()){
-                holder.binding.tvContent.text = data.content
-                holder.binding.tvAuthor.text = data.author
-                val index = this.getSelectedIndex(data)
-                if (index < 0) {
-                    holder.binding.tvSelectedIndex.text = ""
-                    holder.binding.tvSelectedIndex.setBackgroundResource(R.drawable.bg_not_selected)
-                } else {
-                    holder.binding.tvSelectedIndex.text = "${index + 1}"
-                    holder.binding.tvSelectedIndex.setBackgroundResource(R.drawable.bg_selected_position)
-                }
-            }else if (payloads.contains("SELECT_STATES")){
-                val index = this.getSelectedIndex(data)
-                if (index < 0) {
-                    holder.binding.tvSelectedIndex.text = ""
-                    holder.binding.tvSelectedIndex.setBackgroundResource(R.drawable.bg_not_selected)
-                } else {
-                    holder.binding.tvSelectedIndex.text = "${index + 1}"
-                    holder.binding.tvSelectedIndex.setBackgroundResource(R.drawable.bg_selected_position)
-                }
+        val itemCallback: ItemCallback<VerseInfo> = object : ItemCallback<VerseInfo>() {
+            override fun areItemsTheSame(oldItem: VerseInfo, newItem: VerseInfo): Boolean {
+                return oldItem == newItem
             }
 
+            @SuppressLint("DiffUtilEquals")
+            override fun areContentsTheSame(oldItem: VerseInfo, newItem: VerseInfo): Boolean {
+                return oldItem == newItem
+            }
+        }
+        return createAdapter<ItemDataOperationBinding, VerseInfo> { (holder, data) ->
+            holder.binding.tvContent.text = data.content
+            holder.binding.tvAuthor.text = data.author
+            val index = this.getSelectedIndex(data)
+            if (index < 0) {
+                holder.binding.tvSelectedIndex.text = ""
+                holder.binding.tvSelectedIndex.setBackgroundResource(R.drawable.bg_not_selected)
+            } else {
+                holder.binding.tvSelectedIndex.text = "${index + 1}"
+                holder.binding.tvSelectedIndex.setBackgroundResource(R.drawable.bg_selected_position)
+            }
         }
             .addHeader<ItemHomeHeaderBinding>()
             .addFooter<ItemHomeFooterBinding>()
 //            .setOnClickListener { holder, data, position, view ->
 //                setSelect(data, !isSelected(data))
 //            }
-            .setOnItemSelectListener(payload = "SELECT_STATES") { data, position, index, fromUser ->
+            .setOnItemSelectListener { data, position, index, fromUser ->
 
             }
             .setOnSelectAllListener { selectedCache, isSelectedAll ->
@@ -178,17 +167,18 @@ class DataOperationFragment : Fragment() {
                     .setMsg(data.content)
                     .onConfirm { _, content: String ->
                         data.content = content
-//                        adapter.update(data)
-//                        adapter.updateAt(getDataList().indexOf(data),data)
-                        adapter.updateAt(getDataList().indexOf(data),)
+//                        adapter.upDate(data)
+//                        adapter.upDate(position,data)
+                        adapter.updateAt(getDataList().indexOf(data))
                     }
                     .onCancel {}
                     .show()
             }
+            .setDiffer(itemCallback)
             .swipeDelete()
             .dragSort()
-
     }
+
 
 
     private val list = arrayListOf(

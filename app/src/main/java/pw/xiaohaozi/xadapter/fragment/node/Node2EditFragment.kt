@@ -1,4 +1,4 @@
-package pw.xiaohaozi.xadapter.fragment
+package pw.xiaohaozi.xadapter.fragment.node
 
 import android.graphics.Typeface
 import android.os.Bundle
@@ -231,7 +231,7 @@ class Node2EditFragment : Fragment() {
         NodeEntity<Unit, NodeInfo2>, ExpandedNodeEntity {
         override var xParentNodeEntity: Unit? = null
         override var xNodeGrade: Int? = null
-        override var xIsExpanded: Boolean = true
+        override var xIsExpanded: Boolean? = true
 
         override fun getChildNodeEntityList(): MutableList<NodeInfo2> {
             return childList
@@ -246,7 +246,7 @@ class Node2EditFragment : Fragment() {
         NodeEntity<NodeInfo1, NodeInfo3>, ExpandedNodeEntity {
         override var xParentNodeEntity: NodeInfo1? = null
         override var xNodeGrade: Int? = null
-        override var xIsExpanded: Boolean = true
+        override var xIsExpanded: Boolean? = true
 
         override fun getChildNodeEntityList(): MutableList<NodeInfo3> {
             return childList
