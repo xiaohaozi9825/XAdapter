@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="40dp"
+    android:background="@color/white"
+    android:gravity="center"
+    android:paddingHorizontal="8dp">
+
+    <ImageView
+        android:id="@+id/iv_arrow"
+        android:layout_width="18dp"
+        android:layout_height="18dp"
+        android:src="@drawable/arrow" />
+
+    <TextView
+        android:id="@+id/tv_name"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="6dp"
+        android:layout_weight="1"
+        android:textColor="@color/black"
+        android:textSize="16sp"
+        tools:text="希望小学同学" />
+
+    <TextView
+        android:id="@+id/tv_count"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textColor="#666666"
+        android:textSize="10sp"
+        tools:text="23/56" />
+</LinearLayout>

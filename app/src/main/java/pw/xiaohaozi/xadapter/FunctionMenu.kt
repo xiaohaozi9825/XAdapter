@@ -9,6 +9,7 @@ import pw.xiaohaozi.xadapter.fragment.smart.CoroutineScopeFragment
 import pw.xiaohaozi.xadapter.fragment.node.CreateMultipleNodeFragment
 import pw.xiaohaozi.xadapter.fragment.node.CreateNodeFragment
 import pw.xiaohaozi.xadapter.fragment.node.EditNodeFragment
+import pw.xiaohaozi.xadapter.fragment.node.FriendFragment
 import pw.xiaohaozi.xadapter.fragment.smart.DataDifferFragment
 import pw.xiaohaozi.xadapter.fragment.smart.DataOperationFragment
 import pw.xiaohaozi.xadapter.fragment.smart.DragSortFragment
@@ -72,26 +73,61 @@ val nodeMenuList = arrayListOf(
     HomeInfo("展开与折叠", "Node展开与折叠", R.mipmap.ic_launcher),
 
     "Node数据操作",
-    HomeInfo("添加一个节点", "", R.mipmap.ic_launcher,AddNodeFragment::class.java),
-    HomeInfo("添加多个节点", "", R.mipmap.ic_launcher,AddNodesFragment::class.java),
+    HomeInfo("添加一个节点", "", R.mipmap.ic_launcher, AddNodeFragment::class.java),
+    HomeInfo("添加多个节点", "", R.mipmap.ic_launcher, AddNodesFragment::class.java),
 
-    HomeInfo("修改节点", "修改指定节点内容", R.mipmap.ic_launcher,EditNodeFragment::class.java),//updateNode(node: D, payload: Any? = null)、updateNode(oldNode: D, newNode: D, payload: Any? = null)、updateChildNode(parent: D, oldNode: D, newNode: D, payload: Any? = null)
-    HomeInfo("替换Node", "替换节点以及子节点", R.mipmap.ic_launcher,ReplaceNodeFragment::class.java),//replaceNode(oldNode: D, newNode: D)
+    HomeInfo(
+        "修改节点",
+        "修改指定节点内容",
+        R.mipmap.ic_launcher,
+        EditNodeFragment::class.java
+    ),//updateNode(node: D, payload: Any? = null)、updateNode(oldNode: D, newNode: D, payload: Any? = null)、updateChildNode(parent: D, oldNode: D, newNode: D, payload: Any? = null)
+    HomeInfo(
+        "替换Node",
+        "替换节点以及子节点",
+        R.mipmap.ic_launcher,
+        ReplaceNodeFragment::class.java
+    ),//replaceNode(oldNode: D, newNode: D)
 
-    HomeInfo("删除一个节点", "删除一个根节点或子节点", R.mipmap.ic_launcher,RemoveNodeFragment::class.java),//removeNode(node: D) 、removeChildNode(parent: D, node: D)
-    HomeInfo("按索引删除节点", "", R.mipmap.ic_launcher,RemoveAtNodeFragment::class.java),//removeNodeAt(index: Int)、removeChildNodeAt(parent: D, index: Int)
-    HomeInfo("删除多个连续节点", "", R.mipmap.ic_launcher, RemoveMultipleNodeFragment::class.java),//removeNode(start: Int, count: Int)、removeChildNode(parent: D, start: Int, count: Int)
-    HomeInfo("删除多个不连续节点", "", R.mipmap.ic_launcher,RemoveListNodeFragment::class.java),//removeNodeList(nodes: List<D>)、 removeChildNodeList(parent: D, nodes: List<D>)
-    HomeInfo("按列表所在位置删除", "", R.mipmap.ic_launcher,RemovePositionNodeFragment::class.java),//removeNodePosition(adapterPosition: Int)、
+    HomeInfo(
+        "删除一个节点",
+        "删除一个根节点或子节点",
+        R.mipmap.ic_launcher,
+        RemoveNodeFragment::class.java
+    ),//removeNode(node: D) 、removeChildNode(parent: D, node: D)
+    HomeInfo(
+        "按索引删除节点",
+        "",
+        R.mipmap.ic_launcher,
+        RemoveAtNodeFragment::class.java
+    ),//removeNodeAt(index: Int)、removeChildNodeAt(parent: D, index: Int)
+    HomeInfo(
+        "删除多个连续节点",
+        "",
+        R.mipmap.ic_launcher,
+        RemoveMultipleNodeFragment::class.java
+    ),//removeNode(start: Int, count: Int)、removeChildNode(parent: D, start: Int, count: Int)
+    HomeInfo(
+        "删除多个不连续节点",
+        "",
+        R.mipmap.ic_launcher,
+        RemoveListNodeFragment::class.java
+    ),//removeNodeList(nodes: List<D>)、 removeChildNodeList(parent: D, nodes: List<D>)
+    HomeInfo(
+        "按列表所在位置删除",
+        "",
+        R.mipmap.ic_launcher,
+        RemovePositionNodeFragment::class.java
+    ),//removeNodePosition(adapterPosition: Int)、
 )
 
 //示例模块
 val exampleMenuList = arrayListOf<Any>(
-    HomeInfo("好友列表", "仿QQ好友列表", R.mipmap.ic_launcher),
+    HomeInfo("好友列表", "仿QQ好友列表", R.mipmap.ic_launcher, FriendFragment::class.java),
     HomeInfo("分类列表联动", "商品分类用与商品列表联动", R.mipmap.ic_launcher),
     HomeInfo("多级分类列表", "商品分类多级菜单", R.mipmap.ic_launcher),
     HomeInfo("图片选择器", "", R.mipmap.ic_launcher),
     HomeInfo("底部导航栏", "", R.mipmap.ic_launcher),
     HomeInfo("TabBar", "", R.mipmap.ic_launcher),
 
-)
+    )

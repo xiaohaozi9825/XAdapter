@@ -404,6 +404,9 @@ open class NodeAdapter<VB : ViewBinding, D : NodeEntity<*, *>>(
         (node as? ExpandedNodeEntity)?.xIsExpanded = true
         //获取当前节点下的子节点
         val childList = node.getChildNodeEntityList() as? List<D>
+        childList?.forEach {
+            if (it as? NodeEntity<NodeEntity<*, *>, *> != null) it.xParentNodeEntity = node
+        }
         //子节点扁平化处理，得到被收起的所有节点
         val flatten = childList?.flatten {
             return@flatten if (isExpandChild) true
