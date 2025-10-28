@@ -42,8 +42,6 @@ class FriendFragment : Fragment() {
             if (data.isExpanded()) adapter.collapse(position) else adapter.expand(position)
             val layoutManager = binding.recycleView.layoutManager as LinearLayoutManager
             layoutManager.scrollToPositionWithOffset(position, 0)
-
-
         }
         .withType<ItemFriendBinding, FriendInfo> { (holder, data) ->
             holder.binding.ivHead.loadCircle(data.head)
