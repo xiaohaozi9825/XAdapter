@@ -1,4 +1,4 @@
-package pw.xiaohaozi.xadapter.fragment.node
+package pw.xiaohaozi.xadapter.fragment.example
 
 import android.annotation.SuppressLint
 import android.graphics.Color
@@ -66,7 +66,7 @@ class GoodsFragment : Fragment() {
             }
         }
         .toAdapter()
-        //permittedTypes = arrayOf(1) 只对itemType == 1 的item添加选择事件
+        //设置为单选。permittedTypes = arrayOf(1) 只对itemType == 1 的item添加选择事件
         .singleSelect(permittedTypes = arrayOf(1)) { data, position, index, fromUser ->
             //同时更新前后item，改变圆角
             if (position > 0) notifyItemChanged(position - 1)

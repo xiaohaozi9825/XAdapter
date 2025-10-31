@@ -1,4 +1,4 @@
-package pw.xiaohaozi.xadapter.fragment.node
+package pw.xiaohaozi.xadapter.fragment.example
 
 import android.annotation.SuppressLint
 import android.os.Bundle
@@ -168,7 +168,7 @@ class FriendFragment : Fragment() {
             fun onAllAnimationsFinished() // 所有挂起动画完成
             fun onAddAnimationFinished(item: RecyclerView.ViewHolder?) // 单个添加动画完成
             fun onRemoveAnimationFinished(item: RecyclerView.ViewHolder?) // 单个移除动画完成
-            fun onChangeAnimationFinished(item: RecyclerView.ViewHolder?) // 
+            fun onChangeAnimationFinished(item: RecyclerView.ViewHolder?) //
             // ... 可根据需要添加其他类型
         }
 

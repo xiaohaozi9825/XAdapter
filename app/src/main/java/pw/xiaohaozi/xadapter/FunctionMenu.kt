@@ -9,8 +9,9 @@ import pw.xiaohaozi.xadapter.fragment.smart.CoroutineScopeFragment
 import pw.xiaohaozi.xadapter.fragment.node.CreateMultipleNodeFragment
 import pw.xiaohaozi.xadapter.fragment.node.CreateNodeFragment
 import pw.xiaohaozi.xadapter.fragment.node.EditNodeFragment
-import pw.xiaohaozi.xadapter.fragment.node.FriendFragment
-import pw.xiaohaozi.xadapter.fragment.node.GoodsFragment
+import pw.xiaohaozi.xadapter.fragment.example.FriendFragment
+import pw.xiaohaozi.xadapter.fragment.example.GoodsFragment
+import pw.xiaohaozi.xadapter.fragment.example.MultipleCategoryFragment
 import pw.xiaohaozi.xadapter.fragment.smart.DataDifferFragment
 import pw.xiaohaozi.xadapter.fragment.smart.DataOperationFragment
 import pw.xiaohaozi.xadapter.fragment.smart.DragSortFragment
@@ -126,7 +127,7 @@ val nodeMenuList = arrayListOf(
 val exampleMenuList = arrayListOf<Any>(
     HomeInfo("好友列表", "仿QQ好友列表", R.mipmap.ic_launcher, FriendFragment::class.java),
     HomeInfo("分类列表联动", "商品分类用与商品列表联动", R.mipmap.ic_launcher, GoodsFragment::class.java),
-    HomeInfo("多级分类列表", "商品分类多级菜单", R.mipmap.ic_launcher),
+    HomeInfo("多级分类列表", "商品分类多级菜单", R.mipmap.ic_launcher,MultipleCategoryFragment::class.java),
     HomeInfo("图片选择器", "", R.mipmap.ic_launcher),
     HomeInfo("底部导航栏", "", R.mipmap.ic_launcher),
     HomeInfo("TabBar", "", R.mipmap.ic_launcher),
