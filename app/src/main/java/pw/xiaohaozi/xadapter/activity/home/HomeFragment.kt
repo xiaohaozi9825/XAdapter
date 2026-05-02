@@ -6,8 +6,10 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.webkit.WebSettings
 import pw.xiaohaozi.xadapter.activity.SearchActivity
 import pw.xiaohaozi.xadapter.databinding.FragmentHomeBinding
+import pw.xiaohaozi.xadapter.loadMarkDownByAsses
 
 
 class HomeFragment : Fragment() {
@@ -26,7 +28,9 @@ class HomeFragment : Fragment() {
         binding.tvSearch.setOnClickListener {
             startActivity(Intent(requireContext(), SearchActivity::class.java))
         }
-        binding.webView.loadUrl("file:///android_asset/index.html")
+        //binding.webView.loadUrl("file:///android_asset/index.html")
+
+        binding.webView.loadMarkDownByAsses(requireContext(), "index.md")
 
     }
 
