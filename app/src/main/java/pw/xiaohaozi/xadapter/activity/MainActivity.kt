@@ -34,14 +34,13 @@ import pw.xiaohaozi.xadapter.info.HomeInfo
 import pw.xiaohaozi.xadapter.info.VerseInfo
 import pw.xiaohaozi.xadapter.smart.ext.createAdapter
 
-
 class MainActivity : AppCompatActivity() {
     private val binding by lazy { ActivityMainBinding.inflate(layoutInflater) }
 
     private val adapter = createAdapter()
-        .addHeader<ItemHomeHeaderBinding> {holder, data ->  }
-        .withType<ItemHomeTitleBinding, String>(isFixed = true) { (holder, data) ->
-            holder.binding.tvTitle.text = data
+        .addHeader<ItemHomeHeaderBinding> { holder, data -> }
+        .withType<ItemHomeTitleBinding, String>(isFixed = true) {
+            it.binding.tvTitle.text = it.data
         }
         .withType<ItemHomeBinding, HomeInfo> { (holder, data) ->
             holder.binding.data = data

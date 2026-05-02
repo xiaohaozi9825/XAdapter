@@ -35,7 +35,10 @@ data class OnBindParams<VB : ViewBinding, D>(
     val data: D,
     val position: Int,
     val payloads: List<Any?>
-)
+) {
+    val binding: VB
+        get() = holder.binding
+}
 
 
 /**
