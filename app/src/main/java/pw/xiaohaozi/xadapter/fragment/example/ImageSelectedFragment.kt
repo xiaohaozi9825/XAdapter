@@ -3,6 +3,8 @@ package pw.xiaohaozi.xadapter.fragment.example
 import android.Manifest
 import android.animation.ObjectAnimator
 import android.annotation.SuppressLint
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
@@ -14,7 +16,9 @@ import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import com.hjq.permissions.Permission
+import kotlinx.coroutines.Dispatchers.Default
 import kotlinx.coroutines.Dispatchers.IO
+import kotlinx.coroutines.Dispatchers.Main
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import pw.xiaohaozi.myvideo.utils.permission.RPermissions
@@ -44,7 +48,7 @@ class ImageSelectedFragment : Fragment() {
         holder.binding.ivImage.load(firstOrNull?.path)
         holder.binding.tvCount.text = "(${data.size})"
     }.singleSelect { data, position, index, fromUser ->
-        if (fromUser){
+        if (fromUser) {
             binding.tvGroupName.postDelayed({ binding.tvGroupName.text = data.firstOrNull().groupName(position) }, 300)
             imageAdapter.refresh(data)
             binding.viewCover.isVisible = false
@@ -65,7 +69,16 @@ class ImageSelectedFragment : Fragment() {
         }
         if (payload.contains("select")) return@createAdapter
         holder.binding.ivImage.load(data.path)
-
+        //进一步验证协成，注意有些gif或视频类型的文件，这里是加载不了的，所以有空白是正常的。
+//        holder.launch(IO) {
+//            val bitmap = BitmapFactory.decodeFile(data.path)
+//            // 缩到500×500
+//            val scaled = Bitmap.createScaledBitmap(bitmap, 500, 500, true)
+//            bitmap.recycle() // 回收原Bitmap
+//            withContext(Main) {
+//                holder.binding.ivImage.setImageBitmap(scaled)
+//            }
+//        }
     }.setOnClickListener { holder, data, position, view ->
         if (!selectedList.contains(data)) {
             selectedList.add(data)
