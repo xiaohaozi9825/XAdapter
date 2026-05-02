@@ -20,7 +20,7 @@ import pw.xiaohaozi.xadapter.smart.ext.singleSelect
 /**
  * item选择
  */
-class ImageSelectFragment : Fragment() {
+class SelectFragment : Fragment() {
     val TAG = "ImageSelectFragment"
     private lateinit var binding: FragmentSelectedBinding
     private val adapter = function2()

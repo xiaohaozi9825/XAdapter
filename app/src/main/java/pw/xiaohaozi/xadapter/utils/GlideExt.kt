@@ -16,6 +16,9 @@ import java.io.File
 fun ImageView.load(file: File) {
     Glide.with(this).load(file).into(this)
 }
+fun ImageView.load(file: String?) {
+    Glide.with(this).load(file).into(this)
+}
 
 fun ImageView.load(@RawRes @DrawableRes res: Int) {
     Glide.with(this).load(res).into(this)

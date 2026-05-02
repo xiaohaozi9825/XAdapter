@@ -11,12 +11,13 @@ import pw.xiaohaozi.xadapter.fragment.node.CreateNodeFragment
 import pw.xiaohaozi.xadapter.fragment.node.EditNodeFragment
 import pw.xiaohaozi.xadapter.fragment.example.FriendFragment
 import pw.xiaohaozi.xadapter.fragment.example.GoodsFragment
+import pw.xiaohaozi.xadapter.fragment.example.ImageSelectedFragment
 import pw.xiaohaozi.xadapter.fragment.example.MultipleCategoryFragment
 import pw.xiaohaozi.xadapter.fragment.smart.DataDifferFragment
 import pw.xiaohaozi.xadapter.fragment.smart.DataOperationFragment
 import pw.xiaohaozi.xadapter.fragment.smart.DragSortFragment
 import pw.xiaohaozi.xadapter.fragment.smart.GroupFragment
-import pw.xiaohaozi.xadapter.fragment.smart.ImageSelectFragment
+import pw.xiaohaozi.xadapter.fragment.smart.SelectFragment
 import pw.xiaohaozi.xadapter.fragment.smart.LongClickFragment
 import pw.xiaohaozi.xadapter.fragment.smart.MultipleFragment
 import pw.xiaohaozi.xadapter.fragment.node.Node2EditFragment
@@ -41,7 +42,7 @@ val smartMenuList = arrayListOf(
     HomeInfo("创建单布局", "单布局创建方式", R.mipmap.ic_launcher, SingleFragment::class.java),
     HomeInfo("创建多布局", "多布局创建方式", R.mipmap.ic_launcher, MultipleFragment::class.java),
     "选择操作",
-    HomeInfo("选择操作", "Item选择操作", R.mipmap.ic_launcher, ImageSelectFragment::class.java),
+    HomeInfo("选择操作", "Item选择操作", R.mipmap.ic_launcher, SelectFragment::class.java),
     "Item事件监听",
     HomeInfo("点击事件", "item点击事件", R.mipmap.ic_launcher, ClickFragment::class.java),
     HomeInfo("长按事件", "item长按事件", R.mipmap.ic_launcher, LongClickFragment::class.java),
@@ -128,7 +129,7 @@ val exampleMenuList = arrayListOf<Any>(
     HomeInfo("好友列表", "仿QQ好友列表", R.mipmap.ic_launcher, FriendFragment::class.java),
     HomeInfo("分类列表联动", "商品分类用与商品列表联动", R.mipmap.ic_launcher, GoodsFragment::class.java),
     HomeInfo("多级分类列表", "商品分类多级菜单", R.mipmap.ic_launcher,MultipleCategoryFragment::class.java),
-    HomeInfo("图片选择器", "", R.mipmap.ic_launcher),
+    HomeInfo("图片选择器", "", R.mipmap.ic_launcher,ImageSelectedFragment::class.java),
     HomeInfo("底部导航栏", "", R.mipmap.ic_launcher),
     HomeInfo("TabBar", "", R.mipmap.ic_launcher),
 

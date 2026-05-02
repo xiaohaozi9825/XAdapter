@@ -19,7 +19,7 @@ import pw.xiaohaozi.xadapter.fragment.smart.DataDifferFragment
 import pw.xiaohaozi.xadapter.fragment.smart.DataOperationFragment
 import pw.xiaohaozi.xadapter.fragment.smart.DragSortFragment
 import pw.xiaohaozi.xadapter.fragment.smart.GroupFragment
-import pw.xiaohaozi.xadapter.fragment.smart.ImageSelectFragment
+import pw.xiaohaozi.xadapter.fragment.smart.SelectFragment
 import pw.xiaohaozi.xadapter.fragment.smart.LongClickFragment
 import pw.xiaohaozi.xadapter.fragment.smart.MultipleFragment
 import pw.xiaohaozi.xadapter.fragment.node.Node2EditFragment
@@ -83,7 +83,7 @@ class MainActivity : AppCompatActivity() {
         HomeInfo("创建多布局", "多布局创建方式", R.mipmap.ic_launcher, MultipleFragment::class.java),
 
         "选择操作",
-        HomeInfo("选择操作", "Item选择操作", R.mipmap.ic_launcher, ImageSelectFragment::class.java),
+        HomeInfo("选择操作", "Item选择操作", R.mipmap.ic_launcher, SelectFragment::class.java),
 
         "Item事件监听",
         HomeInfo("点击事件", "item点击事件", R.mipmap.ic_launcher, ClickFragment::class.java),
