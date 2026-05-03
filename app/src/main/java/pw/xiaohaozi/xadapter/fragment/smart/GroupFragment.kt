@@ -1,25 +1,20 @@
 package pw.xiaohaozi.xadapter.fragment.smart
 
-import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
-import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.DividerItemDecoration.VERTICAL
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import pw.xiaohaozi.xadapter.R
 import pw.xiaohaozi.xadapter.databinding.FragmentRecyclerBinding
 import pw.xiaohaozi.xadapter.databinding.ItemHomeTitleBinding
 import pw.xiaohaozi.xadapter.databinding.ItemImageAutoHeightBinding
+import pw.xiaohaozi.xadapter.fragment.VBFragment
 import pw.xiaohaozi.xadapter.smart.ext.createAdapter
 
 
 /**
  * item选择
  */
-class GroupFragment : Fragment() {
+class GroupFragment : VBFragment<FragmentRecyclerBinding>() {
     val TAG = "GroupFragment"
-    private lateinit var binding: FragmentRecyclerBinding
     private val adapter = createAdapter()
         .withType<ItemHomeTitleBinding, String>(isFixed = true) {
             it.holder.binding.tvTitle.text = it.data
@@ -29,18 +24,10 @@ class GroupFragment : Fragment() {
         }
         .toAdapter()
 
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View {
-        binding = FragmentRecyclerBinding.inflate(inflater)
+
+    override fun FragmentRecyclerBinding.initView() {
         binding.recycleView.layoutManager = StaggeredGridLayoutManager(2, VERTICAL)
         binding.recycleView.adapter = adapter
-        return binding.root
-    }
-
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
         adapter.refresh(list)
     }
 
