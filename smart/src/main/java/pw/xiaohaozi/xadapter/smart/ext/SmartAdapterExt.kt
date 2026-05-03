@@ -1,5 +1,6 @@
 package pw.xiaohaozi.xadapter.smart.ext
 
+import android.view.View
 import androidx.lifecycle.LifecycleOwner
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.ItemTouchHelper.DOWN
@@ -153,6 +154,55 @@ fun LifecycleOwner.createLifecycleAdapter(
     return adapter
 }
 
+/**
+ * setOnClickListener 的简易写法
+ */
+fun <VB : ViewBinding, D> SmartAdapter<VB, D>.onClick(
+    id: Int? = null, listener: (biding: VB, data: D, position: Int, view: View) -> Unit
+): SmartAdapter<VB, D> {
+    setOnClickListener(id) { holder, data, position, view ->
+        listener.invoke(holder.binding, data, position, view)
+    }
+    return this
+}
+
+/**
+ * setOnClickListener 的简易写法
+ */
+fun <AVB : ViewBinding, AD, PVB : ViewBinding, PD> SmartProvider<AVB, AD, PVB, PD>.onClick(
+    id: Int? = null, listener: (biding: PVB, data: PD, position: Int, view: View) -> Unit
+): SmartProvider<AVB, AD, PVB, PD> {
+    setOnClickListener(id) { holder, data, position, view ->
+        listener.invoke(holder.binding, data, position, view)
+    }
+    return this
+}
+
+/**
+ * setOnLongClickListener 的简易写法
+ */
+fun <VB : ViewBinding, D> SmartAdapter<VB, D>.onLongClick(
+    id: Int? = null, listener: (biding: VB, data: D, position: Int, view: View) -> Unit
+): SmartAdapter<VB, D> {
+    setOnLongClickListener(id) { holder, data, position, view ->
+        listener.invoke(holder.binding, data, position, view)
+        return@setOnLongClickListener false
+    }
+    return this
+}
+
+/**
+ * setOnLongClickListener 的简易写法
+ */
+fun <AVB : ViewBinding, AD, PVB : ViewBinding, PD> SmartProvider<AVB, AD, PVB, PD>.onLongClick(
+    id: Int? = null, listener: (biding: PVB, data: PD, position: Int, view: View) -> Unit
+): SmartProvider<AVB, AD, PVB, PD> {
+    setOnLongClickListener(id) { holder, data, position, view ->
+        listener.invoke(holder.binding, data, position, view)
+        return@setOnLongClickListener false
+    }
+    return this
+}
 
 /*****************************************************
  * 其他操作

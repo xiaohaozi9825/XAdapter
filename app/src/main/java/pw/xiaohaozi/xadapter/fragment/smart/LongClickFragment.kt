@@ -1,39 +1,23 @@
 package pw.xiaohaozi.xadapter.fragment.smart
 
-import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
 import android.widget.Toast
-import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.viewbinding.ViewBinding
 import pw.xiaohaozi.xadapter.R
 import pw.xiaohaozi.xadapter.databinding.FragmentRecyclerBinding
 import pw.xiaohaozi.xadapter.databinding.ItemImageCardBinding
 import pw.xiaohaozi.xadapter.databinding.ItemVerseBinding
+import pw.xiaohaozi.xadapter.fragment.VBFragment
 import pw.xiaohaozi.xadapter.info.VerseInfo
 import pw.xiaohaozi.xadapter.smart.adapter.SmartAdapter
 import pw.xiaohaozi.xadapter.smart.ext.createAdapter
+import pw.xiaohaozi.xadapter.smart.ext.onLongClick
 
 
+class LongClickFragment : VBFragment<FragmentRecyclerBinding>() {
 
-class LongClickFragment : Fragment() {
-    private lateinit var binding: FragmentRecyclerBinding
-
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View {
-        binding = FragmentRecyclerBinding.inflate(inflater)
+    override fun FragmentRecyclerBinding.initView() {
         binding.recycleView.layoutManager = LinearLayoutManager(requireContext())
-
-
-        return binding.root
-    }
-
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
         //单布局
 //        val adapter1 = function1()
 //        binding.recycleView.adapter = adapter1
@@ -92,14 +76,14 @@ class LongClickFragment : Fragment() {
                 holder.binding.tvContent.text = data.content
                 holder.binding.tvAuthor.text = data.author
             }
-            .setOnLongClickListener() { holder, data, position, view ->
+            .setOnLongClickListener { holder, data, position, view ->
                 Toast.makeText(requireContext(), "长按了诗句 ${data.content}", Toast.LENGTH_SHORT).show()
                 return@setOnLongClickListener false
             }
             .withType<ItemImageCardBinding, Int> { (holder, data) ->
                 holder.binding.image.setImageResource(data)
             }
-            .setOnLongClickListener() { holder, data, position, view ->
+            .setOnLongClickListener { holder, data, position, view ->
                 Toast.makeText(requireContext(), "长按了图片 $data", Toast.LENGTH_SHORT).show()
                 return@setOnLongClickListener false
             }
@@ -113,18 +97,24 @@ class LongClickFragment : Fragment() {
                 holder.binding.tvContent.text = data.content
                 holder.binding.tvAuthor.text = data.author
             }
-            .setOnLongClickListener() { holder, data, position, view ->
-                Toast.makeText(requireContext(), "长按了诗句 ${data.content}", Toast.LENGTH_SHORT).show()
-                return@setOnLongClickListener false
+            .onLongClick{ biding, data, position, view ->
+            Toast.makeText(requireContext(), "长按了诗句 ${data.content}", Toast.LENGTH_SHORT).show()
             }
+//            .setOnLongClickListener() { holder, data, position, view ->
+//                Toast.makeText(requireContext(), "长按了诗句 ${data.content}", Toast.LENGTH_SHORT).show()
+//                return@setOnLongClickListener false
+//            }
             .withType<ItemImageCardBinding, Int> { (holder, data) ->
                 holder.binding.image.setImageResource(data)
             }
             .toAdapter()
-            .setOnLongClickListener() { holder, data, position, view ->
+            .onLongClick { biding, data, position, view ->
                 Toast.makeText(requireContext(), "长按了item $data", Toast.LENGTH_SHORT).show()
-                return@setOnLongClickListener false
             }
+//            .setOnLongClickListener() { holder, data, position, view ->
+//                Toast.makeText(requireContext(), "长按了item $data", Toast.LENGTH_SHORT).show()
+//                return@setOnLongClickListener false
+//            }
 
     }
 
