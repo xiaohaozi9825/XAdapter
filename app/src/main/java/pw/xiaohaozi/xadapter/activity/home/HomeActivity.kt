@@ -32,7 +32,7 @@ class HomeActivity : AppCompatActivity() {
     }
 
     private fun initBottomNav() {
-        val adapter = createAdapter<ItemHomeBottomButtonBinding, NevButton>(create = {
+        val adapter = createAdapter<ItemHomeBottomButtonBinding, NevButton>(created = {
             it.binding.root.anima()
         }) {
             it.holder.binding.apply {

@@ -1,39 +1,28 @@
 package pw.xiaohaozi.xadapter.fragment.smart
 
-import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
-import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import pw.xiaohaozi.xadapter.databinding.FragmentRecyclerBinding
 import pw.xiaohaozi.xadapter.databinding.ItemVerseBinding
 import pw.xiaohaozi.xadapter.databinding.ItemVerseDataBindingBinding
+import pw.xiaohaozi.xadapter.fragment.VBFragment
+import pw.xiaohaozi.xadapter.fragment.smart.provider.SingleProvider
 import pw.xiaohaozi.xadapter.info.VerseInfo
 import pw.xiaohaozi.xadapter.smart.adapter.SmartAdapter
 import pw.xiaohaozi.xadapter.smart.ext.createAdapter
-import pw.xiaohaozi.xadapter.smart.holder.XHolder
-import pw.xiaohaozi.xadapter.smart.provider.SmartProvider
 
 /**
  * 单布局
  */
-class SingleFragment : Fragment() {
-    private lateinit var binding: FragmentRecyclerBinding
+class SingleFragment : VBFragment<FragmentRecyclerBinding>() {
 
     private val adapter = function2()
 
-    override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View {
-        binding = FragmentRecyclerBinding.inflate(inflater)
-        binding.recycleView.layoutManager = LinearLayoutManager(requireContext())
-        binding.recycleView.adapter = adapter
+    override fun FragmentRecyclerBinding.initView() {
+        recycleView.layoutManager = LinearLayoutManager(requireContext())
+        recycleView.adapter = adapter
         adapter.refresh(list)
-        return binding.root
     }
+
 
     /**
      * 方法1
@@ -60,31 +49,7 @@ class SingleFragment : Fragment() {
      * 如果逻辑复杂，推荐使用方法2.
      */
     private fun function2(): SmartAdapter<ItemVerseBinding, VerseInfo> {
-        //①创建Adapter
-        val SmartAdapter = SmartAdapter<ItemVerseBinding, VerseInfo>()
-        //②创建Provider
-        val provider = object : SmartProvider<ItemVerseBinding, VerseInfo,ItemVerseBinding, VerseInfo>(SmartAdapter) {
-            override fun onCreated(holder: XHolder<ItemVerseBinding>) {
-
-            }
-
-            override fun onBind(
-                holder: XHolder<ItemVerseBinding>,
-                data: VerseInfo,
-                position: Int
-            ) {
-                holder.binding.tvContent.text = data?.content
-                holder.binding.tvAuthor.text = data?.author
-            }
-
-        }
-        //③将Provider 添加到 Adapter中
-        //方式一：使用方法添加，viewType可不填
-        SmartAdapter.addProvider(provider, 0)
-        return SmartAdapter
-        //方式一二：使用➕链接，viewType为空
-//        return xAdapter + provider
-
+        return SingleProvider().adapter
     }
 
     /**
@@ -103,7 +68,7 @@ class SingleFragment : Fragment() {
      */
     private fun function3(): SmartAdapter<ItemVerseDataBindingBinding, VerseInfo> {
         //一行代码实现Adapter的创建和数据绑定
-        return createAdapter { (holder, data, position) -> holder.binding.data = data }
+        return createAdapter<ItemVerseDataBindingBinding, VerseInfo> { it.binding.data = it.data }
     }
 
 
