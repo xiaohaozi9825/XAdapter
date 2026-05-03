@@ -1,34 +1,18 @@
 package pw.xiaohaozi.xadapter.fragment.smart
 
-import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
-import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import pw.xiaohaozi.xadapter.R
 import pw.xiaohaozi.xadapter.databinding.FragmentRecyclerBinding
-import pw.xiaohaozi.xadapter.databinding.ItemTextChingeBinding
+import pw.xiaohaozi.xadapter.databinding.ItemTextChangeBinding
+import pw.xiaohaozi.xadapter.fragment.VBFragment
 import pw.xiaohaozi.xadapter.smart.adapter.SmartAdapter
 import pw.xiaohaozi.xadapter.smart.ext.createAdapter
 
 
-class TextChangeFragment : Fragment() {
-    private lateinit var binding: FragmentRecyclerBinding
+class TextChangeFragment : VBFragment<FragmentRecyclerBinding>() {
 
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View {
-        binding = FragmentRecyclerBinding.inflate(inflater)
+    override fun FragmentRecyclerBinding.initView() {
         binding.recycleView.layoutManager = LinearLayoutManager(requireContext())
-
-
-        return binding.root
-    }
-
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
         val adapter = function()
         binding.recycleView.adapter = adapter
         adapter.refresh(list)
@@ -38,8 +22,8 @@ class TextChangeFragment : Fragment() {
     /**
      * 文本变化监听
      */
-    private fun function(): SmartAdapter<ItemTextChingeBinding, Exercises> {
-        return createAdapter<ItemTextChingeBinding, Exercises> { (holder, data) ->
+    private fun function(): SmartAdapter<ItemTextChangeBinding, Exercises> {
+        return createAdapter<ItemTextChangeBinding, Exercises> { (holder, data) ->
             //绑定题目
             holder.binding.tvContent.text = data.content
             //绑定答案
