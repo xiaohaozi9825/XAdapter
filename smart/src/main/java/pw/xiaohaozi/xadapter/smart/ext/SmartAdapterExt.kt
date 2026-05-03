@@ -43,12 +43,20 @@ data class OnBindParams<VB : ViewBinding, D>(
 
 /**
  * 创建单布局Adapter
+ * 泛型VB ：布局文件，泛型D：数据
+ * @param itemType
+ * @param onItemId
+ * @param init 创建Provider后回调，可在此处对Provider做一些初始化操作
+ * @param created 创建ViewHolder完成后回调，可在此处对viewHolder做一些初始化工作
+ * @param bind 核心方法，UI绑定数据时回调
+ *
+ * @return 返回创建好的adapter
  */
 inline fun <reified VB : ViewBinding, reified D> createAdapter(
     itemType: Int = 0,
     crossinline onItemId: OnItemId<VB, D> = { NO_ID },
     crossinline init: (SmartProvider<VB, D, VB, D>.() -> Unit) = {},
-    crossinline create: OnAdapterInitHolder<VB, D> = {},
+    crossinline created: OnAdapterInitHolder<VB, D> = {},
     crossinline bind: OnAdapterBindHolder<VB, D>,
 ): SmartAdapter<VB, D> {
     val adapter = object : SmartAdapter<VB, D>() {
@@ -59,7 +67,7 @@ inline fun <reified VB : ViewBinding, reified D> createAdapter(
     val provider = object : SmartProvider<VB, D, VB, D>(adapter) {
 
         override fun onCreated(holder: XHolder<VB>) {
-            create.invoke(adapter, holder)
+            created.invoke(adapter, holder)
         }
 
         override fun onBind(holder: XHolder<VB>, data: D, position: Int) {
