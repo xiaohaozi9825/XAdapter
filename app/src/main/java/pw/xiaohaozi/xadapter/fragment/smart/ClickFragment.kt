@@ -1,39 +1,22 @@
 package pw.xiaohaozi.xadapter.fragment.smart
 
-import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
 import android.widget.Toast
-import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.viewbinding.ViewBinding
 import pw.xiaohaozi.xadapter.R
 import pw.xiaohaozi.xadapter.databinding.FragmentRecyclerBinding
 import pw.xiaohaozi.xadapter.databinding.ItemImageCardBinding
 import pw.xiaohaozi.xadapter.databinding.ItemVerseBinding
+import pw.xiaohaozi.xadapter.fragment.VBFragment
 import pw.xiaohaozi.xadapter.info.VerseInfo
 import pw.xiaohaozi.xadapter.smart.adapter.SmartAdapter
 import pw.xiaohaozi.xadapter.smart.ext.createAdapter
 
 
+class ClickFragment : VBFragment<FragmentRecyclerBinding>() {
 
-class ClickFragment : Fragment() {
-    private lateinit var binding: FragmentRecyclerBinding
-
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View {
-        binding = FragmentRecyclerBinding.inflate(inflater)
-        binding.recycleView.layoutManager = LinearLayoutManager(requireContext())
-
-
-        return binding.root
-    }
-
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
+    override fun FragmentRecyclerBinding.initView() {
+        recycleView.layoutManager = LinearLayoutManager(requireContext())
         //单布局
 //        val adapter1 = function1()
 //        binding.recycleView.adapter = adapter1
@@ -52,7 +35,7 @@ class ClickFragment : Fragment() {
         //多布局，为adapter和provider设置点击事件。provider优先级高于adapter，
         // 同时设置，provider会覆盖adapter；未设置点击事件的provider会执行adapter的点击事件
         val adapter4 = function4()
-        binding.recycleView.adapter = adapter4
+        recycleView.adapter = adapter4
         adapter4.refresh(list2)
     }
 
