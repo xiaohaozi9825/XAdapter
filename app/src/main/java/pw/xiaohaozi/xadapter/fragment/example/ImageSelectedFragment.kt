@@ -26,6 +26,7 @@ import pw.xiaohaozi.xadapter.R
 import pw.xiaohaozi.xadapter.databinding.FragmentImageSelectBinding
 import pw.xiaohaozi.xadapter.databinding.ItemImageSelectGroupBinding
 import pw.xiaohaozi.xadapter.databinding.ItemImageSelectedBinding
+import pw.xiaohaozi.xadapter.fragment.VBFragment
 import pw.xiaohaozi.xadapter.smart.ext.createAdapter
 import pw.xiaohaozi.xadapter.smart.ext.singleSelect
 import pw.xiaohaozi.xadapter.utils.LoadLocalMedia
@@ -33,9 +34,8 @@ import pw.xiaohaozi.xadapter.utils.LoadMediaFile
 import pw.xiaohaozi.xadapter.utils.load
 
 
-class ImageSelectedFragment : Fragment() {
+class ImageSelectedFragment : VBFragment<FragmentImageSelectBinding>() {
     private val TAG = "ImageSelectedFragment"
-    private lateinit var binding: FragmentImageSelectBinding
     private var selectedList = mutableListOf<LoadMediaFile>()
 
     @SuppressLint("SetTextI18n")
@@ -71,12 +71,16 @@ class ImageSelectedFragment : Fragment() {
         holder.binding.ivImage.load(data.path)
         //进一步验证协成，注意有些gif或视频类型的文件，这里是加载不了的，所以有空白是正常的。
 //        holder.launch(IO) {
-//            val bitmap = BitmapFactory.decodeFile(data.path)
-//            // 缩到500×500
-//            val scaled = Bitmap.createScaledBitmap(bitmap, 500, 500, true)
-//            bitmap.recycle() // 回收原Bitmap
-//            withContext(Main) {
-//                holder.binding.ivImage.setImageBitmap(scaled)
+//            try {
+//                val bitmap = BitmapFactory.decodeFile(data.path)
+//                // 缩到500×500
+//                val scaled = Bitmap.createScaledBitmap(bitmap, 500, 500, true)
+//                bitmap.recycle() // 回收原Bitmap
+//                withContext(Main) {
+//                    holder.binding.ivImage.setImageBitmap(scaled)
+//                }
+//            } catch (e: Exception) {
+//                Log.e(TAG, "图片加载失败:${data.name}", e)
 //            }
 //        }
     }.setOnClickListener { holder, data, position, view ->
@@ -120,12 +124,7 @@ class ImageSelectedFragment : Fragment() {
         animator.start()
     }
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        binding = FragmentImageSelectBinding.inflate(inflater)
-        return binding.root
-    }
-
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+    override fun FragmentImageSelectBinding.initView() {
         binding.rvGroup.adapter = groupAdapter
         binding.rvImage.adapter = imageAdapter
         binding.viewCover.setOnClickListener {

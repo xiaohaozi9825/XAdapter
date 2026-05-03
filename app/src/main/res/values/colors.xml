@@ -11,8 +11,8 @@
 
     <color name="off_white">#F8F6E7</color>//米白色
 
-    <color name="theme">#FF3794FC</color>
-    <color name="theme2">#FF68B1FE</color>
+    <color name="theme">#DC3D3D</color>
+    <color name="theme2">#F26767</color>
 
     <color name="delete">#FE1900</color>
     <color name="to_top">#FE9400</color>
