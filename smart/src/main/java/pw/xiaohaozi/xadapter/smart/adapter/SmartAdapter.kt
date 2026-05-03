@@ -65,7 +65,13 @@ open class SmartAdapter<VB : ViewBinding, D>(
 
     /**
      * 多布局切换
-     * 返回Provider
+     * @param isFixed 是否填充整行，仅线性布局、网格布局、瀑布流布局有效。
+     * @param itemType
+     * @param init 创建Provider后回调，可在此处对Provider做一些初始化操作
+     * @param created 创建ViewHolder完成后回调，可在此处对viewHolder做一些初始化工作
+     * @param bind 核心方法，UI绑定数据时回调
+     *
+     * @return 返回Provider
      */
     inline fun <reified pvb : VB, reified pd : D> withType(
         isFixed: Boolean? = null,

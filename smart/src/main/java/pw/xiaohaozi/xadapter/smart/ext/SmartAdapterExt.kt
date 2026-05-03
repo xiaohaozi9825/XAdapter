@@ -122,6 +122,12 @@ inline fun <reified VB : ViewBinding, reified D> createTypeAdapter(
     return adapter
 }
 
+/**
+ * 创建多布局Adapter
+ * @param onItemId
+ * @param custom 根据数据动态返回itemType
+ * @return 多类型Adapter，泛型类型必须为<ViewBinding, Any?>
+ */
 fun createAdapter(
     onItemId: OnItemId<ViewBinding, Any?>? = null,
     custom: OnCustomType<ViewBinding, Any?>? = null,

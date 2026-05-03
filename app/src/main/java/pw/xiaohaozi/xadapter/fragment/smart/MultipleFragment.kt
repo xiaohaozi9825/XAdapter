@@ -1,43 +1,31 @@
 package pw.xiaohaozi.xadapter.fragment.smart
 
-import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
-import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.viewbinding.ViewBinding
 import pw.xiaohaozi.xadapter.R
 import pw.xiaohaozi.xadapter.databinding.FragmentRecyclerBinding
 import pw.xiaohaozi.xadapter.databinding.ItemImageCardBinding
 import pw.xiaohaozi.xadapter.databinding.ItemVerseBinding
+import pw.xiaohaozi.xadapter.fragment.VBFragment
+import pw.xiaohaozi.xadapter.fragment.smart.provider.MultipleProvider1
+import pw.xiaohaozi.xadapter.fragment.smart.provider.MultipleProvider2
 import pw.xiaohaozi.xadapter.info.VerseInfo
 import pw.xiaohaozi.xadapter.smart.adapter.SmartAdapter
 import pw.xiaohaozi.xadapter.smart.entity.XMultiItemEntity
 import pw.xiaohaozi.xadapter.smart.ext.createAdapter
 
-import pw.xiaohaozi.xadapter.smart.holder.XHolder
-import pw.xiaohaozi.xadapter.smart.provider.SmartProvider
-
 /**
  * 多布局
  */
-class MultipleFragment : Fragment() {
-    private lateinit var binding: FragmentRecyclerBinding
+class MultipleFragment : VBFragment<FragmentRecyclerBinding>() {
+    //①创建adapter
     private val adapter = function1()
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View {
-        binding = FragmentRecyclerBinding.inflate(inflater)
-        binding.recycleView.layoutManager = LinearLayoutManager(requireContext())
-        binding.recycleView.adapter = adapter
 
-        return binding.root
-    }
-
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
+    override fun FragmentRecyclerBinding.initView() {
+        recycleView.layoutManager = LinearLayoutManager(requireContext())
+        //②recyclerview设置adapter
+        recycleView.adapter = adapter
+        //③获取数据后更新数据
         adapter.refresh(list)
     }
 
@@ -49,12 +37,12 @@ class MultipleFragment : Fragment() {
     private fun function1(): SmartAdapter<ViewBinding, Any?> {
         //泛型VB 确定布局文件，泛型D确定数据类型，回调函数中绑定数据
         return createAdapter()
-            .withType<ItemVerseBinding, VerseInfo> { (holder, data, position) ->
-                holder.binding.tvContent.text = data.content
-                holder.binding.tvAuthor.text = data.author
+            .withType<ItemVerseBinding, VerseInfo> {
+                it.binding.tvContent.text = it.data.content
+                it.binding.tvAuthor.text = it.data.author
             }
-            .withType<ItemImageCardBinding, Int> { (holder, data, position) ->
-                holder.binding.image.setImageResource(data)
+            .withType<ItemImageCardBinding, Int> {
+                it.binding.image.setImageResource(it.data)
             }
             .toAdapter()
     }
@@ -63,36 +51,8 @@ class MultipleFragment : Fragment() {
         //①创建Adapter
         val smartAdapter = SmartAdapter<ViewBinding, Any?>()
         //②创建Provider
-        val provider1 = object : SmartProvider<ViewBinding, Any?, ItemImageCardBinding, Int>(smartAdapter) {
-            override fun onCreated(holder: XHolder<ItemImageCardBinding>) {
-
-            }
-
-            override fun onBind(
-                holder: XHolder<ItemImageCardBinding>,
-                data: Int,
-                position: Int
-            ) {
-                holder.binding.image.setImageResource(data)
-            }
-
-
-        }
-        val provider2 = object : SmartProvider<ViewBinding, Any?, ItemVerseBinding, VerseInfo?>(smartAdapter) {
-            override fun onCreated(holder: XHolder<ItemVerseBinding>) {
-
-            }
-
-            override fun onBind(
-                holder: XHolder<ItemVerseBinding>,
-                data: VerseInfo?,
-                position: Int
-            ) {
-                holder.binding.tvContent.text = data?.content
-                holder.binding.tvAuthor.text = data?.author
-            }
-
-        }
+        val provider1 = MultipleProvider1(smartAdapter)
+        val provider2 = MultipleProvider2(smartAdapter)
         //③将Provider 添加到 Adapter中
         //方式一：使用方法添加，viewType可不填
 
