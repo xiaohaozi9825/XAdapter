@@ -18,6 +18,7 @@ import pw.xiaohaozi.xadapter.R
 import pw.xiaohaozi.xadapter.databinding.FragmentSelectedBinding
 import pw.xiaohaozi.xadapter.databinding.ItemCameraBinding
 import pw.xiaohaozi.xadapter.databinding.ItemImageSelectedBinding
+import pw.xiaohaozi.xadapter.fragment.VBFragment
 import pw.xiaohaozi.xadapter.smart.adapter.SmartAdapter
 import pw.xiaohaozi.xadapter.smart.ext.createLifecycleAdapter
 
@@ -25,15 +26,11 @@ import pw.xiaohaozi.xadapter.smart.ext.createLifecycleAdapter
 /**
  * item选择
  */
-class CoroutineScopeFragment : Fragment() {
+class CoroutineScopeFragment : VBFragment<FragmentSelectedBinding>() {
     val TAG = "CoroutineScopeFragment"
-    private lateinit var binding: FragmentSelectedBinding
     private val adapter = function2()
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View {
-        binding = FragmentSelectedBinding.inflate(inflater)
+
+    override fun FragmentSelectedBinding.initView() {
         binding.llSelectedAll.setOnClickListener {
             if (adapter.isSelectAll())
                 adapter.deselectAll()
@@ -41,11 +38,7 @@ class CoroutineScopeFragment : Fragment() {
                 adapter.selectAll()
         }
         binding.rvList.adapter = adapter
-        return binding.root
-    }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
         adapter.refresh(list2)
     }
 
