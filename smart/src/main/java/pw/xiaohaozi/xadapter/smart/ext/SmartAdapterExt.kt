@@ -260,7 +260,7 @@ fun <T : SmartAdapter<*, *>> T.swipeDelete(
 
 
 /**
- * 拖拽排序
+ * 侧滑删除
  *
  * @param threshold 设置用户在拖拽视图时应该移动视图的比例。在视图移动到这个位置之后，ItemTouchHelper开始检查视图下方是否有可能的删除。一个浮点值，表示视图大小的百分比。缺省值为。1f。
  * @param flags 触发方向

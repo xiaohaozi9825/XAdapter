@@ -1,10 +1,5 @@
 package pw.xiaohaozi.xadapter.fragment.smart
 
-import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
-import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.viewbinding.ViewBinding
 import coil.load
@@ -14,6 +9,7 @@ import pw.xiaohaozi.xadapter.databinding.ItemHomeFooterBinding
 import pw.xiaohaozi.xadapter.databinding.ItemHomeHeaderBinding
 import pw.xiaohaozi.xadapter.databinding.ItemImageCardBinding
 import pw.xiaohaozi.xadapter.databinding.ItemVerseBinding
+import pw.xiaohaozi.xadapter.fragment.VBFragment
 import pw.xiaohaozi.xadapter.info.VerseInfo
 import pw.xiaohaozi.xadapter.smart.adapter.SmartAdapter
 import pw.xiaohaozi.xadapter.smart.ext.createAdapter
@@ -23,22 +19,14 @@ import pw.xiaohaozi.xadapter.smart.ext.swipeDelete
 /**
  * 单布局
  */
-class SwipeDeleteFragment : Fragment() {
-    private lateinit var binding: FragmentRecyclerBinding
+class SwipeDeleteFragment : VBFragment<FragmentRecyclerBinding>() {
 
     private val adapter = function1()
 
-
-    override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View {
-        binding = FragmentRecyclerBinding.inflate(inflater)
+    override fun FragmentRecyclerBinding.initView() {
         binding.recycleView.layoutManager = LinearLayoutManager(requireContext())
         binding.recycleView.adapter = adapter
         adapter.refresh(list)
-        return binding.root
     }
 
     /**
