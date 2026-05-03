@@ -1,22 +1,240 @@
-## 选中状态改变监听
-> 特殊布局，如头布局，脚布局，空布局、错误布局
+# Item设置选中事件
+> 监听CheckBox、RadioButton、Switch等继承了CompoundButton的类的选择状态变更监听
+## 用法
 
+### 方法定义
+```kotlin
+/**
+ * 设置选中事件监听
+ * @param id 被监听的控件id，必须是CompoundButton的子组件，如RadioButton、CheckBox
+ * @param listener 状态改变回调
+ */
+fun setOnCheckedChangeListener(
+    id: Int?,
+    listener: OnItemCheckedChangeListener<Employer, VB, D>
+): Employer
 
-#### 核心方法
+```
 
+### 基础用法
 ```kotlin
 adapter.setOnCheckedChangeListener(R.id.rb_option_a) { holder, data, position, view, isCheck ->
-            
-}
-
-provider.setOnCheckedChangeListener(R.id.rb_option_a) { holder, data, position, view, isCheck ->
-            
+    
 }
 ```
 
-##### 参数说明
-- id：被监听的ViewId，必须是CompoundButton的子类，否则无效。
-- listener：回调方法，状态改变时回调
+## 示例代码
+
+item_check_checkbox.xml
+
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <TextView
+        android:id="@+id/tv_content"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingHorizontal="8dp"
+        android:textColor="@color/black"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        android:paddingVertical="6dp"
+        app:layout_constraintBottom_toTopOf="@id/ll_answer"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:text="1、何时杖尔看南雪，我与梅花两白头。" />
+
+    <LinearLayout
+        android:id="@+id/ll_answer"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/tv_content">
+
+        <CheckBox
+            android:id="@+id/cb_option_a"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="A" />
+
+        <CheckBox
+            android:id="@+id/cb_option_b"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="B" />
+
+        <CheckBox
+            android:id="@+id/cb_option_c"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="C" />
+
+        <CheckBox
+            android:id="@+id/cb_option_d"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="D" />
+    </LinearLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>
+```
+
+ExercisesCheck.kt
+
+```kotlin
+/**
+ * 多选题
+ */
+class ExercisesCheck(
+    content: String,
+    option: ArrayList<String>,
+    var answers: HashSet<Int> = hashSetOf()//已选项，值对应option中index
+) : Exercises(content, option)
+```
+
+CheckFragment.kt
+
+```kotlin
+class CheckFragment : VBFragment<FragmentRecyclerBinding>() {
+    val adapter = createAdapter<ItemCheckCheckboxBinding, ExercisesCheck> { (holder, data, position) ->
+        //绑定题目
+        holder.binding.tvContent.text = data.content
+
+        //绑定答案
+        holder.binding.cbOptionA.text = data.option[0]
+        holder.binding.cbOptionB.text = data.option[1]
+        holder.binding.cbOptionC.text = data.option[2]
+        holder.binding.cbOptionD.text = data.option[3]
+
+        //绑定答案选择状态
+        holder.binding.cbOptionA.isChecked = data.answers.contains(0)
+        holder.binding.cbOptionB.isChecked = data.answers.contains(1)
+        holder.binding.cbOptionC.isChecked = data.answers.contains(2)
+        holder.binding.cbOptionD.isChecked = data.answers.contains(3)
+
+    }.setOnCheckedChangeListener(R.id.cb_option_a) { holder, data, position, view, isCheck ->
+        if (isCheck) data.answers.add(0)
+        else data.answers.remove(0)
+    }.setOnCheckedChangeListener(R.id.cb_option_b) { holder, data, position, view, isCheck ->
+        if (isCheck) data.answers.add(1)
+        else data.answers.remove(1)
+    }.setOnCheckedChangeListener(R.id.cb_option_c) { holder, data, position, view, isCheck ->
+        if (isCheck) data.answers.add(2)
+        else data.answers.remove(2)
+    }.setOnCheckedChangeListener(R.id.cb_option_d) { holder, data, position, view, isCheck ->
+        if (isCheck) data.answers.add(3)
+        else data.answers.remove(3)
+    }
+
+    override fun FragmentRecyclerBinding.initView() {
+        binding.recycleView.layoutManager = LinearLayoutManager(requireContext())
+        binding.recycleView.adapter = adapter
+        adapter2.refresh(list)
+    }
 
 
+    private val list = arrayListOf(
+        ExercisesCheck(
+            "1、河姆渡和半坡原始居民过上定居生活的最主要原因是（）",
+            arrayListOf("A、农业生产的出现", " B、火的使用  ", "C、建造房屋 ", "D、使用陶器")
+        ),
 
+        ExercisesCheck(
+            "2、我国是世界最早种植蔬菜的国家。下列遗址的考古发现中可为这一论断提供证据的是（）",
+            arrayListOf("A、元谋人遗址", "B、北京人遗址  ", "C、河姆渡人遗址", "D、半坡人遗址")
+        ),
+
+        ExercisesCheck(
+            "3、相传，造出衣裳、舟车、宫室等，为后世的衣食住行奠定基础的“人文始祖”是（）",
+            arrayListOf("A、黄帝 ", "B、尧", "C、舜", "D、禹")
+        ),
+
+        ExercisesCheck(
+            "4、在古希腊神话中，众神经常参加人间战争。传说中国古代也有一场“风伯御风、雨神行雨”的战役。在这场战役中，炎帝、黄帝部落大败蚩尤部落。该战役发生在（）",
+            arrayListOf("A、牧野 ", "B、逐鹿", "C、长平", "D、城濮")
+        ),
+
+        ExercisesCheck(
+            "5、我们的祖先在与自然灾害抗争中留下了许多美丽的传说。右图反映的是（）",
+            arrayListOf("A、大禹治水", "B、精卫填海", "C、后羿射日", "D、夸父逐日")
+        ),
+
+        ExercisesCheck(
+            "6、黄河流域是中华文明的发祥地之一。下列选项中最能体现该地区原始农耕文化成就是（）",
+            arrayListOf("A、种植粟", "B、种植水稻", "C、人工取火", " D、住干栏式房子")
+        ),
+
+        ExercisesCheck(
+            "7、西周为了巩固统治，实行“封建亲戚，以藩屏周”的政治制度。这种制度是（）",
+            arrayListOf("A、禅让制", "B、世袭制", " C、分封制", "D、郡县制")
+        ),
+
+        ExercisesCheck(
+            "8、战国时期有这样一户人家：老大因作战有功获得爵位；老二在家勤于耕作。被免除徭役；老三则被国君派往小县为吏。这户人家最有可能生活在（）",
+            arrayListOf("A、齐国", "B、楚国", "C、燕国", "D、秦国")
+        ),
+
+        ExercisesCheck(
+            "9、春秋战国时期。新旧制度更替，社会大变革的根本原因是（）",
+            arrayListOf("A、战争频繁", " B、诸侯争霸", "C、百家争鸣 ", "D、社会生产力发展，铁制农具的广泛使用和牛耕的推广")
+        ),
+
+        ExercisesCheck(
+            "10、某校七年级二班的同学在学习“商鞅变法”一课后表演了一出历史短剧。下列各项中错误的是（）",
+            arrayListOf(
+                "A、甲同学扮演秦孝公任命商鞅主持变法",
+                "B、乙同学扮演生产粮食布帛多的人获得奖励",
+                "C、丙同学扮演获得军功的大奖接受爵位",
+                "D、扮演秦孝公的甲同学向全国颁旨：废除土地私有制"
+            )
+        ),
+
+        ExercisesCheck(
+            "11、经典诵读已成为当今中国人传承历史文化的重要方式。《三字经》中“瀛秦氏，始兼并。传二世。楚汉争。高祖兴，汉业建”所包含的朝代顺序是（）",
+            arrayListOf("A、秦——西汉", "B、西汉——东汉  ", "C、东汉——三国", "D、三国——西晋")
+        ),
+
+        ExercisesCheck(
+            "12、“地方推行郡县制。小篆成为规范字，焚书坑儒稿专制。”这一顺口溜反映的是（）实行的统治政策。",
+            arrayListOf("A、秦始皇", "B、汉武帝", "C、唐太宗", "D、宋太祖")
+        ),
+
+        ExercisesCheck(
+            "13、“惜秦皇汉武。略输文采，同宗宋祖，稍逊风骚……”毛泽东在《沁园春.雪》中提及了中国古代多位杰出君王。其中“汉武”最主要的功绩是（）",
+            arrayListOf("A、创立了中央集权", " B、结束割据，实现国家统一 ", "C、稳固大一统局面", "D、统治期间出现盛世局面")
+        ),
+
+        )
+
+    /**
+     * 习题类
+     */
+    open class Exercises(
+        val content: String,//题目内容
+        val option: ArrayList<String>//选择项 A B C D
+    )
+
+    /**
+     * 单选题
+     */
+    class ExercisesRadio(
+        content: String,
+        option: ArrayList<String>,
+        var answer: Int? = null//已选项，值对应option中index
+    ) : Exercises(content, option)
+
+    /**
+     * 多选题
+     */
+    class ExercisesCheck(
+        content: String,
+        option: ArrayList<String>,
+        var answers: HashSet<Int> = hashSetOf()//已选项，值对应option中index
+    ) : Exercises(content, option)
+
+}
+```

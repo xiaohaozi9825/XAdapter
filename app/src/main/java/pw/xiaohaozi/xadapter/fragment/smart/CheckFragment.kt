@@ -1,35 +1,19 @@
 package pw.xiaohaozi.xadapter.fragment.smart
 
-import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
-import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import pw.xiaohaozi.xadapter.R
 import pw.xiaohaozi.xadapter.databinding.FragmentRecyclerBinding
 import pw.xiaohaozi.xadapter.databinding.ItemCheckCheckboxBinding
 import pw.xiaohaozi.xadapter.databinding.ItemCheckRadiobuttonBinding
+import pw.xiaohaozi.xadapter.fragment.VBFragment
 import pw.xiaohaozi.xadapter.smart.adapter.SmartAdapter
 import pw.xiaohaozi.xadapter.smart.ext.createAdapter
 
 
-class CheckFragment : Fragment() {
-    private lateinit var binding: FragmentRecyclerBinding
+class CheckFragment : VBFragment<FragmentRecyclerBinding>() {
 
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View {
-        binding = FragmentRecyclerBinding.inflate(inflater)
+    override fun FragmentRecyclerBinding.initView() {
         binding.recycleView.layoutManager = LinearLayoutManager(requireContext())
-
-
-        return binding.root
-    }
-
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
 //        val adapter1 = function1()
 //        binding.recycleView.adapter = adapter1
 //        adapter1.reset(list1)
@@ -37,7 +21,6 @@ class CheckFragment : Fragment() {
         val adapter2 = function2()
         binding.recycleView.adapter = adapter2
         adapter2.refresh(list2)
-
     }
 
 
