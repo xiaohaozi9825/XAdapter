@@ -1,10 +1,5 @@
 package pw.xiaohaozi.xadapter.fragment.smart
 
-import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
-import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.viewbinding.ViewBinding
@@ -19,6 +14,7 @@ import pw.xiaohaozi.xadapter.databinding.ItemImageCardBinding
 import pw.xiaohaozi.xadapter.databinding.ItemLoadFailBinding
 import pw.xiaohaozi.xadapter.databinding.ItemLoadingBinding
 import pw.xiaohaozi.xadapter.databinding.ItemVerseBinding
+import pw.xiaohaozi.xadapter.fragment.VBFragment
 import pw.xiaohaozi.xadapter.info.VerseInfo
 import pw.xiaohaozi.xadapter.smart.adapter.SmartAdapter
 import pw.xiaohaozi.xadapter.smart.ext.createAdapter
@@ -27,18 +23,13 @@ import pw.xiaohaozi.xadapter.smart.ext.createAdapter
 /**
  * 特殊布局，如头布局，脚布局，空布局、错误布局
  */
-class SpecialLayoutFragment : Fragment() {
-    private lateinit var binding: FragmentSpecialLayoutBinding
+class SpecialLayoutFragment : VBFragment<FragmentSpecialLayoutBinding>() {
     private val adapter = function1()
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View {
-        binding = FragmentSpecialLayoutBinding.inflate(inflater)
-        binding.recycleView.layoutManager = LinearLayoutManager(requireContext())
-        binding.recycleView.adapter = adapter
+    override fun FragmentSpecialLayoutBinding.initView() {
+        recycleView.layoutManager = LinearLayoutManager(requireContext())
+        recycleView.adapter = adapter
         //模拟空数据
-        binding.tvEmpty.setOnClickListener {
+        tvEmpty.setOnClickListener {
             lifecycleScope.launch {
                 loading()
                 adapter.hintDefaultPage()//隐藏加载中缺省页
@@ -46,11 +37,11 @@ class SpecialLayoutFragment : Fragment() {
             }
         }
         //模拟加载成功
-        binding.tvLoadSuccess.setOnClickListener {
+        tvLoadSuccess.setOnClickListener {
             lifecycleScope.launch {
                 loading()
                 adapter.hasHeader = true
-//                adapter.addHeader<ItemHomeHeaderBinding> { }
+//                adapter.addHeader<ItemHomeHeaderBinding>()
                 adapter.addFooter<ItemHomeFooterBinding>()
                 adapter.hintDefaultPage()//隐藏加载中缺省页
                 adapter.refresh(list)//刷新数据
@@ -58,15 +49,21 @@ class SpecialLayoutFragment : Fragment() {
 
         }
         //模拟加载失败
-        binding.tvLoadFail.setOnClickListener {
+        tvLoadFail.setOnClickListener {
             lifecycleScope.launch {
                 loading()
                 adapter.showDefaultPage<ItemLoadFailBinding>()//显示加载失败缺省页，这里会替换加载中缺省页
             }
 
         }
-        return binding.root
+
+        lifecycleScope.launch {
+            loading()
+            adapter.hintDefaultPage()
+            adapter.refresh(list)
+        }
     }
+
 
     //模拟加载中
     private suspend fun loading() {
@@ -78,15 +75,6 @@ class SpecialLayoutFragment : Fragment() {
         adapter.showDefaultPage<ItemLoadingBinding>()
         //模拟加载耗时1s
         delay(1000)
-    }
-
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-        lifecycleScope.launch {
-            loading()
-            adapter.hintDefaultPage()
-            adapter.refresh(list)
-        }
     }
 
     /**
