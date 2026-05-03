@@ -11,10 +11,10 @@
 
     <androidx.cardview.widget.CardView
         android:layout_width="match_parent"
-        app:cardElevation="0dp"
+        app:cardElevation="4dp"
         anima="@{6}"
         android:layout_margin="8dp"
-        app:cardCornerRadius="6dp"
+        app:cardCornerRadius="12dp"
         android:layout_height="wrap_content">
 
         <androidx.constraintlayout.widget.ConstraintLayout
@@ -27,7 +27,7 @@
                 android:layout_height="0dp"
                 android:scaleType="centerCrop"
                 load="@{data.url}"
-                app:layout_constraintDimensionRatio="1.2"
+                app:layout_constraintDimensionRatio="1"
                 app:layout_constraintTop_toTopOf="parent" />
 
             <TextView
