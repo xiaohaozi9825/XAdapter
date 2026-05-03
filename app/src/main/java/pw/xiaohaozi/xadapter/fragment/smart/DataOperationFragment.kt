@@ -1,12 +1,7 @@
 package pw.xiaohaozi.xadapter.fragment.smart
 
 import android.annotation.SuppressLint
-import android.os.Bundle
 import android.util.Log
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
-import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import com.scwang.smart.refresh.footer.ClassicsFooter
 import com.scwang.smart.refresh.header.ClassicsHeader
@@ -18,6 +13,7 @@ import pw.xiaohaozi.xadapter.databinding.ItemDataOperationBinding
 import pw.xiaohaozi.xadapter.databinding.ItemHomeFooterBinding
 import pw.xiaohaozi.xadapter.databinding.ItemHomeHeaderBinding
 import pw.xiaohaozi.xadapter.dialog.InputDialog
+import pw.xiaohaozi.xadapter.fragment.VBFragment
 import pw.xiaohaozi.xadapter.info.VerseInfo
 import pw.xiaohaozi.xadapter.smart.adapter.SmartAdapter
 import pw.xiaohaozi.xadapter.smart.ext.createAdapter
@@ -29,17 +25,13 @@ import pw.xiaohaozi.xadapter.smart.proxy.ObservableList
 /**
  * item选择
  */
-class DataOperationFragment : Fragment() {
+class DataOperationFragment : VBFragment<FragmentDataOperationBinding>() {
     val TAG = "DataOperationFragment"
-    private lateinit var binding: FragmentDataOperationBinding
     private val adapter = function()
 
     var pos = 0
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View {
-        binding = FragmentDataOperationBinding.inflate(inflater)
+
+    override fun FragmentDataOperationBinding.initView() {
         binding.llSelectedAll.setOnClickListener {
             if (adapter.isSelectAll())
                 adapter.deselectAll()
@@ -94,11 +86,7 @@ class DataOperationFragment : Fragment() {
                 binding.tvItemCount.text = "共${sender.size}条数据"
             }
         })
-        return binding.root
-    }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
         val refreshLayout = binding.refreshLayout
         refreshLayout.setRefreshHeader(ClassicsHeader(requireContext()))
         refreshLayout.setRefreshFooter(ClassicsFooter(requireContext()))

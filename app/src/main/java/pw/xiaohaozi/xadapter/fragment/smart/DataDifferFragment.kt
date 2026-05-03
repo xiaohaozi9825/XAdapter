@@ -18,6 +18,7 @@ import pw.xiaohaozi.xadapter.databinding.ItemDataOperationBinding
 import pw.xiaohaozi.xadapter.databinding.ItemHomeFooterBinding
 import pw.xiaohaozi.xadapter.databinding.ItemHomeHeaderBinding
 import pw.xiaohaozi.xadapter.dialog.InputDialog
+import pw.xiaohaozi.xadapter.fragment.VBFragment
 import pw.xiaohaozi.xadapter.info.VerseInfo
 import pw.xiaohaozi.xadapter.smart.adapter.SmartAdapter
 import pw.xiaohaozi.xadapter.smart.ext.createAdapter
@@ -29,16 +30,12 @@ import pw.xiaohaozi.xadapter.smart.proxy.ObservableList
 /**
  * item选择
  */
-class DataDifferFragment : Fragment() {
+class DataDifferFragment : VBFragment<FragmentDataOperationBinding>() {
     val TAG = "DataDifferFragment"
-    private lateinit var binding: FragmentDataOperationBinding
     private val adapter = function()
     var pos = 0
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View {
-        binding = FragmentDataOperationBinding.inflate(inflater)
+
+    override fun FragmentDataOperationBinding.initView() {
         binding.llSelectedAll.setOnClickListener {
             if (adapter.isSelectAll())
                 adapter.deselectAll()
@@ -74,7 +71,13 @@ class DataDifferFragment : Fragment() {
                 binding.tvItemCount.text = "共${sender.size}条数据"
             }
 
-            override fun onItemRangeMoved(sender: MutableList<VerseInfo>, fromPosition: Int, toPosition: Int, itemCount: Int, payload: Any?) {
+            override fun onItemRangeMoved(
+                sender: MutableList<VerseInfo>,
+                fromPosition: Int,
+                toPosition: Int,
+                itemCount: Int,
+                payload: Any?
+            ) {
                 binding.tvItemCount.text = "共${sender.size}条数据"
             }
 
@@ -86,11 +89,7 @@ class DataDifferFragment : Fragment() {
                 binding.tvItemCount.text = "共${sender.size}条数据"
             }
         })
-        return binding.root
-    }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
         val refreshLayout = binding.refreshLayout
         refreshLayout.setRefreshHeader(ClassicsHeader(requireContext()))
         refreshLayout.setRefreshFooter(ClassicsFooter(requireContext()))
@@ -178,7 +177,6 @@ class DataDifferFragment : Fragment() {
             .swipeDelete()
             .dragSort()
     }
-
 
 
     private val list = arrayListOf(
