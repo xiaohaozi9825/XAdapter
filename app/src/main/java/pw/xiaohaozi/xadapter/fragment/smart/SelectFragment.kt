@@ -13,6 +13,7 @@ import pw.xiaohaozi.xadapter.R
 import pw.xiaohaozi.xadapter.databinding.FragmentSelectedBinding
 import pw.xiaohaozi.xadapter.databinding.ItemCameraBinding
 import pw.xiaohaozi.xadapter.databinding.ItemImageSelectedBinding
+import pw.xiaohaozi.xadapter.fragment.VBFragment
 import pw.xiaohaozi.xadapter.smart.adapter.SmartAdapter
 import pw.xiaohaozi.xadapter.smart.ext.createAdapter
 import pw.xiaohaozi.xadapter.smart.ext.singleSelect
@@ -20,27 +21,19 @@ import pw.xiaohaozi.xadapter.smart.ext.singleSelect
 /**
  * item选择
  */
-class SelectFragment : Fragment() {
+class SelectFragment : VBFragment<FragmentSelectedBinding>() {
     val TAG = "ImageSelectFragment"
-    private lateinit var binding: FragmentSelectedBinding
     private val adapter = function2()
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View {
-        binding = FragmentSelectedBinding.inflate(inflater)
-        binding.llSelectedAll.setOnClickListener {
+
+    override fun FragmentSelectedBinding.initView() {
+        llSelectedAll.setOnClickListener {
             if (adapter.isSelectAll())
                 adapter.deselectAll()
             else
                 adapter.selectAll()
         }
-        binding.rvList.adapter = adapter
-        return binding.root
-    }
+        rvList.adapter = adapter
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
         adapter.refresh(list2)
 //
 //        lifecycleScope.launch {
@@ -84,23 +77,24 @@ class SelectFragment : Fragment() {
     private fun function2(): SmartAdapter<ViewBinding, Any?> {
         //泛型VB 确定布局文件，泛型D确定数据类型，回调函数中绑定数据
         val adapter = createAdapter()
-//            .setOnItemSelectListener(
-//                payload = "select",
-////                permittedTypes = arrayOf(java.lang.Integer::class.java)
-//                permittedTypes = arrayOf(Int.MIN_VALUE + 1)
-//            ) { data, position, index, fromUser ->
-//                binding.tvSelectedCount.text = "已选${getSelectedList().size}张"
-//            }
-//            .setMaxSelectCount(3)
-//            .isAutoCancel(false)
-//            .isAllowCancel(true)
-            .singleSelect(
+            .setOnItemSelectListener(
                 payload = "select",
 //                permittedTypes = arrayOf(java.lang.Integer::class.java)
-//                permittedTypes = arrayOf(Int.MIN_VALUE + 1)
+                permittedTypes = arrayOf(Int.MIN_VALUE + 1)
             ) { data, position, index, fromUser ->
                 binding.tvSelectedCount.text = "已选${getSelectedList().size}张"
             }
+//            .setMaxSelectCount(3)
+//            .isAutoCancel(false)
+//            .isAllowCancel(true)
+
+//            .singleSelect(
+//                payload = "select",
+////                permittedTypes = arrayOf(java.lang.Integer::class.java)
+////                permittedTypes = arrayOf(Int.MIN_VALUE + 1)
+//            ) { data, position, index, fromUser ->
+//                binding.tvSelectedCount.text = "已选${getSelectedList().size}张"
+//            }
             .setOnSelectAllListener { selectedCache, isSelectedAll ->
                 if (binding.ivSelectedAll.isSelected != isSelectedAll) {
                     binding.ivSelectedAll.isSelected = isSelectedAll
@@ -169,8 +163,6 @@ class SelectFragment : Fragment() {
         R.mipmap.y8,
         R.mipmap.y9,
         R.mipmap.y10,
-
-
         )
     private val list2 = arrayListOf(
         null,
@@ -197,10 +189,6 @@ class SelectFragment : Fragment() {
         R.mipmap.y8,
         R.mipmap.y9,
         R.mipmap.y10,
-
-
         )
-
-
 }
 
