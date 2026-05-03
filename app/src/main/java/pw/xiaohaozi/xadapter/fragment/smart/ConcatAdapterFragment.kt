@@ -13,6 +13,7 @@ import pw.xiaohaozi.xadapter.databinding.ItemHomeFooterBinding
 import pw.xiaohaozi.xadapter.databinding.ItemHomeHeaderBinding
 import pw.xiaohaozi.xadapter.databinding.ItemImageCardBinding
 import pw.xiaohaozi.xadapter.databinding.ItemVerseBinding
+import pw.xiaohaozi.xadapter.fragment.VBFragment
 import pw.xiaohaozi.xadapter.info.VerseInfo
 import pw.xiaohaozi.xadapter.smart.ext.createAdapter
 
@@ -21,8 +22,7 @@ import pw.xiaohaozi.xadapter.smart.ext.createAdapter
  * 与ConcatAdapter结合使用
  * 注意：与ConcatAdapter结合使用时，不支持特殊布局，如：头布局、脚布局、空布局、缺省页布局、分组布局等
  */
-class ConcatAdapterFragment : Fragment() {
-    private lateinit var binding: FragmentRecyclerBinding
+class ConcatAdapterFragment : VBFragment<FragmentRecyclerBinding>() {
     private val adapterHeader = createAdapter<ItemHomeHeaderBinding, String>(1, onItemId = { _ -> -1 }) { }
     private val adapterFooter = createAdapter<ItemHomeFooterBinding, String>(2, onItemId = { _ -> -2 }) { }
     private val adapterBody = createAdapter(onItemId = { position: Int -> position.toLong() }) { data, _ ->
@@ -37,11 +37,7 @@ class ConcatAdapterFragment : Fragment() {
         }
         .toAdapter()
 
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View {
-        binding = FragmentRecyclerBinding.inflate(inflater)
+    override fun FragmentRecyclerBinding.initView() {
         binding.recycleView.layoutManager = LinearLayoutManager(requireContext())
 
         val config = ConcatAdapter.Config.Builder()
@@ -67,11 +63,7 @@ class ConcatAdapterFragment : Fragment() {
             adapterFooter,
         )
         binding.recycleView.adapter = concatAdapter
-        return binding.root
-    }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
         adapterHeader.refresh(arrayListOf("1"))
         adapterBody.refresh(list)
         adapterFooter.refresh(arrayListOf("2"))

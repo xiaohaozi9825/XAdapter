@@ -1,9 +1,13 @@
-## 与ConcatAdapter结合使用
+# 与ConcatAdapter结合使用
 > 注意：与ConcatAdapter结合使用时，不支持特殊布局，如：头布局、脚布局、空布局、缺省页布局、分组布局等
+## 用法
 
-#### 创建子adapter
+### 方法定义
+ConcatAdapter 是官方提供的类，这里不做过多赘述，与XAdapter没有太大关联，注意不要与特殊布局同时使用即可
+
+### 基础用法
 创建子adapter与普通adapter一样创建
-```java
+```kotlin
 private val adapterHeader = createAdapter<ItemHomeHeaderBinding, String>(1, onItemId = { _ -> -1 }) { }
 private val adapterFooter = createAdapter<ItemHomeFooterBinding, String>(2, onItemId = { _ -> -2 }) { }
 private val adapterBody = createAdapter(onItemId = { position: Int -> position.toLong() }) { data, _ ->
@@ -19,8 +23,8 @@ private val adapterBody = createAdapter(onItemId = { position: Int -> position.t
     .toAdapter()
 ```
 
-#### 与ConcatAdapter结合
-
+### 进阶用法
+ConcatAdapter结合
 ```kotlin
 val config = ConcatAdapter.Config.Builder()
 //isolateViewTypes：如果使用false，需要明确指定各itemType值,且保证在所有adapt。默认true
@@ -46,7 +50,6 @@ val concatAdapter = ConcatAdapter(
     adapterFooter,
 )
 ```
-
 
 
 
