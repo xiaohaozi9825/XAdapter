@@ -47,7 +47,17 @@ val adapter = createAdapter()
     }
     .toAdapter()
 
-//②如果不想自动生成itemType，也可以通过withType方法中itemType参数指定
+//②实现XMultiItemEntity接口，通过getItemViewType()返回itemType
+data class MultipleVerseInfo(val verseInfo: VerseInfo) : XMultiItemEntity {
+    override fun getItemViewType(): Int {
+        return 5
+    }
+}
+data class MultipleInt(val res: Int) : XMultiItemEntity {
+    override fun getItemViewType(): Int {
+        return 8
+    }
+}
 val adapter = createAdapter()
     .withType<ItemVerseBinding, MultipleVerseInfo>(itemType = 5) { 
         //实现绑定逻辑
