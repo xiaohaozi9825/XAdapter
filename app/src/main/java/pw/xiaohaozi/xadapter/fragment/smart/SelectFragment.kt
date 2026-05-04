@@ -2,6 +2,7 @@ package pw.xiaohaozi.xadapter.fragment.smart
 
 import android.annotation.SuppressLint
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -17,6 +18,7 @@ import pw.xiaohaozi.xadapter.fragment.VBFragment
 import pw.xiaohaozi.xadapter.smart.adapter.SmartAdapter
 import pw.xiaohaozi.xadapter.smart.ext.createAdapter
 import pw.xiaohaozi.xadapter.smart.ext.singleSelect
+import kotlin.math.log
 
 /**
  * item选择
@@ -70,6 +72,7 @@ class SelectFragment : VBFragment<FragmentSelectedBinding>() {
                 binding.tvSelectedAll.text = if (isSelectedAll) "全不选" else "全选"
             }
         }
+            .isUpdateIndexChangeItem(true)
 
     }
 
@@ -77,11 +80,13 @@ class SelectFragment : VBFragment<FragmentSelectedBinding>() {
     private fun function2(): SmartAdapter<ViewBinding, Any?> {
         //泛型VB 确定布局文件，泛型D确定数据类型，回调函数中绑定数据
         val adapter = createAdapter()
+            .isUpdateIndexChangeItem(true)
             .setOnItemSelectListener(
                 payload = "select",
 //                permittedTypes = arrayOf(java.lang.Integer::class.java)
                 permittedTypes = arrayOf(Int.MIN_VALUE + 1)
             ) { data, position, index, fromUser ->
+                Log.i(TAG, "setOnItemSelectListener: $index")
                 binding.tvSelectedCount.text = "已选${getSelectedList().size}张"
             }
 //            .setMaxSelectCount(3)
@@ -96,6 +101,7 @@ class SelectFragment : VBFragment<FragmentSelectedBinding>() {
 //                binding.tvSelectedCount.text = "已选${getSelectedList().size}张"
 //            }
             .setOnSelectAllListener { selectedCache, isSelectedAll ->
+                Log.i(TAG, "setOnSelectAllListener: ${if (isSelectedAll) "全不选" else "全选"}")
                 if (binding.ivSelectedAll.isSelected != isSelectedAll) {
                     binding.ivSelectedAll.isSelected = isSelectedAll
                     binding.tvSelectedAll.text = if (isSelectedAll) "全不选" else "全选"
@@ -122,6 +128,7 @@ class SelectFragment : VBFragment<FragmentSelectedBinding>() {
 //
 //            }
             .withType<ItemImageSelectedBinding, Int> { (holder, data, position, payloads) ->
+                Log.i(TAG, "withType: $position")
                 if (!payloads.contains("select")) {
                     holder.binding.ivImage.load(data)
                 }
@@ -163,7 +170,7 @@ class SelectFragment : VBFragment<FragmentSelectedBinding>() {
         R.mipmap.y8,
         R.mipmap.y9,
         R.mipmap.y10,
-        )
+    )
     private val list2 = arrayListOf(
         null,
         R.mipmap.snow1,
@@ -189,6 +196,6 @@ class SelectFragment : VBFragment<FragmentSelectedBinding>() {
         R.mipmap.y8,
         R.mipmap.y9,
         R.mipmap.y10,
-        )
+    )
 }
 

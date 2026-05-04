@@ -44,6 +44,9 @@ interface SelectedProxy<Employer : XProxy<Employer>, VB : ViewBinding, D> :
     //是否允许取消，默认允许
     var isAllowCancel: Boolean
 
+    //选中索引发生变化，是否需要更新
+    var isUpdateIndexChangeItem: Boolean
+
     /**
      * 设置选中事件监听
      * @param id 触发选中事件的 view，默认为item
@@ -113,6 +116,12 @@ interface SelectedProxy<Employer : XProxy<Employer>, VB : ViewBinding, D> :
     fun isAllowCancel(isAllowCancel: Boolean = true): Employer
 
     /**
+     * 设置是否刷新选中索引发生变化的Item，如果您需要显示选中顺序，则设置为true，否则设置为false
+     * @param isUpdate
+     */
+    fun isUpdateIndexChangeItem(isUpdate: Boolean = false): Employer
+
+    /**
      * 修改item选择状态
      * @param position
      * @param isSelect 是否选择
@@ -140,12 +149,12 @@ interface SelectedProxy<Employer : XProxy<Employer>, VB : ViewBinding, D> :
     /**
      *  全选
      */
-    fun selectAll(payload: Any?= null): Int
+    fun selectAll(payload: Any? = null): Int
 
     /**
      * 取消全选
      */
-    fun deselectAll(payload: Any?= null): Int
+    fun deselectAll(payload: Any? = null): Int
 
     /**
      * 获取选中的数据
