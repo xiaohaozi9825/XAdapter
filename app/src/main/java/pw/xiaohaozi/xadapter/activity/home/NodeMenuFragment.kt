@@ -6,21 +6,22 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
+import pw.xiaohaozi.xadapter.R
 import pw.xiaohaozi.xadapter.activity.toEmptyActivity
 import pw.xiaohaozi.xadapter.databinding.FragmentMenuBinding
 import pw.xiaohaozi.xadapter.databinding.ItemHomeBinding
 import pw.xiaohaozi.xadapter.databinding.ItemHomeHeaderBinding
 import pw.xiaohaozi.xadapter.databinding.ItemHomeTitleBinding
+import pw.xiaohaozi.xadapter.fragment.VBFragment
 import pw.xiaohaozi.xadapter.info.HomeInfo
 import pw.xiaohaozi.xadapter.nodeMenuList
 import pw.xiaohaozi.xadapter.smart.ext.createAdapter
 
 
-class NodeMenuFragment : Fragment() {
-    private lateinit var binding: FragmentMenuBinding
+class NodeMenuFragment : VBFragment<FragmentMenuBinding>() {
 
     private val adapter = createAdapter()
-        .addHeader<ItemHomeHeaderBinding> { holder, data ->  }
+        .addHeader<ItemHomeHeaderBinding> { holder, _ -> holder.binding.ivPoster.setImageResource(R.mipmap.image_poster2) }
         .withType<ItemHomeTitleBinding, String>(isFixed = true) { (holder, data) ->
             holder.binding.tvTitle.text = data
         }
@@ -37,15 +38,7 @@ class NodeMenuFragment : Fragment() {
         .toAdapter()
 
 
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View {
-        binding = FragmentMenuBinding.inflate(inflater)
-        return binding.root
-    }
-
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+    override fun FragmentMenuBinding.initView() {
         binding.rvList.adapter = adapter
         adapter.refresh(nodeMenuList)
     }
