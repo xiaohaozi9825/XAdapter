@@ -24,6 +24,7 @@
         android:layout_margin="6dp"
         android:ellipsize="end"
         android:lines="1"
+        android:textSize="15sp"
         android:textColor="@color/black"
         android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="parent"
@@ -47,7 +48,7 @@
         android:id="@+id/division"
         android:layout_width="0dp"
         android:layout_height="1dp"
-        android:background="#CCCCCC"
+        android:background="#EEEEEE"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@id/iv_icon" />

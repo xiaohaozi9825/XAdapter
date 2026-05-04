@@ -17,7 +17,6 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.isGone
 import androidx.lifecycle.lifecycleScope
-import coil.load
 import kotlinx.coroutines.Dispatchers.Default
 import kotlinx.coroutines.Dispatchers.Main
 import kotlinx.coroutines.launch
@@ -30,6 +29,7 @@ import pw.xiaohaozi.xadapter.info.HomeInfo
 import pw.xiaohaozi.xadapter.nodeMenuList
 import pw.xiaohaozi.xadapter.smart.ext.createAdapter
 import pw.xiaohaozi.xadapter.smartMenuList
+import pw.xiaohaozi.xadapter.utils.load
 import java.util.regex.Pattern
 
 class SearchActivity : AppCompatActivity() {
@@ -42,7 +42,7 @@ class SearchActivity : AppCompatActivity() {
     val adapter = createAdapter<ItemSearchBinding, HomeInfo> { (holder, data, position) ->
         holder.binding.apply {
             val keyword = binding.tvSearch.text.toString().trim()
-            ivIcon.load(data.url)
+            ivIcon.load(data.url,8f)
             tvTitle.highlight(data.label, keyword)
             tvContent.highlight(data.msg, keyword)
             division.isGone = position == getDataList().lastIndex
@@ -69,6 +69,7 @@ class SearchActivity : AppCompatActivity() {
         initSearchView()
         //左上角返回按钮
         binding.ivGoBack.setOnClickListener { finish() }
+        binding.btnClean.setOnClickListener { binding.tvSearch.setText("") }
         //设置adapter
         binding.rvList.adapter = adapter
         //初始化数据
