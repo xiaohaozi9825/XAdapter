@@ -30,7 +30,7 @@ dependencies {
 
 #### 步骤3.启用ViewBinding或DataBinding
 
-在项目 build.gradle 文件中android节点中添加
+在项目 build.gradle 文件中android节点中添加，dataBinding与viewBinding可启用其中一个，也可以两个都启用。
 
 ```
 buildFeatures {
@@ -59,7 +59,24 @@ buildFeatures {
 
 ## 功能锦集
 
+V1.0 smart
+
+- 快速创建：单布局创建、多布局创建
+- 事件监听：点击事件、长按事件、选中状态变化、文本内容变化
+- 特殊布局：头布局、脚布局、空布局、缺省页布局、分组布局
+- 常用操作：侧滑删除、拖拽排序、侧滑菜单
+- 选择操作：单选、多选、全选、全不选
+- 数据操作：添加数据、删除数据、修改数据、获取列表数据、获取已选列表
+
+V2、0 node
+
+- 快速创建：单布局node创建、多布局node创建
+- 展开折叠：展开或收起子节点
+- 数据操作：添加节点、删除节点、修改节点、替换节点
+
 #### Adapter
+
+V1.0 smart
 
 - createAdapter：创建Adapter
 - withType：类型转换
@@ -73,7 +90,16 @@ buildFeatures {
 - dragSort：设置拖拽排序
 - swipeMenu：设置侧滑菜单
 
+V2、0 node
+
+- nodeAdapter：创建NodeAdapter
+- withType：切换类型
+- expand：展开子node
+- collapse：收起子node
+
 #### 数据操作
+
+V1.0 smart
 
 - `fun <L : MutableList<D>> setList(list: L)`设置数据
 - `fun <L : Collection<D>> refresh(list: L)`刷新数据
@@ -94,7 +120,28 @@ buildFeatures {
 - `fun setDiffer(): Employer`设置Differ模式
 - `fun submitList(list: List<D>)`Deffer模式更新数据
 
+V2、0 node
+- `addNode(node: D, index: Int? = null)` 添加一个根节点
+- `addNode(nodes: L, index: Int? = null)` 添加多个根节点
+- `addChildNode(parent: D, node: D, index: Int? = null)` 添加一个子节点
+- `addChildNode(parent: D, nodes: L, index: Int? = null)` 添加多个子节点
+- `removeNode(node: D)` 删除一个根节点
+- `removeNodeAt(index: Int)` 删除指定索引的根节点
+- `removeNode(start: Int, count: Int)` 从start位置开始删除count个根节点
+- `removeNodeList(nodes: List<D>)` 删除多个根节点
+- `removeChildNode(parent: D, node: D)` 删除一个子节点
+- `removeChildNodeAt(parent: D, index: Int)` 删除指定位置一个子节点
+- `removeChildNode(parent: D, start: Int, count: Int)` 从start位置开始删除count个子节点
+- `removeChildNodeList(parent: D, nodes: List<D>)` 删除多个子节点
+- `removeNodePosition(adapterPosition: Int)` 删除position处的一个节点（可以是根节点，也可以是子节点）
+- `updateNode(node: D, payload: Any? = null)` 更新一个根节点
+- `updateNode(oldNode: D, newNode: D, payload: Any? = null)` 更新一个根节点
+- `updateChildNode(parent: D, oldNode: D, newNode: D, payload: Any? = null)` 更新一个子节点
+- `replaceNode(oldNode: D, newNode: D) ` 替换一个节点
+
 #### 事件监听
+
+V1.0 smart
 
 - setOnClickListener：点击事件监听
 - setOnLongClickListener：长按事件监听
@@ -102,6 +149,8 @@ buildFeatures {
 - setOnTextChange：文本变化监听
 
 #### 选择操作
+
+V1.0 smart
 
 - setOnItemSelectListener：设置选择事件监听
 - setOnSelectAllListener：设置全选监听
@@ -122,7 +171,9 @@ buildFeatures {
 ## 示例代码
 
 #### 创建单布局Adapter
+
 调用createAdapter()方法，泛型VB确定布局文件，D确定数据类型，回调方法中完成数据与视图的绑定。
+
 ```kotlin
 val adapter = createAdapter<ItemVerseBinding, VerseInfo> { (holder, data) ->
     holder.binding.tvContent.text = data.content
@@ -131,7 +182,10 @@ val adapter = createAdapter<ItemVerseBinding, VerseInfo> { (holder, data) ->
 ```
 
 #### 创建多布局Adapter
-调用createAdapter()方法创建adapter实例；使用withType切换布局类型，返回Provider；调用toAdapter()方法将Provider转换为adapter。
+
+调用createAdapter()方法创建adapter实例；使用withType切换布局类型，返回Provider；调用toAdapter()
+方法将Provider转换为adapter。
+
 ```kotlin
 val adapter = createAdapter()
     .withType<ItemVerseBinding, VerseInfo> { (holder, data, position) ->
@@ -152,4 +206,3 @@ github：[https://github.com/xiaohaozi9825/XAdapter](https://github.com/xiaohaoz
 
 gitee：[https://gitee.com/xiaohaozi9825/xadapter](https://gitee.com/xiaohaozi9825/xadapter)
 
-简书：[https://www.jianshu.com/p/936be339b378?v=1735022668540](https://www.jianshu.com/p/936be339b378?v=1735022668540)
