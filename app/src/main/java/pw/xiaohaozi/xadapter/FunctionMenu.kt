@@ -14,6 +14,7 @@ import pw.xiaohaozi.xadapter.fragment.example.GoodsFragment
 import pw.xiaohaozi.xadapter.fragment.example.ImageSelectedFragment
 import pw.xiaohaozi.xadapter.fragment.example.MultipleCategoryFragment
 import pw.xiaohaozi.xadapter.fragment.example.TagFragment
+import pw.xiaohaozi.xadapter.fragment.node.ExpandCollapseFragment
 import pw.xiaohaozi.xadapter.fragment.smart.DataDifferFragment
 import pw.xiaohaozi.xadapter.fragment.smart.DataOperationFragment
 import pw.xiaohaozi.xadapter.fragment.smart.DragSortFragment
@@ -67,19 +68,19 @@ val smartMenuList = arrayListOf(
 
 //node模块
 val nodeMenuList = arrayListOf(
-    "Node测试",
-    HomeInfo("node测试", "", R.mipmap.ic_launcher, NodeFragment::class.java),
-    HomeInfo("node编辑", "", R.mipmap.ic_launcher, NodeEditFragment::class.java),
-    HomeInfo("node编辑2", "", R.mipmap.ic_launcher, Node2EditFragment::class.java),
+//    "Node测试",
+//    HomeInfo("node测试", "", R.mipmap.ic_launcher, NodeFragment::class.java),
+//    HomeInfo("node编辑", "", R.mipmap.ic_launcher, NodeEditFragment::class.java),
+//    HomeInfo("node编辑2", "", R.mipmap.ic_launcher, Node2EditFragment::class.java),
     "Node创建",
     HomeInfo("单类型创建", "单类型Node创建", R.mipmap.icon_smart_single, CreateNodeFragment::class.java),
     HomeInfo("多类型创建", "多类型Node创建", R.mipmap.icon_node_multiple, CreateMultipleNodeFragment::class.java),
     "Node展开与折叠",
-    HomeInfo("展开与折叠", "Node展开与折叠", R.mipmap.icon_smart_multiple),
+    HomeInfo("展开与折叠", "Node展开与折叠", R.mipmap.icon_smart_multiple,ExpandCollapseFragment::class.java),
 
     "Node数据操作",
-    HomeInfo("添加一个节点", "", R.mipmap.icon_node_add, AddNodeFragment::class.java),
-    HomeInfo("添加多个节点", "", R.mipmap.icon_node_add, AddNodesFragment::class.java),
+    HomeInfo("添加一个节点", "", R.mipmap.icon_node_add, AddNodeFragment::class.java,"AddNodeFragment"),
+    HomeInfo("添加多个节点", "", R.mipmap.icon_node_add, AddNodesFragment::class.java,"AddNodeFragment"),
 
     //updateNode(node: D, payload: Any? = null)、updateNode(oldNode: D, newNode: D, payload: Any? = null)、updateChildNode(parent: D, oldNode: D, newNode: D, payload: Any? = null)
     HomeInfo("修改节点", "修改指定节点内容", R.mipmap.icon_node_edit, EditNodeFragment::class.java),
@@ -88,19 +89,19 @@ val nodeMenuList = arrayListOf(
     HomeInfo("替换Node", "替换节点以及子节点", R.mipmap.icon_node_replace, ReplaceNodeFragment::class.java),
 
     //removeNode(node: D) 、removeChildNode(parent: D, node: D)
-    HomeInfo("删除一个节点", "删除一个根节点或子节点", R.mipmap.icon_node_delete, RemoveNodeFragment::class.java),
+    HomeInfo("删除一个节点", "删除一个根节点或子节点", R.mipmap.icon_node_delete, RemoveNodeFragment::class.java,"RemoveNodeFragment"),
 
     //removeNodeAt(index: Int)、removeChildNodeAt(parent: D, index: Int)
-    HomeInfo("按索引删除节点", "", R.mipmap.icon_node_delete, RemoveAtNodeFragment::class.java),
+    HomeInfo("按索引删除节点", "", R.mipmap.icon_node_delete, RemoveAtNodeFragment::class.java,"RemoveNodeFragment"),
 
     //removeNode(start: Int, count: Int)、removeChildNode(parent: D, start: Int, count: Int)
-    HomeInfo("删除多个连续节点", "", R.mipmap.icon_node_delete, RemoveMultipleNodeFragment::class.java),
+    HomeInfo("删除多个连续节点", "", R.mipmap.icon_node_delete, RemoveMultipleNodeFragment::class.java,"RemoveNodeFragment"),
 
     //removeNodeList(nodes: List<D>)、 removeChildNodeList(parent: D, nodes: List<D>)
-    HomeInfo("删除多个不连续节点", "", R.mipmap.icon_node_delete, RemoveListNodeFragment::class.java),
+    HomeInfo("删除多个不连续节点", "", R.mipmap.icon_node_delete, RemoveListNodeFragment::class.java,"RemoveNodeFragment"),
 
     //removeNodePosition(adapterPosition: Int)、
-    HomeInfo("按列表所在位置删除", "", R.mipmap.icon_node_delete, RemovePositionNodeFragment::class.java),
+    HomeInfo("按列表所在位置删除", "", R.mipmap.icon_node_delete, RemovePositionNodeFragment::class.java,"RemoveNodeFragment"),
     "",
 )
 

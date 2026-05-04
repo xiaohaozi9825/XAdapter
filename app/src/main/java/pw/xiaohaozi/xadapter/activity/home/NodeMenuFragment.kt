@@ -33,7 +33,7 @@ class NodeMenuFragment : VBFragment<FragmentMenuBinding>() {
             if (clazz == null) {
                 Toast.makeText(requireContext(), "敬请期待", Toast.LENGTH_SHORT).show()
             } else
-                toEmptyActivity(clazz, data.label, clazz.simpleName)
+                toEmptyActivity(clazz, data.label, data.markdownName ?: clazz.simpleName)
         }
         .toAdapter()
 

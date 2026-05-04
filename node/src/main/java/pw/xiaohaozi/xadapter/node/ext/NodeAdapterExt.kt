@@ -30,6 +30,12 @@ typealias OnItemId<VB, D> = (NodeAdapter<VB, D>.(position: Int) -> Long)
 
 /**
  * 创建单布局Adapter
+ * @param itemType
+ * @param onItemId
+ * @param init
+ * @param create
+ * @param bind
+ * @return NodeAdapter<VB, D>
  */
 inline fun <VB : ViewBinding, D : NodeEntity<*, *>> nodeAdapter(
     itemType: Int = 0,

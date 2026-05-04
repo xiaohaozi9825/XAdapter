@@ -50,7 +50,7 @@ class MainActivity : AppCompatActivity() {
             if (clazz == null) {
                 Toast.makeText(this@MainActivity, "敬请期待", Toast.LENGTH_SHORT).show()
             } else
-                toEmptyActivity(clazz, data.label, clazz.simpleName)
+                toEmptyActivity(clazz, data.label, data.markdownName ?: clazz.simpleName)
         }
         .toAdapter()
 

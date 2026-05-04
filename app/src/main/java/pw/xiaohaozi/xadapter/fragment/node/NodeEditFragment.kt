@@ -1,14 +1,10 @@
 package pw.xiaohaozi.xadapter.fragment.node
 
-import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
-import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import pw.xiaohaozi.xadapter.R
 import pw.xiaohaozi.xadapter.databinding.FragmentNodeEditBinding
 import pw.xiaohaozi.xadapter.databinding.ItemNodeEditBinding
+import pw.xiaohaozi.xadapter.fragment.VBFragment
 import pw.xiaohaozi.xadapter.node.NodeAdapter
 import pw.xiaohaozi.xadapter.node.entity.NodeEntity
 import pw.xiaohaozi.xadapter.node.ext.nodeAdapter
@@ -17,17 +13,12 @@ import pw.xiaohaozi.xadapter.node.ext.nodeAdapter
 /**
  * 单布局
  */
-class NodeEditFragment : Fragment() {
-    private lateinit var binding: FragmentNodeEditBinding
+class NodeEditFragment : VBFragment<FragmentNodeEditBinding>() {
 
     private val adapter = function()
     var index = 0
-    override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View {
-        binding = FragmentNodeEditBinding.inflate(inflater)
+
+    override fun FragmentNodeEditBinding.initView() {
         binding.recycleView.layoutManager = LinearLayoutManager(requireContext())
         binding.recycleView.adapter = adapter
         adapter.refresh(mutableListOf())
@@ -40,9 +31,7 @@ class NodeEditFragment : Fragment() {
 
 
         }
-        return binding.root
     }
-
 
     fun function(): NodeAdapter<ItemNodeEditBinding, NodeInfo> {
         val adapter = nodeAdapter<ItemNodeEditBinding, NodeInfo> { (holder, data) ->
@@ -96,6 +85,7 @@ class NodeEditFragment : Fragment() {
             return childList
         }
     }
+
 }
 
 

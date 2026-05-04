@@ -14,6 +14,7 @@ import pw.xiaohaozi.xadapter.enableEdgeToEdge
 
 class EmptyActivity : AppCompatActivity() {
     private val binding by lazy { ActivityEmptyBinding.inflate(layoutInflater) }
+    private var markdownName: String? = null
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -25,18 +26,22 @@ class EmptyActivity : AppCompatActivity() {
         }
         binding.title.text = intent.getStringExtra("title") ?: "SmartAdapter"
         binding.llGoBack.setOnClickListener { onBackPressed() }
+        //参考文档
         binding.btnImage.setOnClickListener {
             val intent = Intent(this, WebActivity::class.java)
-                .putExtra("fileName", intent.getStringExtra("name"))
+                .putExtra("fileName", intent.getStringExtra("name"))//文档名
             startActivity(intent)
         }
         supportFragmentManager.beginTransaction().replace(
             R.id.fl_fragment,
-            Class.forName(intent.getStringExtra("fragmentClassName")) as Class<out Fragment>, null
+            intent.getStringExtra("fragmentClassName")?.let { Class.forName(it) } as Class<out Fragment>, null
         ).commit()
     }
 }
 
+/**
+ * @param title 页面标题
+ */
 inline fun <reified F : Fragment> Activity.toEmptyActivity(title: String) {
     startActivity(
         Intent(this, EmptyActivity::class.java)
@@ -44,7 +49,11 @@ inline fun <reified F : Fragment> Activity.toEmptyActivity(title: String) {
             .putExtra("title", title)
     )
 }
-
+/**
+ * @param clazz
+ * @param title 页面标题
+ * @param name 参考文档文件名
+ */
 fun Activity.toEmptyActivity(clazz: Class<out Fragment>, title: String, name: String) {
     startActivity(
         Intent(this, EmptyActivity::class.java)
@@ -53,6 +62,7 @@ fun Activity.toEmptyActivity(clazz: Class<out Fragment>, title: String, name: St
             .putExtra("name", name)
     )
 }
+
 fun Fragment.toEmptyActivity(clazz: Class<out Fragment>, title: String, name: String) {
     startActivity(
         Intent(requireContext(), EmptyActivity::class.java)

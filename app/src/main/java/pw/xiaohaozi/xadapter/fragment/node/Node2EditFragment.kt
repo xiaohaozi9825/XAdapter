@@ -1,13 +1,8 @@
 package pw.xiaohaozi.xadapter.fragment.node
 
 import android.graphics.Typeface
-import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
 import androidx.core.view.isInvisible
 import androidx.core.view.isVisible
-import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.viewbinding.ViewBinding
 import pw.xiaohaozi.xadapter.R
@@ -15,6 +10,7 @@ import pw.xiaohaozi.xadapter.databinding.FragmentNodeEditBinding
 import pw.xiaohaozi.xadapter.databinding.ItemHomeHeaderBinding
 import pw.xiaohaozi.xadapter.databinding.ItemNodeEditBinding
 import pw.xiaohaozi.xadapter.dialog.InputDialog
+import pw.xiaohaozi.xadapter.fragment.VBFragment
 import pw.xiaohaozi.xadapter.node.NodeAdapter
 import pw.xiaohaozi.xadapter.node.NodeProvider
 import pw.xiaohaozi.xadapter.node.entity.ExpandedNodeEntity
@@ -27,17 +23,12 @@ import pw.xiaohaozi.xadapter.smart.holder.XHolder
 /**
  * 单布局
  */
-class Node2EditFragment : Fragment() {
-    private lateinit var binding: FragmentNodeEditBinding
+class Node2EditFragment : VBFragment<FragmentNodeEditBinding>() {
 
     private val adapter = function()
     var index = 1
-    override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View {
-        binding = FragmentNodeEditBinding.inflate(inflater)
+
+    override fun FragmentNodeEditBinding.initView() {
         binding.recycleView.layoutManager = LinearLayoutManager(requireContext())
         binding.recycleView.adapter = adapter
         adapter.refresh(dataList)
@@ -50,7 +41,6 @@ class Node2EditFragment : Fragment() {
 
 
         }
-        return binding.root
     }
 
 

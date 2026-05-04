@@ -1,8 +1,7 @@
-# XAdapter 框架
-在Android项目开发过程中，我们会大量使用RecyclerView控件，而每个RecyclerView都需要一个与之对应的Adapter，这会花费我们大量的开发时间。而XAdapter框架则将Adapter创建、ViewHolder创建、以及大量常用方法封装到了一起，使得每个功能只需要调用一个方法即可完成，最大程度提高开发效率。
 
+>在Android项目开发过程中，我们会大量使用RecyclerView控件，而每个RecyclerView都需要一个与之对应的Adapter，这会花费我们大量的开发时间。而XAdapter框架则将Adapter创建、ViewHolder创建、以及大量常用方法封装到了一起，使得每个功能只需要调用一个方法即可完成，最大程度提高开发效率。
 
-## XAdapter的优势
+### XAdapter的优势
 充分利用kotlin语法特性，结合ViewBinding或DataBinding，基本可以一个方法实现一个功能。用最简单的方式，实现复杂的功能，极大提高开发效率。
 
 - 单布局一个方法即可创建，无需使用继承。
@@ -19,7 +18,7 @@
 - 方法返回adapter，方便开发者链式调用。
 - 回调方法this指向adapter。
 
-## XAdapter的功能
+### XAdapter的功能
 
 #### smart模块
 * adapter创建：单布局创建、多布局创建。
@@ -34,7 +33,7 @@
 * node数据操作相关：数据增删改查。
 * node展开与折叠。
 
-## 方案对比
+### 方案对比
 
 ### 创建单布局对比
 
@@ -65,7 +64,7 @@ class MyAdapter : Adapter<MyViewHolder>() {
 
 * 在Activity中创建MyAdapter实例
 ```kotlin 
- val adapter = MyAdapter()
+val adapter = MyAdapter()
 ```
 
 #### 使用优秀的第三方库创建
@@ -93,14 +92,14 @@ public class DataBindingAdapter extends BaseQuickAdapter<Movie, BaseDataBindingH
 #### 使用XAdapter框架
 只需要一个方法即可。对，你没看错，就只需要一个方法
 ```kotlin 
-val adapter = createAdapter<ItemVerseBinding, VerseInfo> {(holder,data)->
-                   //此处完成数据绑定逻辑
-                }
+val adapter = createAdapter<ItemVerseBinding, VerseInfo> {
+       //此处完成数据绑定逻辑
+    }
 ```
 
-### 创建多布局对比
+#### 创建多布局对比
 
-#### 使用原始方法创建
+##### 使用原始方法创建
 在不借助第三方框架的情况下，我们使用一个Adapter需要有如下步骤：
 
 * 继承ViewHolder类
@@ -146,7 +145,7 @@ class MyAdapter : Adapter<ViewHolder>() {
  val adapter = MyAdapter()
 ```
 
-#### 使用优秀的第三方库创建
+##### 使用优秀的第三方库创建
 比如BaseRecyclerViewAdapterHelper框架。
 * 每种类型都继承BaseItemProvider类并实现绑定逻辑
 ```java
@@ -197,19 +196,19 @@ public class ProviderMultiAdapter extends BaseProviderMultiAdapter<ProviderMulti
  val adapter = ProviderMultiAdapter()
 ```
 
-#### 使用XAdapter框架
+##### 使用XAdapter框架
 ```kotlin
 val adapter = createAdapter()
-            .withType<ItemVerseBinding, VerseInfo> { (holder, data) ->
-                //此处完成数据绑定逻辑
-            }
-            .withType<ItemImageCardBinding, Int> { (holder, data) ->
-                //此处完成数据绑定逻辑
-            }
-            .toAdapter()
+    .withType<ItemVerseBinding, VerseInfo> { 
+        //此处完成数据绑定逻辑
+    }
+    .withType<ItemImageCardBinding, Int> { 
+        //此处完成数据绑定逻辑
+    }
+    .toAdapter()
 ```
 
-## XAdapter相关地址
+### XAdapter相关地址
 
 demo体验：[https://www.pgyer.com/7kPKon2W](https://www.pgyer.com/7kPKon2W)
 
@@ -217,4 +216,3 @@ github：[https://github.com/xiaohaozi9825/XAdapter](https://github.com/xiaohaoz
 
 gitee：[https://gitee.com/xiaohaozi9825/xadapter](https://gitee.com/xiaohaozi9825/xadapter)
 
-简书：[https://www.jianshu.com/p/936be339b378?v=1735022668540](https://www.jianshu.com/p/936be339b378?v=1735022668540)

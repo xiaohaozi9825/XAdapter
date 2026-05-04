@@ -36,7 +36,7 @@ class SearchActivity : AppCompatActivity() {
     val binding by lazy { ActivitySearchBinding.inflate(layoutInflater) }
 
     // 原始数据
-    private val originalList = (smartMenuList + nodeMenuList+ exampleMenuList).filterIsInstance<HomeInfo>()
+    private val originalList = (smartMenuList + nodeMenuList + exampleMenuList).filterIsInstance<HomeInfo>()
 
     //创建adapter
     val adapter = createAdapter<ItemSearchBinding, HomeInfo> { (holder, data, position) ->
@@ -52,7 +52,7 @@ class SearchActivity : AppCompatActivity() {
         if (clazz == null) {
             Toast.makeText(this@SearchActivity, "敬请期待", Toast.LENGTH_SHORT).show()
         } else
-            toEmptyActivity(clazz, data.label, clazz.simpleName)
+            toEmptyActivity(clazz, data.label, data.markdownName ?: clazz.simpleName)
     }
 
 

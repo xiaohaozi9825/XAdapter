@@ -1,17 +1,13 @@
 package pw.xiaohaozi.xadapter.fragment.node
 
 import android.graphics.Typeface
-import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
 import android.widget.Toast
 import androidx.core.view.isVisible
-import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.viewbinding.ViewBinding
 import pw.xiaohaozi.xadapter.databinding.FragmentNodeEditBinding
 import pw.xiaohaozi.xadapter.databinding.ItemNodeEditBinding
+import pw.xiaohaozi.xadapter.fragment.VBFragment
 import pw.xiaohaozi.xadapter.fragment.node.RemovePositionNodeFragment.NodeInfo1
 import pw.xiaohaozi.xadapter.fragment.node.RemovePositionNodeFragment.NodeInfo2
 import pw.xiaohaozi.xadapter.node.NodeAdapter
@@ -25,12 +21,11 @@ import pw.xiaohaozi.xadapter.smart.holder.XHolder
 /**
  * 单布局
  */
-class RemoveListNodeFragment : Fragment() {
-    private lateinit var binding: FragmentNodeEditBinding
+class RemoveListNodeFragment : VBFragment<FragmentNodeEditBinding>() {
 
     private val adapter = function()
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
-        binding = FragmentNodeEditBinding.inflate(inflater)
+
+    override fun FragmentNodeEditBinding.initView() {
         binding.btnAddData.text = "删除基数位元素"
         binding.btnAddData.setOnClickListener {
             val list = adapter.source?.filterIndexed { index, _ -> index % 2 == 0 }
@@ -43,7 +38,6 @@ class RemoveListNodeFragment : Fragment() {
         binding.recycleView.layoutManager = LinearLayoutManager(requireContext())
         binding.recycleView.adapter = adapter
         adapter.refresh(dataList)
-        return binding.root
     }
 
 

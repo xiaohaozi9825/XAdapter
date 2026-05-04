@@ -1,17 +1,13 @@
 package pw.xiaohaozi.xadapter.fragment.node
 
 import android.graphics.Typeface
-import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
 import android.widget.Toast
 import androidx.core.view.isVisible
-import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.viewbinding.ViewBinding
 import pw.xiaohaozi.xadapter.databinding.FragmentNodeEditBinding
 import pw.xiaohaozi.xadapter.databinding.ItemNodeEditBinding
+import pw.xiaohaozi.xadapter.fragment.VBFragment
 import pw.xiaohaozi.xadapter.node.NodeAdapter
 import pw.xiaohaozi.xadapter.node.NodeProvider
 import pw.xiaohaozi.xadapter.node.entity.ExpandedNodeEntity
@@ -23,12 +19,11 @@ import pw.xiaohaozi.xadapter.smart.holder.XHolder
 /**
  * 单布局
  */
-class RemoveMultipleNodeFragment : Fragment() {
-    private lateinit var binding: FragmentNodeEditBinding
+class RemoveMultipleNodeFragment : VBFragment<FragmentNodeEditBinding>() {
 
     private val adapter = function()
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
-        binding = FragmentNodeEditBinding.inflate(inflater)
+
+    override fun FragmentNodeEditBinding.initView() {
         binding.btnAddData.text = "删除前2个一级节点"
         binding.btnAddData.setOnClickListener {
             if ((adapter.source?.size ?: 0) >= 2) {
@@ -40,7 +35,6 @@ class RemoveMultipleNodeFragment : Fragment() {
         binding.recycleView.layoutManager = LinearLayoutManager(requireContext())
         binding.recycleView.adapter = adapter
         adapter.refresh(dataList)
-        return binding.root
     }
 
 

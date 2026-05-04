@@ -1,10 +1,5 @@
 package pw.xiaohaozi.xadapter.fragment.node
 
-import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
-import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.viewbinding.ViewBinding
 import com.google.gson.GsonBuilder
@@ -15,31 +10,24 @@ import com.google.gson.JsonParseException
 import com.google.gson.reflect.TypeToken
 import pw.xiaohaozi.xadapter.databinding.FragmentRecyclerBinding
 import pw.xiaohaozi.xadapter.databinding.ItemNodeBinding
-import pw.xiaohaozi.xadapter.node.entity.ExpandedNodeEntity
+import pw.xiaohaozi.xadapter.fragment.VBFragment
 import pw.xiaohaozi.xadapter.node.NodeAdapter
+import pw.xiaohaozi.xadapter.node.entity.ExpandedNodeEntity
 import pw.xiaohaozi.xadapter.node.entity.NodeEntity
 import pw.xiaohaozi.xadapter.node.ext.nodeAdapter
-
 
 
 /**
  * 单布局
  */
-class NodeFragment : Fragment() {
-    private lateinit var binding: FragmentRecyclerBinding
+class NodeFragment : VBFragment<FragmentRecyclerBinding>() {
 
     private val adapter = function()
 
-    override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View {
-        binding = FragmentRecyclerBinding.inflate(inflater)
+    override fun FragmentRecyclerBinding.initView() {
         binding.recycleView.layoutManager = LinearLayoutManager(requireContext())
         binding.recycleView.adapter = adapter
         adapter.refresh(getList())
-        return binding.root
     }
 
     fun function(): NodeAdapter<ViewBinding, NodeEntity<*, *>> {
