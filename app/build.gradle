@@ -103,5 +103,6 @@ dependencies {
 
     implementation "io.noties.markwon:core:4.6.2"
 
-
+    // Google 官方弹性布局管理器（完美实现流式布局）
+    implementation 'com.google.android.flexbox:flexbox:3.0.0'
 }

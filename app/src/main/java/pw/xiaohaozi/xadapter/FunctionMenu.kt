@@ -13,6 +13,7 @@ import pw.xiaohaozi.xadapter.fragment.example.FriendFragment
 import pw.xiaohaozi.xadapter.fragment.example.GoodsFragment
 import pw.xiaohaozi.xadapter.fragment.example.ImageSelectedFragment
 import pw.xiaohaozi.xadapter.fragment.example.MultipleCategoryFragment
+import pw.xiaohaozi.xadapter.fragment.example.TagFragment
 import pw.xiaohaozi.xadapter.fragment.smart.DataDifferFragment
 import pw.xiaohaozi.xadapter.fragment.smart.DataOperationFragment
 import pw.xiaohaozi.xadapter.fragment.smart.DragSortFragment
@@ -107,7 +108,7 @@ val exampleMenuList = arrayListOf<Any>(
     HomeInfo("多级分类列表", "商品分类多级菜单", R.mipmap.icon_example_goods_category, MultipleCategoryFragment::class.java),
     HomeInfo("图片选择器", "仿微信图片选择器", R.mipmap.icon_example_image_selected, ImageSelectedFragment::class.java),
     HomeInfo("分类列表联动", "商品分类与商品列表联动,分类可吸顶", R.mipmap.icon_example_goods_category, GoodsFragment::class.java),
-    HomeInfo("标签选择器", "流式布局", R.mipmap.icon_example_tag),
+    HomeInfo("标签选择器", "流式布局", R.mipmap.icon_example_tag, TagFragment::class.java),
 //    HomeInfo("底部导航栏", "", R.mipmap.ic_launcher),
 //    HomeInfo("TabBar", "", R.mipmap.ic_launcher),
 
