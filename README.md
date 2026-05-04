@@ -24,7 +24,10 @@ dependencyResolutionManagement {
 
 ```
 dependencies {
-    implementation 'com.github.xiaohaozi9825:XAdapter:Tag'
+    //基础模块，必须依赖
+    implementation 'com.github.xiaohaozi9825.XAdapter:smart:2.0.0'
+    //可选
+    implementation 'com.github.xiaohaozi9825.XAdapter:node:2.0.0'
 }
 ```
 
