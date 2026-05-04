@@ -2,6 +2,9 @@ package pw.xiaohaozi.xadapter
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.content.res.ColorStateList
+import android.graphics.Color
+import android.view.View
 import android.webkit.WebSettings
 import android.webkit.WebView
 import okio.FileNotFoundException
@@ -14,6 +17,10 @@ fun WebView.loadMarkDown(markdown: String) {
 @SuppressLint("SetJavaScriptEnabled")
 fun WebView.loadMarkDownByAsses(context: Context, fileName: String) {
     try {
+        setBackgroundColor(Color.TRANSPARENT)
+        backgroundTintList = ColorStateList.valueOf(Color.TRANSPARENT)
+        setLayerType(View.LAYER_TYPE_SOFTWARE, null)
+
         // 配置 WebView（必须开 JS）
         val webSettings: WebSettings = settings
         webSettings.javaScriptEnabled = true
@@ -51,11 +58,23 @@ private fun getRenderHtml(markdown: String): String {
                     <!--深色豆包风格-->
                     <!--<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/atom-one-dark.min.css">-->
                     <style>
-                        body { padding:12px; font-size:16px; }
+                        /* 全局背景透明 */
+                        body, .markdown-body, #content {
+                            background-color: transparent !important;
+                        }
+                        /* 图片强制透明、无边框、无背景 */
+                        img {
+                            background: transparent !important;
+                            border: none !important;
+                            border-radius: 8px;
+                            box-shadow: none !important;
+                            max-width: 100%;
+                        }
+                        body { padding:12px; font-size:16px;}
                         /* 👇 豆包同款代码块样式（柔和灰底、圆角、清爽） */
                         pre {
                             background-color: #f6f8fa;
-                            padding: 14px;
+                            padding: 4px 14px  !important;
                             border-radius: 8px;
                             overflow-x: auto;
                         }

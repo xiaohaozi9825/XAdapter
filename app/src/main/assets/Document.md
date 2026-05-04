@@ -1,5 +1,5 @@
 # XAdapter使用文档
-## XAdapter接入
+### XAdapter接入
 #### 步骤1. 将 JitPack 添加到您的 build 文件中
 
 在您工程 build.gradle 文件中添加:
@@ -36,27 +36,27 @@ buildFeatures {
 }
 ```
 
-## XAdapter常用方法
+### XAdapter常用方法
 此处只列举了一些常用方法，更多用法请在对应功能中查看参考代码。
 #### 创建单布局Adapter
 ItemVerseBinding 对应布局文件，VerseInfo 对应数据
 ```kotlin 
 val adapter = createAdapter<ItemVerseBinding, VerseInfo> {(holder,data)->
-                   //此处完成数据绑定逻辑
-                }
+       //此处完成数据绑定逻辑
+    }
 ```
 
 #### 创建多布局Adapter
 用withType指定不同的布局，返回ViewHolderProvider类型，最后需要调用toAdapter()方法切换回Adapter类型。
 ```kotlin
 val adapter = createAdapter()
-            .withType<ItemVerseBinding, VerseInfo> { (holder, data) ->
-                //此处完成数据绑定逻辑
-            }
-            .withType<ItemImageCardBinding, Int> { (holder, data) ->
-                //此处完成数据绑定逻辑
-            }
-            .toAdapter()
+    .withType<ItemVerseBinding, VerseInfo> { (holder, data) ->
+        //此处完成数据绑定逻辑
+    }
+    .withType<ItemImageCardBinding, Int> { (holder, data) ->
+        //此处完成数据绑定逻辑
+    }
+    .toAdapter()
 ```
 
 #### 添加点击事件

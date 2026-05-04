@@ -17,12 +17,12 @@ class HomeFragment : VBFragment<FragmentHomeBinding>() {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
         }
-        binding.tvSearch.setOnClickListener {
+        tvSearch.setOnClickListener {
             startActivity(Intent(requireContext(), SearchActivity::class.java))
         }
         //binding.webView.loadUrl("file:///android_asset/index.html")
 
-        binding.webView.loadMarkDownByAsses(requireContext(), "index.md")
+        webView.loadMarkDownByAsses(requireContext(), "index.md")
     }
 
 }

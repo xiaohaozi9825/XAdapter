@@ -16,6 +16,7 @@ class DocumentFragment : VBFragment<FragmentDocumentBinding>() {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
         }
+
         binding.webView.loadMarkDownByAsses(requireContext(), "Document.md")
     }
 

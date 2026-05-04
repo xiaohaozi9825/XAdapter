@@ -62,6 +62,7 @@ val smartMenuList = arrayListOf(
     "其他",
     HomeInfo("协程作用域", "XAdapter对协成的支持", R.mipmap.icon_smart_coroutine, CoroutineScopeFragment::class.java),
     HomeInfo("ConcatAdapter", "结合ConcatAdapter使用", R.mipmap.icon_smart_concat, ConcatAdapterFragment::class.java),
+    "",
 )
 
 //node模块
@@ -100,6 +101,7 @@ val nodeMenuList = arrayListOf(
 
     //removeNodePosition(adapterPosition: Int)、
     HomeInfo("按列表所在位置删除", "", R.mipmap.icon_node_delete, RemovePositionNodeFragment::class.java),
+    "",
 )
 
 //示例模块
@@ -109,6 +111,7 @@ val exampleMenuList = arrayListOf<Any>(
     HomeInfo("图片选择器", "仿微信图片选择器", R.mipmap.icon_example_image_selected, ImageSelectedFragment::class.java),
     HomeInfo("分类列表联动", "商品分类与商品列表联动,分类可吸顶", R.mipmap.icon_example_goods_category, GoodsFragment::class.java),
     HomeInfo("标签选择器", "流式布局", R.mipmap.icon_example_tag, TagFragment::class.java),
+    "",
 //    HomeInfo("底部导航栏", "", R.mipmap.ic_launcher),
 //    HomeInfo("TabBar", "", R.mipmap.ic_launcher),
 
