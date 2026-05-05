@@ -19,7 +19,7 @@ fun WebView.loadMarkDownByAsses(context: Context, fileName: String) {
     try {
         setBackgroundColor(Color.TRANSPARENT)
         backgroundTintList = ColorStateList.valueOf(Color.TRANSPARENT)
-        setLayerType(View.LAYER_TYPE_SOFTWARE, null)
+//        setLayerType(View.LAYER_TYPE_SOFTWARE, null)
 
         // 配置 WebView（必须开 JS）
         val webSettings: WebSettings = settings
