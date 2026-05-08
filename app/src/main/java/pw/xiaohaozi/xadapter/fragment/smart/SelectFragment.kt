@@ -73,6 +73,9 @@ class SelectFragment : VBFragment<FragmentSelectedBinding>() {
             }
         }
             .isUpdateIndexChangeItem(true)
+            .setSelectionSame { i, i1 ->
+                return@setSelectionSame  i==i1
+            }
 
     }
 

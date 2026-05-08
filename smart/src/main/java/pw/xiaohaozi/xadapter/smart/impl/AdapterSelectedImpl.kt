@@ -18,6 +18,7 @@ import pw.xiaohaozi.xadapter.smart.proxy.ObservableList
 import pw.xiaohaozi.xadapter.smart.proxy.OnItemSelectListener
 import pw.xiaohaozi.xadapter.smart.proxy.OnSelectedDataChangesListener
 import pw.xiaohaozi.xadapter.smart.proxy.SelectedProxy
+import pw.xiaohaozi.xadapter.smart.proxy.SelectionSame
 import pw.xiaohaozi.xadapter.smart.proxy.SmartDataProxy
 import pw.xiaohaozi.xadapter.smart.proxy.XEmployer
 import pw.xiaohaozi.xadapter.smart.proxy.XProxy
@@ -45,6 +46,36 @@ open class AdapterSelectedImpl<Employer : XProxy<Employer>, VB : ViewBinding, D>
         }
     }
 
+    /** 与 [SelectedProxy.selectionSame] 一致；未配置时为 equals */
+    private fun sameItem(a: D, b: D): Boolean =
+        selectionSame?.invoke(a, b) ?: (a == b)
+
+    private fun listContainsSender(sender: List<D>, item: D): Boolean =
+        sender.any { sameItem(it, item) }
+
+    private fun removeCacheItemsNotIn(sender: List<D>) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            selectedCache.removeIf { sel -> !listContainsSender(sender, sel) }
+        } else {
+            val toRemove = selectedCache.filter { sel -> !listContainsSender(sender, sel) }
+            toRemove.forEach { selectedCache.remove(it) }
+        }
+    }
+
+    private fun removeCacheItemsInRemoved(removedData: Iterable<D>?) {
+        if (removedData == null) return
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            selectedCache.removeIf { cacheItem ->
+                removedData.any { rm -> sameItem(cacheItem, rm) }
+            }
+        } else {
+            val toRemove = selectedCache.filter { cacheItem ->
+                removedData.any { rm -> sameItem(cacheItem, rm) }
+            }
+            toRemove.forEach { selectedCache.remove(it) }
+        }
+    }
+
     private fun getData() = adapter.getDataList() as MutableList<D>
     override var onSelectedDataChangesListener: OnSelectedDataChangesListener<Employer, D>? = null
     override var itemSelectListener: SelectedProxy.Selected<Employer, D>? = null
@@ -52,6 +83,7 @@ open class AdapterSelectedImpl<Employer : XProxy<Employer>, VB : ViewBinding, D>
     override var isAllowCancel: Boolean = true
     override var isAutoCancel: Boolean = true
     override var isUpdateIndexChangeItem: Boolean = false
+    override var selectionSame: SelectionSame<D>? = null
 
     //是否全选
     private var oldSelectedAllStatus: Boolean? = null
@@ -84,11 +116,7 @@ open class AdapterSelectedImpl<Employer : XProxy<Employer>, VB : ViewBinding, D>
         //刷新所有数据时回调
         override fun onChanged(sender: MutableList<D>, payload: Any?) {
             Log.i(TAG, "onChanged: ")
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                selectedCache.removeIf { !sender.contains(it) }
-            } else {
-                selectedCache.removeAll(selectedCache.filter { !sender.contains(it) }.toSet())
-            }
+            removeCacheItemsNotIn(sender)
             curSelectedAllStatus = dpSelectAll()
 
             val start = 0
@@ -132,16 +160,12 @@ open class AdapterSelectedImpl<Employer : XProxy<Employer>, VB : ViewBinding, D>
             //找到被取消选中的item后面的所有item，并更新
             val filter = selectedCache.filterIndexed { index, _ -> index >= startIndex }
             Log.i(TAG, "onItemRangeRemoved: filter = ${filter.size}")
-            //被删除掉的数据
-            val removedData = selectedCache.subtract(sender.toSet())
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                selectedCache.removeIf { removedData.contains(it) }
-            } else {
-                selectedCache.removeAll(selectedCache.filter { removedData.contains(it) }.toSet())
-            }
+            //被删除掉的数据（与列表剩余项比较同一性）
+            val removedData = selectedCache.filter { sel -> !listContainsSender(sender, sel) }
+            removeCacheItemsInRemoved(removedData)
             curSelectedAllStatus = dpSelectAll()
             getData().forEachIndexed { position, d ->
-                if (filter.contains(d)) {
+                if (filter.any { sameItem(it, d) }) {
                     Log.i(TAG, "notifyItemChanged: position = ${position}")
                     val adapterPosition = adapter.getAdapterPosition(position)
                     if (adapterPosition > -1 && adapterPosition < adapter.itemCount) {
@@ -156,23 +180,21 @@ open class AdapterSelectedImpl<Employer : XProxy<Employer>, VB : ViewBinding, D>
         //删除数据时回调
         override fun onItemRangeRemoved(sender: MutableList<D>, changeDatas: MutableList<D>?, payload: Any?) {
             //被删除的元素在selectedCache中的起始索引
-            val startIndex = selectedCache.indexOfFirst { changeDatas?.contains(it) ?: false }
+            val startIndex = selectedCache.indexOfFirst { sel ->
+                changeDatas?.any { cd -> sameItem(sel, cd) } ?: false
+            }
             Log.i(TAG, "onItemRangeRemoved: startIndex = ${startIndex}")
             //找到被取消选中的item后面的所有item，并更新
             val filter = selectedCache.filterIndexed { index, _ -> index >= startIndex }
             Log.i(TAG, "onItemRangeRemoved: filter = ${filter.size}")
             //被删除掉的数据
-            val removedData = if (startIndex > -1 && changeDatas == null) {
-                selectedCache.subtract(sender)
+            val removedData: MutableList<D>? = if (startIndex > -1 && changeDatas == null) {
+                selectedCache.filter { sel -> !listContainsSender(sender, sel) }.toMutableList()
             } else changeDatas
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                selectedCache.removeIf { removedData?.contains(it) ?: false }
-            } else {
-                selectedCache.removeAll(selectedCache.filter { removedData?.contains(it) ?: false }.toSet())
-            }
+            removeCacheItemsInRemoved(removedData)
             curSelectedAllStatus = dpSelectAll()
             getData().forEachIndexed { position, d ->
-                if (filter.contains(d)) {
+                if (filter.any { sameItem(it, d) }) {
                     Log.i(TAG, "notifyItemChanged: position = ${position}")
                     val adapterPosition = adapter.getAdapterPosition(position)
                     if (adapterPosition > -1 && adapterPosition < adapter.itemCount) {
@@ -189,6 +211,8 @@ open class AdapterSelectedImpl<Employer : XProxy<Employer>, VB : ViewBinding, D>
 
     override fun initProxy(employer: Employer) {
         super.initProxy(employer)
+
+        selectedCache.sameRule = { a, b -> sameItem(a, b) }
 
         adapter.addOnViewHolderChanges(object : XAdapter.OnViewHolderChanges {
             override fun onCreated(provide: TypeProvider<*, *>, holder: XHolder<*>) {
@@ -302,6 +326,11 @@ open class AdapterSelectedImpl<Employer : XProxy<Employer>, VB : ViewBinding, D>
         return employer
     }
 
+    override fun setSelectionSame(same: SelectionSame<D>?): Employer {
+        selectionSame = same
+        return employer
+    }
+
     override fun isAutoCancel(isAutoCancel: Boolean): Employer {
         this.isAutoCancel = isAutoCancel
         return employer
@@ -356,12 +385,13 @@ open class AdapterSelectedImpl<Employer : XProxy<Employer>, VB : ViewBinding, D>
         val startPos = adapter.getAdapterPosition(0)
         val endPos = adapter.getAdapterPosition(getData().size)
         for (pos in startPos until endPos) {
-            if (temp.contains(getData()[adapter.getDataPosition(pos)])) {
+            val rowData = getData()[adapter.getDataPosition(pos)]
+            if (temp.any { sameItem(it, rowData) }) {
                 adapter.notifyItemChanged(pos, payload ?: itemSelectListener?.payload)
             }
         }
         getData().forEachIndexed { position, data ->
-            if (temp.contains(data)) {
+            if (temp.any { sameItem(it, data) }) {
                 val adapterPosition = adapter.getAdapterPosition(position)
                 notifyItemSelectedChanges(data, adapterPosition, -1, false)
             }
@@ -388,7 +418,7 @@ open class AdapterSelectedImpl<Employer : XProxy<Employer>, VB : ViewBinding, D>
         curSelectedAllStatus = false
         //更新被取消选中的item
         getData().forEachIndexed { position, d ->
-            if (d == data) {
+            if (sameItem(d, data)) {
                 val adapterPosition = adapter.getAdapterPosition(position)
                 if (adapterPosition > -1 && adapterPosition < adapter.itemCount) {
                     adapter.notifyItemChanged(adapterPosition, payload ?: itemSelectListener?.payload)
@@ -401,7 +431,7 @@ open class AdapterSelectedImpl<Employer : XProxy<Employer>, VB : ViewBinding, D>
             //找到被取消选中的item后面的所有item，并更新
             val filter = selectedCache.filterIndexed { index, _ -> index >= indexOf }
             getData().forEachIndexed { position, d ->
-                if (filter.contains(d)) {
+                if (filter.any { sameItem(it, d) }) {
                     val adapterPosition = adapter.getAdapterPosition(position)
                     if (adapterPosition > -1 && adapterPosition < adapter.itemCount) {
                         adapter.notifyItemChanged(adapterPosition, payload ?: itemSelectListener?.payload)
@@ -434,7 +464,7 @@ open class AdapterSelectedImpl<Employer : XProxy<Employer>, VB : ViewBinding, D>
         curSelectedAllStatus = dpSelectAll()
         //更新被选中的item
         getData().forEachIndexed { position, d ->
-            if (d == data) {
+            if (sameItem(d, data)) {
                 val adapterPosition = adapter.getAdapterPosition(position)
                 if (adapterPosition > -1 && adapterPosition < adapter.itemCount) {
                     adapter.notifyItemChanged(adapterPosition, payload ?: itemSelectListener?.payload)

@@ -11,6 +11,7 @@ typealias OnSelectedDataChangesListener<Employer, D> = Employer.(selectedDatas: 
  */
 typealias OnItemSelectListener<Employer, D> = Employer.(data: D, position: Int, index: Int, fromUser: Boolean) -> Unit
 
+typealias SelectionSame<D> = (a:D,b:D)-> Boolean
 
 /**
  * item选择事件
@@ -46,6 +47,16 @@ interface SelectedProxy<Employer : XProxy<Employer>, VB : ViewBinding, D> :
 
     //选中索引发生变化，是否需要更新
     var isUpdateIndexChangeItem: Boolean
+
+    /**
+     * 自定义「选中」时的是否为同一条数据；为 null 时退回 [equals]。
+     */
+    var selectionSame: SelectionSame<D>?
+
+    /**
+     * 配置选中同一性规则（例如按业务 id）.
+     */
+    fun setSelectionSame(same: SelectionSame<D>?): Employer
 
     /**
      * 设置选中事件监听
