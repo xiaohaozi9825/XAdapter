@@ -174,6 +174,7 @@ class SmartDataImpl<Employer : XProxy<Employer>, VB : ViewBinding, D> : SmartDat
         adapter.notifyDataSetChanged()
         notifyChanged(null)
     }
+
     @SuppressLint("NotifyDataSetChanged")
     override fun <L : Collection<D>> refresh(list: L) {
         if (adapter.isDifferMode()) throw XAdapterException("Differ模式不能使用改方法操作数据，更新数据请使用submitList()方法")
@@ -250,10 +251,32 @@ class SmartDataImpl<Employer : XProxy<Employer>, VB : ViewBinding, D> : SmartDat
 
 
     override fun submitList(list: List<D>, commitCallback: Runnable) {
+        if (!adapter.isDifferMode()) setDiffer(object : DiffUtil.ItemCallback<D>() {
+            override fun areItemsTheSame(p0: D & Any, p1: D & Any): Boolean {
+                return p0 == p1
+            }
+
+            @SuppressLint("DiffUtilEquals")
+            override fun areContentsTheSame(p0: D & Any, p1: D & Any): Boolean {
+                return p0 == p1
+            }
+
+        })
         adapter.asyncListDiffer.submitList(list, commitCallback)
     }
 
     override fun submitList(list: List<D>) {
+        if (!adapter.isDifferMode()) setDiffer(object : DiffUtil.ItemCallback<D>() {
+            override fun areItemsTheSame(p0: D & Any, p1: D & Any): Boolean {
+                return p0 == p1
+            }
+
+            @SuppressLint("DiffUtilEquals")
+            override fun areContentsTheSame(p0: D & Any, p1: D & Any): Boolean {
+                return p0 == p1
+            }
+
+        })
         adapter.asyncListDiffer.submitList(list)
     }
 
