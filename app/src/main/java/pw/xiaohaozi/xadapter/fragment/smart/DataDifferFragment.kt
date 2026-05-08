@@ -173,7 +173,7 @@ class DataDifferFragment : VBFragment<FragmentDataOperationBinding>() {
                     .onCancel {}
                     .show()
             }
-            .setDiffer(itemCallback)
+//            .setDiffer(itemCallback)
             .swipeDelete()
             .dragSort()
     }
