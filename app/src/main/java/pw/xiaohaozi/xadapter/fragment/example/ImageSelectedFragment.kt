@@ -58,7 +58,7 @@ class ImageSelectedFragment : VBFragment<FragmentImageSelectBinding>() {
     }
 
     @SuppressLint("SetTextI18n")
-    private val imageAdapter = createAdapter<ItemImageSelectedBinding, LoadMediaFile> { (holder, data, _, payload) ->
+    private val imageAdapter = createAdapter<ItemImageSelectedBinding, LoadMediaFile> { (holder, data, _, payload,scope) ->
         val index = selectedList.indexOf(data)
         if (index < 0) {
             holder.binding.tvSelectedIndex.text = ""
@@ -70,7 +70,7 @@ class ImageSelectedFragment : VBFragment<FragmentImageSelectBinding>() {
         if (payload.contains("select")) return@createAdapter
         holder.binding.ivImage.load(data.path)
         //进一步验证协成，注意有些gif或视频类型的文件，这里是加载不了的，所以有空白是正常的。
-//        holder.launch(IO) {
+//        scope.launch(IO) {
 //            try {
 //                val bitmap = BitmapFactory.decodeFile(data.path)
 //                // 缩到500×500

@@ -1,20 +1,16 @@
 package pw.xiaohaozi.xadapter.smart.adapter
 
 import androidx.viewbinding.ViewBinding
+import kotlinx.coroutines.CoroutineScope
 import pw.xiaohaozi.xadapter.smart.XAdapterException
-import pw.xiaohaozi.xadapter.smart.entity.DEFAULT_PAGE
-import pw.xiaohaozi.xadapter.smart.entity.EMPTY
-import pw.xiaohaozi.xadapter.smart.entity.FOOTER
-import pw.xiaohaozi.xadapter.smart.entity.HEADER
-import pw.xiaohaozi.xadapter.smart.ext.OnBindParams
 import pw.xiaohaozi.xadapter.smart.ext.OnProviderBindHolder
 import pw.xiaohaozi.xadapter.smart.ext.OnProviderCreatedHolder
 import pw.xiaohaozi.xadapter.smart.holder.XHolder
 import pw.xiaohaozi.xadapter.smart.impl.AdapterSelectedImpl
 import pw.xiaohaozi.xadapter.smart.impl.EventImpl
 import pw.xiaohaozi.xadapter.smart.impl.SmartDataImpl
+import pw.xiaohaozi.xadapter.smart.params.OnBindParams
 import pw.xiaohaozi.xadapter.smart.provider.SmartProvider
-import pw.xiaohaozi.xadapter.smart.provider.TypeProvider
 import pw.xiaohaozi.xadapter.smart.proxy.EventProxy
 import pw.xiaohaozi.xadapter.smart.proxy.SelectedProxy
 import pw.xiaohaozi.xadapter.smart.proxy.SmartDataProxy
@@ -86,11 +82,11 @@ open class SmartAdapter<VB : ViewBinding, D>(
                 created.invoke(this, holder)
             }
 
-            override fun onBind(holder: XHolder<pvb>, data: pd, position: Int) {
+            override fun onBind(scope: CoroutineScope, holder: XHolder<pvb>, data: pd, position: Int) {
             }
 
-            override fun onBind(holder: XHolder<pvb>, data: pd, position: Int, payloads: List<Any?>) {
-                bind.invoke(this, OnBindParams(holder, data, position, payloads))
+            override fun onBind(scope: CoroutineScope, holder: XHolder<pvb>, data: pd, position: Int, payloads: List<Any?>) {
+                bind.invoke(this, OnBindParams(holder, data, position, payloads, scope))
             }
 
             override fun isFixedViewType(): Boolean {

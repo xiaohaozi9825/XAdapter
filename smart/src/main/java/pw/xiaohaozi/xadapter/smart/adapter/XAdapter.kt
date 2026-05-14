@@ -19,7 +19,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
-import kotlinx.coroutines.cancelChildren
 import kotlinx.coroutines.job
 import pw.xiaohaozi.xadapter.smart.XAdapterException
 import pw.xiaohaozi.xadapter.smart.entity.DEFAULT_PAGE
@@ -112,7 +111,7 @@ open class XAdapter<VB : ViewBinding, D, out R : XAdapter<VB, D, R>> : Adapter<X
     private fun bindViewHolder(holder: XHolder<VB>, position: Int, payloads: MutableList<Any>?) {
         Log.i(TAG, "bindViewHolder: ")
         if (position < 0) return
-        holder.xAdapter = this
+        holder.resetBindScope()
         holder.data = getData(position)
         val provide = providers[holder.itemViewType] ?: providers[getItemViewType(position)]
         ?: throw XAdapterException("没有找到 itemViewType = ${holder.itemViewType} 的 Provider")
@@ -654,7 +653,7 @@ open class XAdapter<VB : ViewBinding, D, out R : XAdapter<VB, D, R>> : Adapter<X
                 create?.invoke(this, holder)
             }
 
-            override fun onBind(holder: XHolder<vb>, data: HEADER, position: Int) {
+            override fun onBind(scope: CoroutineScope, holder: XHolder<vb>, data: HEADER, position: Int) {
                 bind?.invoke(this, holder, data)
             }
 
@@ -699,7 +698,7 @@ open class XAdapter<VB : ViewBinding, D, out R : XAdapter<VB, D, R>> : Adapter<X
                 create?.invoke(this, holder)
             }
 
-            override fun onBind(holder: XHolder<vb>, data: FOOTER, position: Int) {
+            override fun onBind(scope: CoroutineScope, holder: XHolder<vb>, data: FOOTER, position: Int) {
                 bind?.invoke(this, holder, data)
             }
 
@@ -743,7 +742,7 @@ open class XAdapter<VB : ViewBinding, D, out R : XAdapter<VB, D, R>> : Adapter<X
                 return true
             }
 
-            override fun onBind(holder: XHolder<vb>, data: EMPTY, position: Int) {
+            override fun onBind(scope: CoroutineScope, holder: XHolder<vb>, data: EMPTY, position: Int) {
                 bind?.invoke(this, holder)
             }
 
@@ -783,7 +782,7 @@ open class XAdapter<VB : ViewBinding, D, out R : XAdapter<VB, D, R>> : Adapter<X
                 return true
             }
 
-            override fun onBind(holder: XHolder<vb>, data: DEFAULT_PAGE, position: Int) {
+            override fun onBind(scope: CoroutineScope, holder: XHolder<vb>, data: DEFAULT_PAGE, position: Int) {
                 bind?.invoke(this, holder, data)
             }
 
@@ -804,7 +803,6 @@ open class XAdapter<VB : ViewBinding, D, out R : XAdapter<VB, D, R>> : Adapter<X
     override fun onViewRecycled(holder: XHolder<VB>) {
         Log.i(TAG, "onViewRecycled: $holder")
         tryNotifyProvider { onViewRecycled(holder) }
-        holder.xAdapter = null
         holder.data = null
     }
 
@@ -857,7 +855,7 @@ open class XAdapter<VB : ViewBinding, D, out R : XAdapter<VB, D, R>> : Adapter<X
     override fun onViewDetachedFromWindow(holder: XHolder<VB>) {
         //该方法比onViewRecycled先调
         Log.i(TAG, "onViewDetachedFromWindow: $holder")
-        holder.coroutineContext.cancelChildren()//取消holder中的所有子协程
+        holder.cancelHolderCoroutineChildren()//取消holder中的所有子协程
         onViewChanges.tryNotify { onViewDetachedFromWindow(holder) }
         tryNotifyProvider { onHolderDetachedFromWindow(holder) }
     }

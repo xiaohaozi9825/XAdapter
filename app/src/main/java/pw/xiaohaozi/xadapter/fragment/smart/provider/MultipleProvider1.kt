@@ -1,6 +1,7 @@
 package pw.xiaohaozi.xadapter.fragment.smart.provider
 
 import androidx.viewbinding.ViewBinding
+import kotlinx.coroutines.CoroutineScope
 import pw.xiaohaozi.xadapter.databinding.ItemImageCardBinding
 import pw.xiaohaozi.xadapter.smart.adapter.SmartAdapter
 import pw.xiaohaozi.xadapter.smart.holder.XHolder
@@ -13,7 +14,7 @@ class MultipleProvider1(override val adapter: SmartAdapter<ViewBinding, Any?>) :
 
     }
 
-    override fun onBind(holder: XHolder<ItemImageCardBinding>, data: Int, position: Int) {
+    override fun onBind(scope: CoroutineScope, holder: XHolder<ItemImageCardBinding>, data: Int, position: Int) {
         holder.binding.image.setImageResource(data)
     }
 

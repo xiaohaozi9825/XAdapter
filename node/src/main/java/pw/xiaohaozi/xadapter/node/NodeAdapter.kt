@@ -3,13 +3,14 @@ package pw.xiaohaozi.xadapter.node
 import android.annotation.SuppressLint
 import android.util.Log
 import androidx.viewbinding.ViewBinding
+import kotlinx.coroutines.CoroutineScope
 import pw.xiaohaozi.xadapter.node.entity.ExpandedNodeEntity
 import pw.xiaohaozi.xadapter.node.entity.NodeEntity
 import pw.xiaohaozi.xadapter.node.ext.OnProviderBindHolder
 import pw.xiaohaozi.xadapter.node.ext.OnProviderInitHolder
 import pw.xiaohaozi.xadapter.smart.XAdapterException
+import pw.xiaohaozi.xadapter.smart.params.OnBindParams
 import pw.xiaohaozi.xadapter.smart.adapter.XAdapter
-import pw.xiaohaozi.xadapter.smart.ext.OnBindParams
 import pw.xiaohaozi.xadapter.smart.ext.removeRange
 import pw.xiaohaozi.xadapter.smart.holder.XHolder
 import pw.xiaohaozi.xadapter.smart.impl.EventImpl
@@ -482,11 +483,11 @@ open class NodeAdapter<VB : ViewBinding, D : NodeEntity<*, *>>(
                 create.invoke(this, holder)
             }
 
-            override fun onBind(holder: XHolder<vb>, data: d, position: Int) {
+            override fun onBind(scope: CoroutineScope, holder: XHolder<vb>, data: d, position: Int) {
             }
 
-            override fun onBind(holder: XHolder<vb>, data: d, position: Int, payloads: List<Any?>) {
-                bind.invoke(this, OnBindParams(holder, data, position, payloads))
+            override fun onBind(scope: CoroutineScope, holder: XHolder<vb>, data: d, position: Int, payloads: List<Any?>) {
+                bind.invoke(this, OnBindParams(holder, data, position, payloads, scope))
             }
 
             override fun isFixedViewType(): Boolean {

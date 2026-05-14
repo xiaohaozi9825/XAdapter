@@ -1,8 +1,9 @@
 package pw.xiaohaozi.xadapter.smart.provider
 
 import androidx.viewbinding.ViewBinding
+import kotlinx.coroutines.CoroutineScope
+import pw.xiaohaozi.xadapter.smart.params.OnBindParams
 import pw.xiaohaozi.xadapter.smart.adapter.SmartAdapter
-import pw.xiaohaozi.xadapter.smart.ext.OnBindParams
 import pw.xiaohaozi.xadapter.smart.ext.OnProviderBindHolder
 import pw.xiaohaozi.xadapter.smart.ext.OnProviderCreatedHolder
 import pw.xiaohaozi.xadapter.smart.holder.XHolder
@@ -62,11 +63,11 @@ abstract class SmartProvider<AVB : ViewBinding, AD, PVB : ViewBinding, PD>(
                 created.invoke(this, holder)
             }
 
-            override fun onBind(holder: XHolder<pvb>, data: pd, position: Int) {
+            override fun onBind(scope: CoroutineScope, holder: XHolder<pvb>, data: pd, position: Int) {
             }
 
-            override fun onBind(holder: XHolder<pvb>, data: pd, position: Int, payloads: List<Any?>) {
-                bind.invoke(this, OnBindParams(holder, data, position, payloads))
+            override fun onBind(scope: CoroutineScope, holder: XHolder<pvb>, data: pd, position: Int, payloads: List<Any?>) {
+                bind.invoke(this, OnBindParams(holder, data, position, payloads, scope))
             }
 
             override fun isFixedViewType(): Boolean {

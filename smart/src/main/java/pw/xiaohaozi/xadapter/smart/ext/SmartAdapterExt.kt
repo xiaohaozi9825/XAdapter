@@ -10,6 +10,8 @@ import androidx.recyclerview.widget.ItemTouchHelper.UP
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.RecyclerView.NO_ID
 import androidx.viewbinding.ViewBinding
+import kotlinx.coroutines.CoroutineScope
+import pw.xiaohaozi.xadapter.smart.params.OnBindParams
 import pw.xiaohaozi.xadapter.smart.adapter.SmartAdapter
 import pw.xiaohaozi.xadapter.smart.adapter.XAdapter
 import pw.xiaohaozi.xadapter.smart.dragswipe.DragSort
@@ -31,15 +33,7 @@ typealias OnProviderBindHolder<AVB, AD, VB, D> = SmartProvider<AVB, AD, VB, D>.(
 typealias OnCustomType<VB, D> = (SmartAdapter<VB, D>.(data: D, position: Int) -> Int?)
 typealias OnItemId<VB, D> = (SmartAdapter<VB, D>.(position: Int) -> Long)
 
-data class OnBindParams<VB : ViewBinding, D>(
-    val holder: XHolder<VB>,
-    val data: D,
-    val position: Int,
-    val payloads: List<Any?>
-) {
-    val binding: VB
-        get() = holder.binding
-}
+
 
 
 /**
@@ -71,11 +65,11 @@ inline fun <reified VB : ViewBinding, reified D> createAdapter(
             created.invoke(adapter, holder)
         }
 
-        override fun onBind(holder: XHolder<VB>, data: D, position: Int) {
+        override fun onBind(scope: CoroutineScope, holder: XHolder<VB>, data: D, position: Int) {
         }
 
-        override fun onBind(holder: XHolder<VB>, data: D, position: Int, payloads: List<Any?>) {
-            bind.invoke(adapter, OnBindParams(holder, data, position, payloads))
+        override fun onBind(scope: CoroutineScope, holder: XHolder<VB>, data: D, position: Int, payloads: List<Any?>) {
+            bind.invoke(adapter, OnBindParams(holder, data, position, payloads, scope))
         }
     }
     adapter.addProvider(provider, itemType)

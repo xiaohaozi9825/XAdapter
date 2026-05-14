@@ -1,5 +1,6 @@
 package pw.xiaohaozi.xadapter.fragment.smart.provider
 
+import kotlinx.coroutines.CoroutineScope
 import pw.xiaohaozi.xadapter.databinding.ItemVerseBinding
 import pw.xiaohaozi.xadapter.info.VerseInfo
 import pw.xiaohaozi.xadapter.smart.adapter.SmartAdapter
@@ -16,7 +17,7 @@ class SingleProvider : SmartProvider<ItemVerseBinding, VerseInfo, ItemVerseBindi
         //初始化ViewHolder
     }
 
-    override fun onBind(holder: XHolder<ItemVerseBinding>, data: VerseInfo, position: Int) {
+    override fun onBind(scope: CoroutineScope, holder: XHolder<ItemVerseBinding>, data: VerseInfo, position: Int) {
         holder.binding.tvContent.text = data?.content
         holder.binding.tvAuthor.text = data?.author
     }

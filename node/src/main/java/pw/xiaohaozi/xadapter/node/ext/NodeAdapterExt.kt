@@ -6,13 +6,14 @@ import androidx.recyclerview.widget.ItemTouchHelper.START
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.RecyclerView.NO_ID
 import androidx.viewbinding.ViewBinding
+import kotlinx.coroutines.CoroutineScope
 import pw.xiaohaozi.xadapter.node.NodeAdapter
 import pw.xiaohaozi.xadapter.node.NodeProvider
 import pw.xiaohaozi.xadapter.node.dragswipe.SwipeDelete
 import pw.xiaohaozi.xadapter.node.entity.NodeEntity
+import pw.xiaohaozi.xadapter.smart.params.OnBindParams
 import pw.xiaohaozi.xadapter.smart.adapter.XAdapter
 import pw.xiaohaozi.xadapter.smart.dragswipe.ItemSwipe
-import pw.xiaohaozi.xadapter.smart.ext.OnBindParams
 import pw.xiaohaozi.xadapter.smart.holder.XHolder
 import pw.xiaohaozi.xadapter.smart.widgets.SwipeItemLayout
 
@@ -55,11 +56,11 @@ inline fun <VB : ViewBinding, D : NodeEntity<*, *>> nodeAdapter(
             create.invoke(adapter, holder)
         }
 
-        override fun onBind(holder: XHolder<VB>, data: D, position: Int) {
+        override fun onBind(scope: CoroutineScope, holder: XHolder<VB>, data: D, position: Int) {
         }
 
-        override fun onBind(holder: XHolder<VB>, data: D, position: Int, payloads: List<Any?>) {
-            bind.invoke(adapter, OnBindParams(holder, data, position, payloads))
+        override fun onBind(scope: CoroutineScope, holder: XHolder<VB>, data: D, position: Int, payloads: List<Any?>) {
+            bind.invoke(adapter, OnBindParams(holder, data, position, payloads, scope))
         }
     }
     adapter.addProvider(provider, itemType)

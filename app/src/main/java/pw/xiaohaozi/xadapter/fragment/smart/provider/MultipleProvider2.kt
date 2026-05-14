@@ -1,6 +1,7 @@
 package pw.xiaohaozi.xadapter.fragment.smart.provider
 
 import androidx.viewbinding.ViewBinding
+import kotlinx.coroutines.CoroutineScope
 import pw.xiaohaozi.xadapter.databinding.ItemImageCardBinding
 import pw.xiaohaozi.xadapter.databinding.ItemVerseBinding
 import pw.xiaohaozi.xadapter.info.VerseInfo
@@ -15,7 +16,7 @@ class MultipleProvider2(override val adapter: SmartAdapter<ViewBinding, Any?>) :
 
     }
 
-    override fun onBind(holder: XHolder<ItemVerseBinding>, data: VerseInfo?, position: Int) {
+    override fun onBind(scope: CoroutineScope, holder: XHolder<ItemVerseBinding>, data: VerseInfo?, position: Int) {
         holder.binding.tvContent.text = data?.content
         holder.binding.tvAuthor.text = data?.author
     }

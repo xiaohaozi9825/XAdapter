@@ -7,11 +7,14 @@ import androidx.core.util.forEach
 import androidx.recyclerview.widget.RecyclerView
 import androidx.viewbinding.ViewBinding
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
 import pw.xiaohaozi.xadapter.smart.adapter.XAdapter
 import pw.xiaohaozi.xadapter.smart.holder.XHolder
 import java.lang.reflect.Method
 import java.lang.reflect.ParameterizedType
 import kotlin.coroutines.CoroutineContext
+import kotlin.coroutines.EmptyCoroutineContext
 
 /**
  * 类型提供者
@@ -21,30 +24,39 @@ import kotlin.coroutines.CoroutineContext
  * github：https://github.com/xiaohaozi9825
  * 创建时间：2024/6/8 14:29
  */
-abstract class XProvider<VB : ViewBinding, D>(override val adapter: XAdapter<*, *, *>) : TypeProvider<VB, D>, CoroutineScope {
+abstract class XProvider<VB : ViewBinding, D>(override val adapter: XAdapter<*, *, *>) : TypeProvider<VB, D> {
     private val TAG = "XProvider"
-    override val coroutineContext: CoroutineContext
-        get() = adapter.coroutineContext
+
+    /**
+     * 在 [adapter] 作用域内启动协程（与 RecyclerView / Adapter 生命周期一致），
+     * 与单次 item 绑定对齐的异步请使用 [onBind] 的首参 [scope]。
+     */
+    protected fun adapterLaunch(
+        context: CoroutineContext = EmptyCoroutineContext,
+        block: suspend CoroutineScope.() -> Unit,
+    ): Job = adapter.launch(context = context, block = block)
 
     abstract fun onCreated(holder: XHolder<VB>)
 
     /**
      * 数据绑定
+     * @param scope 与当前一次 bind 对齐，请使用 `scope.launch { }`。
      * @param holder viewHolder
      * @param data 当前数据
      * @param position 在adapter中的索引。注意：有特殊布局的时候，不要直接用该position获取dataList中的数据，需要用getDataPosition(position)方法转换。
      */
-    abstract fun onBind(holder: XHolder<VB>, data: D, position: Int)
+    abstract fun onBind(scope: CoroutineScope, holder: XHolder<VB>, data: D, position: Int)
 
     /**
      * 数据绑定
+     * @param scope 与当前一次 bind 对齐，请使用 `scope.launch { }`。
      * @param holder viewHolder
      * @param data 当前数据
      * @param position 在adapter中的索引。注意：有特殊布局的时候，不要直接用该position获取dataList中的数据，需要用getDataPosition(position)方法转换。
      * @param payloads 局部刷新使用
      */
-    open fun onBind(holder: XHolder<VB>, data: D, position: Int, payloads: List<Any?>) {
-        onBind(holder, data, position)
+    open fun onBind(scope: CoroutineScope, holder: XHolder<VB>, data: D, position: Int, payloads: List<Any?>) {
+        onBind(scope, holder, data, position)
     }
 
     override fun getEmployerAdapter(): XAdapter<*, *, *> {
@@ -53,7 +65,7 @@ abstract class XProvider<VB : ViewBinding, D>(override val adapter: XAdapter<*, 
 
     final override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): XHolder<VB> {
         Log.i(TAG, "onCreateViewHolder: ")
-        return XHolder(smartCreateViewBinding(parent))
+        return XHolder(adapter, smartCreateViewBinding(parent))
     }
 
     override fun onCreatedViewHolder(holder: XHolder<*>) {
@@ -63,12 +75,14 @@ abstract class XProvider<VB : ViewBinding, D>(override val adapter: XAdapter<*, 
 
     override fun onBindViewHolder(holder: XHolder<*>, data: Any?, position: Int) {
         @Suppress("UNCHECKED_CAST")
-        onBind(holder as XHolder<VB>, data as D, position)
+        val h = holder as XHolder<VB>
+        onBind(h.bindCoroutineScope(), h, data as D, position)
     }
 
     override fun onBindViewHolder(holder: XHolder<*>, data: Any?, position: Int, payloads: List<Any?>) {
         @Suppress("UNCHECKED_CAST")
-        onBind(holder as XHolder<VB>, data as D, position, payloads)
+        val h = holder as XHolder<VB>
+        onBind(h.bindCoroutineScope(), h, data as D, position, payloads)
     }
 
     override fun onViewRecycled(holder: XHolder<VB>) {
@@ -131,4 +145,3 @@ abstract class XProvider<VB : ViewBinding, D>(override val adapter: XAdapter<*, 
         return null
     }
 }
-

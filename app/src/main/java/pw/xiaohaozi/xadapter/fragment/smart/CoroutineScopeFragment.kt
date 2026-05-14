@@ -65,28 +65,28 @@ class CoroutineScopeFragment : VBFragment<FragmentSelectedBinding>() {
             .setOnClickListener { holder, data, position, view ->
                 Toast.makeText(requireContext(), "点击拍照", Toast.LENGTH_SHORT).show()
             }
-            .withType<ItemImageSelectedBinding, Int> { (holder, data, position, payloads) ->
-                Log.i(TAG, "function2: $data")
-                if (!payloads.contains("select")) {
+            .withType<ItemImageSelectedBinding, Int> { it ->
+                Log.i(TAG, "function2: ${it.data}")
+                if (!it.payloads.contains("select")) {
                     //模拟耗时操作，在滑动时能明显感觉到卡顿
                     //val bitmap = BitmapFactory.decodeResource(resources, data)
                     //holder.binding.ivImage.setImageBitmap(bitmap)
-                    //使用协程，将耗时操作切换到其他线程
-                    holder.launch(IO) {
-                        val bitmap = BitmapFactory.decodeResource(resources, data)
+                    //使用协程，将耗时操作切换到其他线程（it 为 OnBindParams，实现 CoroutineScope）
+                    it.launch(IO) {
+                        val bitmap = BitmapFactory.decodeResource(resources, it.data)
                         withContext(Main) {
-                            holder.binding.ivImage.setImageBitmap(bitmap)
+                            it.holder.binding.ivImage.setImageBitmap(bitmap)
                         }
                     }
                 }
 
-                val index = this.adapter.getSelectedIndexAt(position)
+                val index = this.adapter.getSelectedIndexAt(it.position)
                 if (index < 0) {
-                    holder.binding.tvSelectedIndex.text = ""
-                    holder.binding.tvSelectedIndex.setBackgroundResource(R.drawable.bg_not_selected)
+                    it.holder.binding.tvSelectedIndex.text = ""
+                    it.holder.binding.tvSelectedIndex.setBackgroundResource(R.drawable.bg_not_selected)
                 } else {
-                    holder.binding.tvSelectedIndex.text = "${index + 1}"
-                    holder.binding.tvSelectedIndex.setBackgroundResource(R.drawable.bg_selected_position)
+                    it.holder.binding.tvSelectedIndex.text = "${index + 1}"
+                    it.holder.binding.tvSelectedIndex.setBackgroundResource(R.drawable.bg_selected_position)
                 }
             }
             .toAdapter()
