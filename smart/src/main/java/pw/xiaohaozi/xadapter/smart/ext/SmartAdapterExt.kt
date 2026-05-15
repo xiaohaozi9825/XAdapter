@@ -130,6 +130,9 @@ fun createAdapter(
     return createTypeAdapter<ViewBinding, Any?>(onItemId, custom)
 }
 
+/**
+ * 与 [createTypeAdapter] 相同，并在创建后调用 [SmartAdapter.bindLifecycle] 绑定 [LifecycleOwner]。
+ */
 inline fun <reified VB : ViewBinding, reified D> LifecycleOwner.createLifecycleTypeAdapter(
     noinline custom: OnCustomType<VB, D>? = null,
     noinline onItemId: OnItemId<VB, D> = { NO_ID }
@@ -139,6 +142,9 @@ inline fun <reified VB : ViewBinding, reified D> LifecycleOwner.createLifecycleT
     return adapter
 }
 
+/**
+ * 创建「任意 ViewBinding + Any?」多类型 Adapter，并绑定当前 [LifecycleOwner] 生命周期。
+ */
 fun LifecycleOwner.createLifecycleAdapter(
     custom: OnCustomType<ViewBinding, Any?>? = null,
     onItemId: OnItemId<ViewBinding, Any?> = { NO_ID }
@@ -385,6 +391,10 @@ fun <A : SmartAdapter<VB, D>, VB : ViewBinding, D> A.singleSelect(
     return this
 }
 
+/**
+ * 单选封装（限定参与选择的 [itemType]）；内部设置最大可选 1 且默认不允许点击取消。
+ * @param permittedTypes 允许参与选择的 itemType 数组
+ */
 fun <A : SmartAdapter<VB, D>, VB : ViewBinding, D> A.singleSelect(
     id: Int? = null,
     payload: Any? = null,
@@ -399,6 +409,10 @@ fun <A : SmartAdapter<VB, D>, VB : ViewBinding, D> A.singleSelect(
     return this
 }
 
+/**
+ * 单选封装（按数据类型 [Class] 限定参与选择的 Provider）；内部设置最大可选 1 且默认不允许点击取消。
+ * @param permittedTypes 允许参与选择的数据类型（需与 Provider 泛型一致）
+ */
 fun <A : SmartAdapter<VB, D>, VB : ViewBinding, D> A.singleSelect(
     id: Int? = null,
     payload: Any? = null,

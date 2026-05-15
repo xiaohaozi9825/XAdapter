@@ -20,7 +20,6 @@ import pw.xiaohaozi.xadapter.smart.proxy.XEmployer
  * Adapter集
  * 描述：包含了XAdapter基础功能，数据操作功能，选择功能，事件监听功能
  * 作者：小耗子
- * 简书地址：https://www.jianshu.com/u/2a2ea7b43087
  * github：https://github.com/xiaohaozi9825
  * 创建时间：2024/6/9 9:10
  */
@@ -38,6 +37,7 @@ open class SmartAdapter<VB : ViewBinding, D>(
         initProxy()
     }
 
+    /** 构造时初始化各代理与当前 Adapter 的宿主关系。 */
     private fun initProxy() {
         initProxy(this)
     }
@@ -48,12 +48,17 @@ open class SmartAdapter<VB : ViewBinding, D>(
             throw XAdapterException("employer不允许设置")
         }
 
+    /**
+     * 将数据、事件、选择三类代理绑定到宿主 Adapter（一般为 [employer] 自身）。
+     * @param employer 当前 Adapter 实例，供各代理通过 [XEmployer] 取数、发通知。
+     */
     final override fun initProxy(employer: SmartAdapter<VB, D>) {
         dataProxy.initProxy(employer)
         eventProxy.initProxy(employer)
         selectedProxy.initProxy(employer)
     }
 
+    /** 供代理层解析宿主；多布局场景下与 [pw.xiaohaozi.xadapter.smart.provider.XProvider] 共用同一 Adapter。 */
     override fun getEmployerAdapter(): SmartAdapter<VB, D> {
         return this
     }

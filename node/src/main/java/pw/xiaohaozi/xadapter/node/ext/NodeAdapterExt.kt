@@ -84,10 +84,10 @@ inline fun <VB : ViewBinding, D : NodeEntity<*, *>> nodeAdapter(
 //}
 
 /**
- * 创建NodeAdapter，单布局和多布局都可以使用，建议创建多布局时使用。
- * 后续需要使用.withType()方法实现数据绑定； 最后调用toAdapter()方法还原回Adapter。
+ * 创建通用 [NodeAdapter]（单布局与多布局均可）；多布局请在返回的 Adapter 上链式调用 [NodeAdapter.withType]，最后在子 [NodeProvider] 上调用 [NodeProvider.toAdapter]。
  *
- * @param custom 动态生成 itemType
+ * @param onItemId 稳定 id 回调；为 null 时使用 Adapter 默认实现。
+ * @param custom 动态返回 itemType；为 null 时不自定义。
  */
 fun nodeAdapter(
     onItemId: OnItemId<ViewBinding, NodeEntity<*, *>>? = null,

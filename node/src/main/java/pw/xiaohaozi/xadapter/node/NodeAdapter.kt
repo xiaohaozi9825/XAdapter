@@ -25,7 +25,6 @@ import pw.xiaohaozi.xadapter.smart.proxy.XEmployer
  * 注意：数据在展现过程中，会做扁平化处理，涉及到很多递归操作，对性能有一定影响，适合数据量少的场景
  *
  * 作者：小耗子
- * 简书地址：https://www.jianshu.com/u/2a2ea7b43087
  * github：https://github.com/xiaohaozi9825
  * 创建时间：2024/12/25 10:58
  */
@@ -40,6 +39,7 @@ open class NodeAdapter<VB : ViewBinding, D : NodeEntity<*, *>>(
         initProxy()
     }
 
+    /** 构造时初始化 [EventProxy] 与当前 Adapter 的宿主关系。 */
     private fun initProxy() {
         initProxy(this)
     }
@@ -50,10 +50,15 @@ open class NodeAdapter<VB : ViewBinding, D : NodeEntity<*, *>>(
             throw XAdapterException("employer不允许设置")
         }
 
+    /**
+     * 将事件代理绑定到宿主 [NodeAdapter]（一般为 this）。
+     * @param employer 当前 Adapter 实例。
+     */
     final override fun initProxy(employer: NodeAdapter<VB, D>) {
         eventProxy.initProxy(employer)
     }
 
+    /** 供代理层解析宿主 Adapter。 */
     override fun getEmployerAdapter(): NodeAdapter<VB, D> {
         return this
     }
@@ -76,6 +81,10 @@ open class NodeAdapter<VB : ViewBinding, D : NodeEntity<*, *>>(
     }
 
 
+    /**
+     * 按当前 [source] 重新扁平化并写入 Adapter 数据列表，随后 [notifyDataSetChanged]。
+     * 若已先调用 [refresh]（带集合参数）更新 [source]，可单独调用本方法触发表格刷新。
+     */
     @SuppressLint("NotifyDataSetChanged")
     fun refresh() {
         val temp = source?.flattenAndAssociationNode() ?: return
@@ -466,9 +475,13 @@ open class NodeAdapter<VB : ViewBinding, D : NodeEntity<*, *>>(
     }
 
     /**
-     * 多布局切换
-     * 返回Provider
-     * 该方法必须指定泛型，不支持自动推断类型
+     * 多布局切换；必须显式指定 [vb]、[d] 泛型，不支持完全类型推断。
+     * @param isFixed 是否占满整行/整列。
+     * @param itemType 显式 itemType；为 null 时由框架自动分配。
+     * @param init 创建 Provider 后的初始化。
+     * @param create [XHolder] 创建完成回调。
+     * @param bind 数据绑定（payload 刷新走 [OnBindParams]）。
+     * @return 新注册的 [NodeProvider]。
      */
     inline fun <reified vb : VB, reified d : D> withType(
         isFixed: Boolean? = null,

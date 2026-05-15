@@ -27,10 +27,10 @@ import kotlin.math.max
 import kotlin.math.min
 
 /**
+ * [SelectedProxy] 的默认实现：维护选中缓存、与列表变更同步，并向 Adapter 发 payload 刷新。
  *
- * 描述：
+ * 描述：依赖 [ObservableList] 回调在增删时校正选中项；支持最大可选数、全选等策略。
  * 作者：小耗子
- * 简书地址：https://www.jianshu.com/u/2a2ea7b43087
  * github：https://github.com/xiaohaozi9825
  * 创建时间：2022/10/5 22:47
  */

@@ -41,7 +41,6 @@ import kotlin.coroutines.CoroutineContext
  *
  * 描述：负责adapter生命周期分发，ViewHolder创建，类型提供者管理等工作
  * 作者：小耗子
- * 简书地址：https://www.jianshu.com/u/2a2ea7b43087
  * github：https://github.com/xiaohaozi9825
  * 创建时间：2024/6/8 14:59
  */
@@ -609,6 +608,10 @@ open class XAdapter<VB : ViewBinding, D, out R : XAdapter<VB, D, R>> : Adapter<X
         providers[itemType] = provider
     }
 
+    /**
+     * 按 [ViewBinding] 类型显示已注册的缺省页（与 [setDefaultPage] 中布局泛型一致）。
+     * 若找到且与当前展示的缺省页不同，则替换中间内容区并刷新。
+     */
     inline fun <reified T : ViewBinding> showDefaultPage() {
         val defaultPageTriple = defaultPages.findLast {
             val genericSuperclass = it.first.javaClass.genericSuperclass as? ParameterizedType
@@ -912,14 +915,17 @@ open class XAdapter<VB : ViewBinding, D, out R : XAdapter<VB, D, R>> : Adapter<X
         }
     }
 
+    /** 注册 ViewHolder 创建/绑定阶段的全局监听（先于具体 Provider 逻辑分发）。 */
     fun addOnViewHolderChanges(change: OnViewHolderChanges) {
         onViewHolderChanges.add(change)
     }
 
+    /** 注册 Adapter 附着/脱离 [RecyclerView] 的监听。 */
     fun addOnRecyclerViewChanges(change: OnRecyclerViewChanges) {
         onRecyclerViewChanges.add(change)
     }
 
+    /** 注册单个 item 视图附着/脱离窗口的监听。 */
     fun addOnViewChanges(change: OnViewChanges<VB>) {
         onViewChanges.add(change)
     }

@@ -18,10 +18,10 @@ import pw.xiaohaozi.xadapter.smart.proxy.XProxy
 import java.util.*
 
 /**
+ * [SmartDataProxy] 的默认实现：维护列表数据与 [RecyclerView] 通知，并在非 Differ 模式下与 [ObservableList] 回调联动。
  *
- * 描述：
+ * 描述：通过 [XEmployer] 解析宿主 [XAdapter] 后操作内部数据列表。
  * 作者：小耗子
- * 简书地址：https://www.jianshu.com/u/2a2ea7b43087
  * github：https://github.com/xiaohaozi9825
  * 创建时间：2022/10/6 8:47
  */
@@ -177,9 +177,12 @@ class SmartDataImpl<Employer : XProxy<Employer>, VB : ViewBinding, D> : SmartDat
         notifyChanged(null)
     }
 
+    /**
+     * 在保留原 [MutableList] 引用前提下，用 [list] 覆盖内容并 [notifyDataSetChanged]；适用于下拉刷新等全量替换。
+     * 非 Differ 模式；Differ 模式请使用 [submitList]。
+     */
     @SuppressLint("NotifyDataSetChanged")
     override fun <L : Collection<D>> refresh(list: L) {
-        if (adapter.isDifferMode()) throw XAdapterException("Differ模式不能使用改方法操作数据，更新数据请使用submitList()方法")
         if (list.isNotEmpty()) adapter.hasEmpty = true//空布局首次默认首次传入空数据时时不显示的
         getData().clear()
         getData().addAll(list)
@@ -242,8 +245,12 @@ class SmartDataImpl<Employer : XProxy<Employer>, VB : ViewBinding, D> : SmartDat
         }
     }
 
+    /**
+     * 交换数据区两个索引位置的元素并触发 [notifyItemMoved]；非 Differ 模式。
+     * @param fromPosition 数据列表中的起始索引
+     * @param toPosition 数据列表中的目标索引
+     */
     override fun swap(fromPosition: Int, toPosition: Int) {
-        if (adapter.isDifferMode()) throw XAdapterException("Differ模式不能使用改方法操作数据，更新数据请使用submitList()方法")
         Collections.swap(getData(), fromPosition, toPosition)
         val fromAdapterPosition = adapter.getAdapterPosition(fromPosition)
         val toAdapterPosition = adapter.getAdapterPosition(toPosition)
@@ -253,6 +260,10 @@ class SmartDataImpl<Employer : XProxy<Employer>, VB : ViewBinding, D> : SmartDat
     }
 
 
+    /**
+     * 提交新列表到 [AsyncListDiffer]；需在 [setDiffer] 之后调用。
+     * 提交完成后执行 [commitCallback]（例如关闭加载框）。
+     */
     override fun submitList(list: List<D>, commitCallback: Runnable) {
         if (!adapter.isDifferMode()) throw XAdapterException("adapter初始化时必须调用adapter.setDiffer()方法，配置为Differ模式")
         if (!list.isEmpty()) adapter.hasEmpty = false
@@ -264,6 +275,7 @@ class SmartDataImpl<Employer : XProxy<Employer>, VB : ViewBinding, D> : SmartDat
         }
     }
 
+    /** 提交新列表到 [AsyncListDiffer]；需在 [setDiffer] 之后调用。 */
     override fun submitList(list: List<D>) {
         if (!adapter.isDifferMode()) throw XAdapterException("adapter初始化时必须调用adapter.setDiffer()方法，配置为Differ模式")
         if (!list.isEmpty()) adapter.hasEmpty = false
@@ -273,6 +285,9 @@ class SmartDataImpl<Employer : XProxy<Employer>, VB : ViewBinding, D> : SmartDat
     }
 
 
+    /**
+     * 使用 [DiffUtil.ItemCallback] 启用异步差分刷新；返回 [employer] 便于链式调用。
+     */
     override fun setDiffer(
         diffCallback: DiffUtil.ItemCallback<D>,
         listener: AsyncListDiffer.ListListener<D>
@@ -285,6 +300,7 @@ class SmartDataImpl<Employer : XProxy<Employer>, VB : ViewBinding, D> : SmartDat
         return employer
     }
 
+    /** 使用自定义 [AsyncDifferConfig] 启用异步差分刷新；返回 [employer] 便于链式调用。 */
     override fun setDiffer(
         config: AsyncDifferConfig<D>,
         listener: AsyncListDiffer.ListListener<D>
@@ -294,10 +310,12 @@ class SmartDataImpl<Employer : XProxy<Employer>, VB : ViewBinding, D> : SmartDat
         return employer
     }
 
+    /** 注册 [ObservableList] 数据变更回调（如选中模块同步列表变化）。 */
     override fun addOnListChangedCallback(callback: ObservableList.OnListChangedCallback<MutableList<D>>) {
         callbacks.add(callback)
     }
 
+    /** 移除已注册的列表变更回调。 */
     override fun removeOnListChangedCallback(callback: ObservableList.OnListChangedCallback<MutableList<D>>) {
         callbacks.remove(callback)
     }

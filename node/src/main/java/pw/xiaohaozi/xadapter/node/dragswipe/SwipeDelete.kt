@@ -29,6 +29,7 @@ class SwipeDelete(
 
     override lateinit var itemSwipe: ItemSwipe
 
+    /** 仅对「常规数据行」响应侧滑；头/脚/空页等返回 0 位移标志。 */
     override fun getMovementFlags(
         recyclerView: RecyclerView,
         viewHolder: RecyclerView.ViewHolder
@@ -38,6 +39,7 @@ class SwipeDelete(
         else makeMovementFlags(0, flags.invoke(recyclerView, viewHolder))
     }
 
+    /** 仅允许同 [itemViewType] 之间判定移动（此处用于占位，侧滑删除不依赖交换）。 */
     override fun onMove(
         recyclerView: RecyclerView,
         source: RecyclerView.ViewHolder,
@@ -46,7 +48,9 @@ class SwipeDelete(
         return source.itemViewType == target.itemViewType
     }
 
-    //侧滑完成后会回调这里，需要在这里执行删除操作
+    /**
+     * 侧滑结束：若 [swipe] 未消费事件，则默认从 [NodeAdapter] 中移除当前节点（含子树由 Adapter 处理）。
+     */
     override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
         if (viewHolder !is XHolder<*>) return
         if (swipe?.invoke(viewHolder, direction) != true) {
@@ -55,10 +59,12 @@ class SwipeDelete(
         }
     }
 
+    /** 视为「已滑动足够距离」的阈值，传给 [ItemTouchHelper]。 */
     override fun getSwipeThreshold(viewHolder: RecyclerView.ViewHolder): Float {
         return threshold
     }
 
+    /** 侧滑过程中裁剪绘制区域，避免内容溢出。 */
     override fun onChildDrawOver(
         canvas: Canvas, recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder,
         dX: Float, dY: Float, actionState: Int, isCurrentlyActive: Boolean
@@ -85,10 +91,12 @@ class SwipeDelete(
         }
     }
 
+    /** 开始侧滑时回调 [start]。 */
     override fun onStart(viewHolder: RecyclerView.ViewHolder?) {
         start?.invoke(viewHolder)
     }
 
+    /** 手指离开视图、动画清理阶段回调 [end]。 */
     override fun clearView(recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder) {
         end?.invoke(recyclerView, viewHolder)
     }

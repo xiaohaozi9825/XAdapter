@@ -11,10 +11,10 @@ import pw.xiaohaozi.xadapter.smart.impl.EventImpl
 import pw.xiaohaozi.xadapter.smart.proxy.EventProxy
 
 /**
+ * 多类型列表中的单一「布局 + 数据」提供者，继承 [XProvider] 并混入 [EventProxy]，可在 Provider 作用域内注册点击等事件。
  *
- * 描述：
+ * 描述：与 [SmartAdapter] 配合使用；子布局可通过 [withType] 嵌套注册。
  * 作者：小耗子
- * 简书地址：https://www.jianshu.com/u/2a2ea7b43087
  * github：https://github.com/xiaohaozi9825
  * 创建时间：2024/6/9 22:08
  */
@@ -42,13 +42,19 @@ abstract class SmartProvider<AVB : ViewBinding, AD, PVB : ViewBinding, PD>(
     override fun isFixedViewType() = false
 
 
+    /** 当前 Provider 所属的 [SmartAdapter]。 */
     fun getSmartAdapter(): SmartAdapter<AVB, AD> {
         return adapter
     }
 
     /**
-     * 多布局切换
-     * 返回Provider
+     * 多布局切换：注册一种子 [ViewBinding] + 子数据类型 [pd] 的 Provider。
+     * @param isFixed 是否占满整行/整列（线性、网格、瀑布流有效）。
+     * @param itemType 显式指定 itemType；为 null 时由框架自动分配。
+     * @param init 创建 Provider 后的初始化（如事件、拖拽扩展）。
+     * @param created [XHolder] 创建完成后的回调。
+     * @param bind 绑定数据；优先走带 [payloads] 的重载（通过 [OnBindParams]）。
+     * @return 新注册的子 Provider。
      */
     inline fun <reified pvb : AVB, reified pd : AD> withType(
         isFixed: Boolean? = null,
@@ -80,6 +86,7 @@ abstract class SmartProvider<AVB : ViewBinding, AD, PVB : ViewBinding, PD>(
         return provider
     }
 
+    /** 从嵌套的 Provider 链回到外层 [SmartAdapter]，便于继续配置 Adapter 级能力。 */
     fun toAdapter(): SmartAdapter<AVB, AD> {
         return adapter
     }

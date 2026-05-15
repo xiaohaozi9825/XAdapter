@@ -37,6 +37,9 @@ fun <T> LinkedHashSet<T?>.removeAt(@IntRange(from = 0) index: Int) {
     }
 }
 
+/**
+ * 按下标读取 [LinkedHashSet] 中第 [index] 个元素（按迭代顺序）；越界或未找到时返回 null。
+ */
 fun <T> LinkedHashSet<T>.get(@IntRange(from = 0) index: Int): T? {
     var t: T? = null
     this.forEachIndexed { i, data ->
