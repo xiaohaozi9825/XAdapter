@@ -67,7 +67,8 @@ open class XHolder<VB : ViewBinding>(
 
     /**
      * 是否是常规布局
-     * 非特殊ViewHolder，如头布局，空布局，错误布局，底部布局
+     *
+     * @return true-常规布局  false-特殊布局（如头布局、脚布局、空布局、缺省页）
      */
     fun isRoutineLayout(): Boolean {
         val dataPosition = xAdapter.getDataPosition(adapterPosition)
@@ -77,7 +78,8 @@ open class XHolder<VB : ViewBinding>(
 
 /**
  * 是否是常规布局
- * 该方法不对外开放，如需使用，请使用XHolder类中成员方法isRoutineLayout()
+ *
+ * @return true-常规布局  false-特殊布局（如头布局、脚布局、空布局、缺省页）
  */
 internal fun RecyclerView.ViewHolder.isXRoutineLayout(): Boolean {
     return (this as? XHolder<*>)?.isRoutineLayout() ?: false

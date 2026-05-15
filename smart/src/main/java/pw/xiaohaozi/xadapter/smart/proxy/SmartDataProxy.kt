@@ -4,6 +4,7 @@ import androidx.recyclerview.widget.AsyncDifferConfig
 import androidx.recyclerview.widget.AsyncListDiffer
 import androidx.recyclerview.widget.DiffUtil
 import androidx.viewbinding.ViewBinding
+import pw.xiaohaozi.xadapter.smart.impl.DefaultItemCallback
 import java.util.LinkedList
 
 /**
@@ -118,7 +119,7 @@ interface SmartDataProxy<Employer : XProxy<Employer>, VB : ViewBinding, D> :
      * 使用Differ算法迭代数据
      */
     fun setDiffer(
-        diffCallback: DiffUtil.ItemCallback<D>,
+        diffCallback: DiffUtil.ItemCallback<D> = DefaultItemCallback(),
         listener: AsyncListDiffer.ListListener<D> = AsyncListDiffer.ListListener<D> { _, _ -> }
     ): Employer
 

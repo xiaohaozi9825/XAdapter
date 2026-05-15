@@ -15,6 +15,7 @@ import kotlinx.coroutines.launch
 import pw.xiaohaozi.xadapter.R
 import pw.xiaohaozi.xadapter.databinding.FragmentDataOperationBinding
 import pw.xiaohaozi.xadapter.databinding.ItemDataOperationBinding
+import pw.xiaohaozi.xadapter.databinding.ItemEmptyBinding
 import pw.xiaohaozi.xadapter.databinding.ItemHomeFooterBinding
 import pw.xiaohaozi.xadapter.databinding.ItemHomeHeaderBinding
 import pw.xiaohaozi.xadapter.dialog.InputDialog
@@ -176,6 +177,7 @@ class DataDifferFragment : VBFragment<FragmentDataOperationBinding>() {
 //            .setDiffer(itemCallback)
             .swipeDelete()
             .dragSort()
+            .setEmpty<ItemEmptyBinding>()
     }
 
 

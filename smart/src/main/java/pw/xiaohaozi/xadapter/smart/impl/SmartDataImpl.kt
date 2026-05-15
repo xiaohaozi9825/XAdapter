@@ -8,6 +8,7 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListUpdateCallback
 import androidx.viewbinding.ViewBinding
 import pw.xiaohaozi.xadapter.smart.XAdapterException
+import pw.xiaohaozi.xadapter.smart.impl.DefaultItemCallback
 import pw.xiaohaozi.xadapter.smart.adapter.XAdapter
 import pw.xiaohaozi.xadapter.smart.ext.removeRange
 import pw.xiaohaozi.xadapter.smart.proxy.ObservableList
@@ -251,32 +252,18 @@ class SmartDataImpl<Employer : XProxy<Employer>, VB : ViewBinding, D> : SmartDat
 
 
     override fun submitList(list: List<D>, commitCallback: Runnable) {
-        if (!adapter.isDifferMode()) setDiffer(object : DiffUtil.ItemCallback<D>() {
-            override fun areItemsTheSame(p0: D & Any, p1: D & Any): Boolean {
-                return p0 == p1
-            }
-
-            @SuppressLint("DiffUtilEquals")
-            override fun areContentsTheSame(p0: D & Any, p1: D & Any): Boolean {
-                return p0 == p1
-            }
-
-        })
+        if (!adapter.isDifferMode()) throw XAdapterException("adapter初始化时必须调用adapter.setDiffer()方法，配置为Differ模式")
+        if (adapter.getDataList().isEmpty() && adapter.emptyTriple != null) {
+            adapter.notifyItemRemoved(adapter.getHeaderProviderCount() + 0)
+        }
         adapter.asyncListDiffer.submitList(list, commitCallback)
     }
 
     override fun submitList(list: List<D>) {
-        if (!adapter.isDifferMode()) setDiffer(object : DiffUtil.ItemCallback<D>() {
-            override fun areItemsTheSame(p0: D & Any, p1: D & Any): Boolean {
-                return p0 == p1
-            }
-
-            @SuppressLint("DiffUtilEquals")
-            override fun areContentsTheSame(p0: D & Any, p1: D & Any): Boolean {
-                return p0 == p1
-            }
-
-        })
+        if (!adapter.isDifferMode()) throw XAdapterException("adapter初始化时必须调用adapter.setDiffer()方法，配置为Differ模式")
+        if (adapter.getDataList().isEmpty() && adapter.emptyTriple != null) {
+            adapter.notifyItemRemoved(adapter.getHeaderProviderCount() + 0)
+        }
         adapter.asyncListDiffer.submitList(list)
     }
 

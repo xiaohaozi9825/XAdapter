@@ -109,7 +109,6 @@ open class XAdapter<VB : ViewBinding, D, out R : XAdapter<VB, D, R>> : Adapter<X
     }
 
     private fun bindViewHolder(holder: XHolder<VB>, position: Int, payloads: MutableList<Any>?) {
-        Log.i(TAG, "bindViewHolder: ")
         if (position < 0) return
         holder.resetBindScope()
         holder.data = getData(position)
