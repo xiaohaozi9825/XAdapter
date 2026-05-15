@@ -27,7 +27,6 @@ import pw.xiaohaozi.xadapter.smart.entity.FOOTER
 import pw.xiaohaozi.xadapter.smart.entity.HEADER
 import pw.xiaohaozi.xadapter.smart.entity.XMultiItemEntity
 import pw.xiaohaozi.xadapter.smart.holder.XHolder
-import pw.xiaohaozi.xadapter.smart.provider.SmartProvider
 import pw.xiaohaozi.xadapter.smart.provider.TypeProvider
 import pw.xiaohaozi.xadapter.smart.provider.XProvider
 import java.lang.reflect.ParameterizedType
@@ -92,7 +91,8 @@ open class XAdapter<VB : ViewBinding, D, out R : XAdapter<VB, D, R>> : Adapter<X
 
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): XHolder<VB> {
-        val provide = providers[viewType] ?: throw XAdapterException("没有找到viewType = $viewType 的 provide，请检查adapter中各布局与数据集合中数据类型是否匹配。")
+        val provide = providers[viewType]
+            ?: throw XAdapterException("没有找到viewType = $viewType 的 provide，请检查adapter中各布局与数据集合中数据类型是否匹配。")
         val holder: XHolder<*> = provide.onCreateViewHolder(parent, viewType)
         onViewHolderChanges.tryNotify { onCreated(provide, holder) }
         provide.onCreatedViewHolder(holder)
@@ -165,6 +165,7 @@ open class XAdapter<VB : ViewBinding, D, out R : XAdapter<VB, D, R>> : Adapter<X
         return getDataList()
     }
 
+
     /**
      * 获取指定位置的数据
      * @param position adapterPosition
@@ -210,7 +211,7 @@ open class XAdapter<VB : ViewBinding, D, out R : XAdapter<VB, D, R>> : Adapter<X
             }
 
         }
-        if (emptyTriple != null && dataSize == 0) {
+        if (hasEmpty) {//如果当前显示了空布局
             return when {
                 hasHeader && hasFooter -> {
                     //头布局
@@ -281,7 +282,7 @@ open class XAdapter<VB : ViewBinding, D, out R : XAdapter<VB, D, R>> : Adapter<X
      */
     override fun getItemViewType(position: Int): Int {
         val dataSize = getDataList().size
-        val headerCount = getHeaderProviderCount()
+        val headerCount = if (hasHeader) getHeaderProviderCount() else 0
 
         //如果设置了缺省页，则使用缺省页
         if (defaultPageTriple != null) {
@@ -314,7 +315,7 @@ open class XAdapter<VB : ViewBinding, D, out R : XAdapter<VB, D, R>> : Adapter<X
                 }
             }
         }
-        if (emptyTriple != null && dataSize == 0) {
+        if (hasEmpty) {//如果当前adapter显示了空布局
             return when {
                 hasHeader && hasFooter -> {
                     //头布局
@@ -344,6 +345,7 @@ open class XAdapter<VB : ViewBinding, D, out R : XAdapter<VB, D, R>> : Adapter<X
                 }
             }
         }
+        Log.i("caonima", "itemCount = $itemCount -- position = $position")
 
         //头布局
         if (hasHeader && position < headerCount) return headers[position].second
@@ -423,13 +425,39 @@ open class XAdapter<VB : ViewBinding, D, out R : XAdapter<VB, D, R>> : Adapter<X
                 notifyItemRangeRemoved(itemCount - footersCount, footersCount)
             }
         }
+    var hasEmpty: Boolean = false
+        set(value) {
+            if (defaultPageTriple == null && emptyTriple != null && datas.isEmpty()) {
+                if (field) {
+                    //如果上一次是隐藏状态：field = true    datas.isEmpty() = false ; 有数据
+                    // value = false -> 存值 return  ；   value = true return
+                    //如果上一次是显示状态，field = true   datas.isEmpty() = true ;
+                    //value = false -> 存值、隐藏 ； value = true return
+                    if (!value) {
+                        notifyItemRemoved(if (hasHeader) getHeaderProviderCount() else 0)
+                    }
+                } else {
+                    //如果上一次是隐藏状态： field = false   datas.isEmpty() = true ; 无数据
+                    //  value = false -> return ； value = true 存值、显示
+                    //如果上一次是隐藏状态：field = false   datas.isEmpty() = false ;有数据
+                    // value = false -> return ；  value = true 存值
+                    if (value) {
+                        notifyItemInserted(if (hasHeader) getHeaderProviderCount() else 0)
+                    }
+                }
+            }
+            field = value
+        }
+        get() {
+            return defaultPageTriple == null && emptyTriple != null && field && datas.isEmpty()
+        }
 
     override fun getItemCount(): Int {
         val headerCount = if (hasHeader) getHeaderProviderCount() else 0
         val footerCount = if (hasFooter) getFooterProviderCount() else 0
         val dataCount = getDataList().size
         if (defaultPageTriple != null) return headerCount + footerCount + 1
-        if (emptyTriple != null && dataCount == 0) return headerCount + footerCount + 1
+        if (hasEmpty) return headerCount + footerCount + 1
         return headerCount + footerCount + dataCount
     }
 
@@ -563,8 +591,9 @@ open class XAdapter<VB : ViewBinding, D, out R : XAdapter<VB, D, R>> : Adapter<X
      * 设置空布局
      * 初始化时设置，当数据为空时自动展示
      */
-    fun setEmptyProvider(provider: XProvider<*, *>, footer: EMPTY) {
+    fun setEmptyProvider(provider: XProvider<*, *>, footer: EMPTY, showOnFirstLoad: Boolean) {
         val type = automaticallyItemType(provider)
+        hasEmpty = showOnFirstLoad
         emptyTriple = Triple(provider, type, footer)
         providers[type] = provider
     }
@@ -603,6 +632,7 @@ open class XAdapter<VB : ViewBinding, D, out R : XAdapter<VB, D, R>> : Adapter<X
         val defaultPageTriple = defaultPages.find { it.third.tag == tag }
         //找到了对应的缺省页，且与上次展示的不一样时，才刷新
         if (defaultPageTriple != null && defaultPageTriple != this.defaultPageTriple) {
+            hasEmpty = false
             val itemCount = itemCount
             val headerCount = if (hasHeader) getHeaderProviderCount() else 0
             val footerCount = if (hasFooter) getFooterProviderCount() else 0
@@ -726,11 +756,13 @@ open class XAdapter<VB : ViewBinding, D, out R : XAdapter<VB, D, R>> : Adapter<X
      * 改方法需在初始化adapter时设置，设置后并不直接显示。
      * 当adapter无数据时自动显示，有数据时自动隐藏。
      *
+     * @param showOnFirstLoad 首次加载时数据为空是否显示该布局
      * @param init 初始化时回调，可在此设置事件监听操作
      * @param create 创建ViewHolder后调用，可用于初始化item
      * @param bind 绑定视图时调用
      */
     inline fun <reified vb : ViewBinding> setEmpty(
+        showOnFirstLoad: Boolean = false,
         noinline init: (XProvider<vb, EMPTY>.() -> Unit)? = null,
         noinline create: (XProvider<vb, EMPTY>.(holder: XHolder<vb>) -> Unit)? = null,
         noinline bind: (XProvider<vb, EMPTY>.(holder: XHolder<vb>) -> Unit)? = null,
@@ -750,7 +782,7 @@ open class XAdapter<VB : ViewBinding, D, out R : XAdapter<VB, D, R>> : Adapter<X
             }
 
         }
-        setEmptyProvider(provider, EMPTY)
+        setEmptyProvider(provider, EMPTY, showOnFirstLoad)
         init?.invoke(provider)
         @Suppress("UNCHECKED_CAST")
         return this as R

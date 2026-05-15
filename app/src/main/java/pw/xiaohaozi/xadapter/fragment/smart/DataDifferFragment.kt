@@ -55,9 +55,10 @@ class DataDifferFragment : VBFragment<FragmentDataOperationBinding>() {
             val dataList = ArrayList(adapter.getDataList())
             dataList.removeAll(adapter.getSelectedList().toSet())
             adapter.submitList(ArrayList(dataList))
-
         }
         binding.rvList.adapter = adapter
+//        adapter.hasHeader = false
+//        adapter.hasFooter = false
         adapter.addOnListChangedCallback(object : ObservableList.OnListChangedCallback<MutableList<VerseInfo>>() {
             override fun onChanged(sender: MutableList<VerseInfo>, payload: Any?) {
                 binding.tvItemCount.text = "共${sender.size}条数据"
@@ -146,8 +147,8 @@ class DataDifferFragment : VBFragment<FragmentDataOperationBinding>() {
                 holder.binding.tvSelectedIndex.setBackgroundResource(R.drawable.bg_selected_position)
             }
         }
-            .addHeader<ItemHomeHeaderBinding>()
-            .addFooter<ItemHomeFooterBinding>()
+//            .addHeader<ItemHomeHeaderBinding>()
+//            .addFooter<ItemHomeFooterBinding>()
 //            .setOnClickListener { holder, data, position, view ->
 //                setSelect(data, !isSelected(data))
 //            }
@@ -174,10 +175,13 @@ class DataDifferFragment : VBFragment<FragmentDataOperationBinding>() {
                     .onCancel {}
                     .show()
             }
-//            .setDiffer(itemCallback)
+            .setDiffer(itemCallback)
             .swipeDelete()
             .dragSort()
             .setEmpty<ItemEmptyBinding>()
+            .setDefaultPage<ItemEmptyBinding> { h, d ->
+                h.binding.tvContent.text = "缺省页"
+            }
     }
 
 

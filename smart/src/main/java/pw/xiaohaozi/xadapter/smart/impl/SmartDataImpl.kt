@@ -1,6 +1,7 @@
 package pw.xiaohaozi.xadapter.smart.impl
 
 import android.annotation.SuppressLint
+import android.util.Log
 import androidx.annotation.IntRange
 import androidx.recyclerview.widget.AsyncDifferConfig
 import androidx.recyclerview.widget.AsyncListDiffer
@@ -8,7 +9,6 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListUpdateCallback
 import androidx.viewbinding.ViewBinding
 import pw.xiaohaozi.xadapter.smart.XAdapterException
-import pw.xiaohaozi.xadapter.smart.impl.DefaultItemCallback
 import pw.xiaohaozi.xadapter.smart.adapter.XAdapter
 import pw.xiaohaozi.xadapter.smart.ext.removeRange
 import pw.xiaohaozi.xadapter.smart.proxy.ObservableList
@@ -171,6 +171,7 @@ class SmartDataImpl<Employer : XProxy<Employer>, VB : ViewBinding, D> : SmartDat
     @SuppressLint("NotifyDataSetChanged")
     override fun <L : MutableList<D>> setList(list: L) {
         if (adapter.isDifferMode()) throw XAdapterException("Differ模式不能使用改方法操作数据，更新数据请使用submitList()方法")
+        if (list.isNotEmpty()) adapter.hasEmpty = true//空布局首次默认首次传入空数据时时不显示的
         adapter.setDataList(list)
         adapter.notifyDataSetChanged()
         notifyChanged(null)
@@ -179,6 +180,7 @@ class SmartDataImpl<Employer : XProxy<Employer>, VB : ViewBinding, D> : SmartDat
     @SuppressLint("NotifyDataSetChanged")
     override fun <L : Collection<D>> refresh(list: L) {
         if (adapter.isDifferMode()) throw XAdapterException("Differ模式不能使用改方法操作数据，更新数据请使用submitList()方法")
+        if (list.isNotEmpty()) adapter.hasEmpty = true//空布局首次默认首次传入空数据时时不显示的
         getData().clear()
         getData().addAll(list)
         adapter.notifyDataSetChanged()
@@ -253,18 +255,21 @@ class SmartDataImpl<Employer : XProxy<Employer>, VB : ViewBinding, D> : SmartDat
 
     override fun submitList(list: List<D>, commitCallback: Runnable) {
         if (!adapter.isDifferMode()) throw XAdapterException("adapter初始化时必须调用adapter.setDiffer()方法，配置为Differ模式")
-        if (adapter.getDataList().isEmpty() && adapter.emptyTriple != null) {
-            adapter.notifyItemRemoved(adapter.getHeaderProviderCount() + 0)
+        if (!list.isEmpty()) adapter.hasEmpty = false
+        adapter.asyncListDiffer.submitList(list) {
+            run {
+                if (list.isEmpty()) adapter.hasEmpty = true
+                commitCallback.run()
+            }
         }
-        adapter.asyncListDiffer.submitList(list, commitCallback)
     }
 
     override fun submitList(list: List<D>) {
         if (!adapter.isDifferMode()) throw XAdapterException("adapter初始化时必须调用adapter.setDiffer()方法，配置为Differ模式")
-        if (adapter.getDataList().isEmpty() && adapter.emptyTriple != null) {
-            adapter.notifyItemRemoved(adapter.getHeaderProviderCount() + 0)
+        if (!list.isEmpty()) adapter.hasEmpty = false
+        adapter.asyncListDiffer.submitList(list) {
+            run { if (list.isEmpty()) adapter.hasEmpty = true }
         }
-        adapter.asyncListDiffer.submitList(list)
     }
 
 
