@@ -5,6 +5,7 @@ import kotlinx.coroutines.CoroutineScope
 import pw.xiaohaozi.xadapter.node.entity.NodeEntity
 import pw.xiaohaozi.xadapter.node.ext.OnProviderBindHolder
 import pw.xiaohaozi.xadapter.node.ext.OnProviderInitHolder
+import pw.xiaohaozi.xadapter.smart.XAdapterException
 import pw.xiaohaozi.xadapter.smart.params.OnBindParams
 import pw.xiaohaozi.xadapter.smart.holder.XHolder
 import pw.xiaohaozi.xadapter.smart.impl.EventImpl
@@ -29,7 +30,9 @@ abstract class NodeProvider<AVB : ViewBinding, AD : NodeEntity<*, *>, VB : AVB, 
 
     override var employer: NodeProvider<AVB, AD, VB, D>
         get() = this
-        set(value) {    }
+        set(value) {
+            throw XAdapterException("禁止赋值")
+        }
 
     /**
      * 将事件代理绑定到当前 Provider（构造时调用）。

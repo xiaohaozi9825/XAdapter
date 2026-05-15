@@ -183,6 +183,7 @@ class SmartDataImpl<Employer : XProxy<Employer>, VB : ViewBinding, D> : SmartDat
      */
     @SuppressLint("NotifyDataSetChanged")
     override fun <L : Collection<D>> refresh(list: L) {
+        if (adapter.isDifferMode()) throw XAdapterException("Differ模式不能使用改方法操作数据，更新数据请使用submitList()方法")
         if (list.isNotEmpty()) adapter.hasEmpty = true//空布局首次默认首次传入空数据时时不显示的
         getData().clear()
         getData().addAll(list)
@@ -251,6 +252,7 @@ class SmartDataImpl<Employer : XProxy<Employer>, VB : ViewBinding, D> : SmartDat
      * @param toPosition 数据列表中的目标索引
      */
     override fun swap(fromPosition: Int, toPosition: Int) {
+        if (adapter.isDifferMode()) throw XAdapterException("Differ模式不能使用改方法操作数据，更新数据请使用submitList()方法")
         Collections.swap(getData(), fromPosition, toPosition)
         val fromAdapterPosition = adapter.getAdapterPosition(fromPosition)
         val toAdapterPosition = adapter.getAdapterPosition(toPosition)

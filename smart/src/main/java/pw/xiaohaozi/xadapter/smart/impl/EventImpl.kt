@@ -52,6 +52,7 @@ class EventImpl<Employer : XProxy<Employer>, VB : ViewBinding, D> : EventProxy<E
      * 向 [XAdapter] 注册 ViewHolder 监听，在创建完成后根据已配置的 map 绑定事件。
      */
     override fun initProxy(employer: Employer) {
+        super.initProxy(employer)
         adapter.addOnViewHolderChanges(object : XAdapter.OnViewHolderChanges {
             override fun onCreated(provide: TypeProvider<*, *>, holder: XHolder<*>) {
                 if (employer == adapter) {//adapter
@@ -124,21 +125,25 @@ class EventImpl<Employer : XProxy<Employer>, VB : ViewBinding, D> : EventProxy<E
 
     /** 注册或覆盖指定 [id] 的 item 点击监听；[id] 为 null 时表示整项根布局。 */
     override fun setOnClickListener(id: Int?, listener: OnItemClickListener<Employer, VB, D>): Employer {
+        clickListenerMap[id] = listener
         return employer
     }
 
     /** 注册或覆盖长按监听。 */
     override fun setOnLongClickListener(id: Int?, listener: OnItemLongClickListener<Employer, VB, D>): Employer {
+        longClickListenerMap[id] = listener
         return employer
     }
 
     /** 注册 [CompoundButton]（如 CheckBox）选中状态变化监听。 */
     override fun setOnCheckedChangeListener(id: Int?, listener: OnItemCheckedChangeListener<Employer, VB, D>): Employer {
+        checkedChangeListener[id] = listener
         return employer
     }
 
     /** 注册 [TextView] / [android.widget.EditText] 文本变化监听。 */
     override fun setOnTextChange(id: Int?, listener: OnItemTextChange<Employer, VB, D>): Employer {
+        textChangeMap[id] = listener
         return employer
     }
 }
