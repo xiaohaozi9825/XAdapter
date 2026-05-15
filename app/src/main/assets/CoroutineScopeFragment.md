@@ -15,14 +15,14 @@
 
 ### 基础用法
 ```kotlin
-adapter.withType<ItemImageSelectedBinding, Int> { (holder, data, position, payloads) ->
+adapter.withType<ItemImageSelectedBinding, Int> { (holder, data, position, payloads,scope) ->
     if (!payloads.contains("select")) {
         //模拟耗时操作，在滑动时能明显感觉到卡顿
         //val bitmap = BitmapFactory.decodeResource(resources, data)
         //holder.binding.ivImage.setImageBitmap(bitmap)
 
         //使用协程，将耗时操作切换到其他线程
-        holder.launch(IO) {
+        scope.launch(IO) {
             val bitmap = BitmapFactory.decodeResource(resources, data)
             withContext(Main) {
                 holder.binding.ivImage.setImageBitmap(bitmap)

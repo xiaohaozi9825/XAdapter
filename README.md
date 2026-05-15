@@ -1,8 +1,21 @@
 # XAdapter
 
-> Android RecyclerView Adapter 封装库，旨在快速创建和快速使用Adapter，一个方法实现一个功能。
+> Android RecyclerView Adapter 封装库，旨在快速创建和快速使用 Adapter，一个方法实现一个功能。
 
-## 接入XAdapter
+- **SDK 模块**：`smart`（必选）、`node`（可选，树形/多级列表）  
+- **Demo 模块**：`app`（仅演示，**不要**作为依赖引入业务工程）  
+- **发版**：通过 [JitPack](https://jitpack.io/#xiaohaozi9825/XAdapter) 分发，适合「只加依赖、不 fork 源码」的集成方式  
+
+**中文文档（接入 / 环境 / 混淆 / 教程 / API）**：[docs/zh-CN/README.md](docs/zh-CN/README.md)  
+
+- **完整教程**：[docs/zh-CN/完整教程.md](docs/zh-CN/完整教程.md)  
+- **API 说明**： [smart](docs/zh-CN/API参考-smart.md) · [node](docs/zh-CN/API参考-node.md)  
+
+---
+
+## 接入 XAdapter（精简版）
+
+更完整的步骤、环境版本、混淆说明见 **[docs/zh-CN/接入指南.md](docs/zh-CN/接入指南.md)**；**用法教程**见 **[docs/zh-CN/完整教程.md](docs/zh-CN/完整教程.md)**，**符号级 API** 见 **[docs/zh-CN/API参考-smart.md](docs/zh-CN/API参考-smart.md)** / **[docs/zh-CN/API参考-node.md](docs/zh-CN/API参考-node.md)**。
 
 #### 步骤1. 将 JitPack 添加到您的 build 文件中
 
@@ -22,12 +35,14 @@ dependencyResolutionManagement {
 
 [![](https://jitpack.io/v/xiaohaozi9825/XAdapter.svg)](https://jitpack.io/#xiaohaozi9825/XAdapter)
 
+将 **`<Tag>`** 替换为你在 JitPack 选用的 **Git Tag 或 commit**（须与页面已成功构建的版本一致）。页面 **Gradle**  tab 可复制官方生成的坐标。
+
 ```
 dependencies {
-    //基础模块，必须依赖
-    implementation 'com.github.xiaohaozi9825.XAdapter:smart:2.0.0'
-    //可选
-    implementation 'com.github.xiaohaozi9825.XAdapter:node:2.0.0'
+    // 核心 SDK（必选）
+    implementation 'com.github.xiaohaozi9825:XAdapter:smart:<Tag>'
+    // 树形 / 多级列表（可选，与 smart 同 Tag）
+    implementation 'com.github.xiaohaozi9825:XAdapter:node:<Tag>'
 }
 ```
 
@@ -71,7 +86,7 @@ V1.0 smart
 - 选择操作：单选、多选、全选、全不选
 - 数据操作：添加数据、删除数据、修改数据、获取列表数据、获取已选列表
 
-V2、0 node
+V2.0 node
 
 - 快速创建：单布局node创建、多布局node创建
 - 展开折叠：展开或收起子节点
@@ -93,7 +108,7 @@ V1.0 smart
 - dragSort：设置拖拽排序
 - swipeMenu：设置侧滑菜单
 
-V2、0 node
+V2.0 node
 
 - nodeAdapter：创建NodeAdapter
 - withType：切换类型
@@ -121,9 +136,9 @@ V1.0 smart
 - `fun <L : Collection<D>> update(list: L, payload: Any? = null)`更新数据
 - `fun swap(fromPosition: Int, toPosition: Int)`交换数据
 - `fun setDiffer(): Employer`设置Differ模式
-- `fun submitList(list: List<D>)`Deffer模式更新数据
+- `fun submitList(list: List<D>)`Differ模式更新数据
 
-V2、0 node
+V2.0 node
 - `addNode(node: D, index: Int? = null)` 添加一个根节点
 - `addNode(nodes: L, index: Int? = null)` 添加多个根节点
 - `addChildNode(parent: D, node: D, index: Int? = null)` 添加一个子节点
@@ -173,33 +188,31 @@ V1.0 smart
 
 ## 示例代码
 
-#### 创建单布局Adapter
+绑定回调统一为 **`OnBindParams`**（属性：`binding`、`data`、`position`、`payloads`；可作为 `CoroutineScope` 使用）。详见 [完整教程](docs/zh-CN/完整教程.md)。
 
-调用createAdapter()方法，泛型VB确定布局文件，D确定数据类型，回调方法中完成数据与视图的绑定。
+#### 创建单布局 Adapter
 
 ```kotlin
-val adapter = createAdapter<ItemVerseBinding, VerseInfo> { (holder, data) ->
-    holder.binding.tvContent.text = data.content
-    holder.binding.tvAuthor.text = data.author
+val adapter = createAdapter<ItemVerseBinding, VerseInfo> { p ->
+    p.binding.tvContent.text = p.data.content
+    p.binding.tvAuthor.text = p.data.author
 }
 ```
 
-#### 创建多布局Adapter
-
-调用createAdapter()方法创建adapter实例；使用withType切换布局类型，返回Provider；调用toAdapter()
-方法将Provider转换为adapter。
+#### 创建多布局 Adapter
 
 ```kotlin
 val adapter = createAdapter()
-    .withType<ItemVerseBinding, VerseInfo> { (holder, data, position) ->
-        holder.binding.tvContent.text = data.content
-        holder.binding.tvAuthor.text = data.author
+    .withType<ItemVerseBinding, VerseInfo> { p ->
+        p.binding.tvContent.text = p.data.content
     }
-    .withType<ItemImageCardBinding, Int> { (holder, data, position) ->
-        holder.binding.image.setImageResource(data)
+    .withType<ItemImageCardBinding, ImageItem> { p ->
+        p.binding.image.setImageResource(p.data.resId)
     }
     .toAdapter()
 ```
+
+若各类型数据有统一父类型（如 `sealed class Row`），可使用 `createTypeAdapter<ViewBinding, Row>()`，再为各子类写 `withType`。
 
 ## 相关地址
 
