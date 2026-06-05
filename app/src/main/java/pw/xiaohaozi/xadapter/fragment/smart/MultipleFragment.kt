@@ -19,7 +19,7 @@ import pw.xiaohaozi.xadapter.smart.ext.createAdapter
  */
 class MultipleFragment : VBFragment<FragmentRecyclerBinding>() {
     //①创建adapter
-    private val adapter = function1()
+    private val adapter by lazy { function2() }
 
     override fun FragmentRecyclerBinding.initView() {
         recycleView.layoutManager = LinearLayoutManager(requireContext())
@@ -47,21 +47,22 @@ class MultipleFragment : VBFragment<FragmentRecyclerBinding>() {
             .toAdapter()
     }
 
+
     private fun function2(): SmartAdapter<ViewBinding, Any?> {
         //①创建Adapter
-        val smartAdapter = SmartAdapter<ViewBinding, Any?>()
+        val smartAdapter =SmartAdapter<ViewBinding, Any?>()
         //②创建Provider
         val provider1 = MultipleProvider1(smartAdapter)
         val provider2 = MultipleProvider2(smartAdapter)
         //③将Provider 添加到 Adapter中
         //方式一：使用方法添加，viewType可不填
-
+//
         smartAdapter.addProvider(provider2)
         smartAdapter.addProvider(provider1)
 //
         return smartAdapter
         //方式一二：使用➕链接，viewType为空
-//        return xAdapter + provider2 + provider1
+//        return smartAdapter + provider2 + provider1
 
     }
 

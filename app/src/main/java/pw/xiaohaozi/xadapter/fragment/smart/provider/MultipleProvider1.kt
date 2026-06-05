@@ -7,7 +7,7 @@ import pw.xiaohaozi.xadapter.smart.adapter.SmartAdapter
 import pw.xiaohaozi.xadapter.smart.holder.XHolder
 import pw.xiaohaozi.xadapter.smart.provider.SmartProvider
 
-class MultipleProvider1(override val adapter: SmartAdapter<ViewBinding, Any?>) :
+class MultipleProvider1(adapter: SmartAdapter<ViewBinding, Any?>) :
     SmartProvider<ViewBinding, Any?, ItemImageCardBinding, Int>(adapter) {
 
     override fun onCreated(holder: XHolder<ItemImageCardBinding>) {

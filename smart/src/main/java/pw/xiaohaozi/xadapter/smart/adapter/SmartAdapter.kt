@@ -45,7 +45,7 @@ open class SmartAdapter<VB : ViewBinding, D>(
     override var employer: SmartAdapter<VB, D>
         get() = this
         set(value) {
-            throw XAdapterException("employer不允许设置")
+            throw XAdapterException("employer禁止赋值")
         }
 
     /**
