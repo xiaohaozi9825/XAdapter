@@ -40,9 +40,9 @@ dependencyResolutionManagement {
 ```
 dependencies {
     // 核心 SDK（必选）
-    implementation 'com.github.xiaohaozi9825:XAdapter:smart:<Tag>'
+    implementation 'com.github.xiaohaozi9825.XAdapter:smart:<Tag>'
     // 树形 / 多级列表（可选，与 smart 同 Tag）
-    implementation 'com.github.xiaohaozi9825:XAdapter:node:<Tag>'
+    implementation 'com.github.xiaohaozi9825.XAdapter:node:<Tag>'
 }
 ```
 
