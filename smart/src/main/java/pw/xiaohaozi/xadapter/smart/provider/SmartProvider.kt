@@ -2,6 +2,7 @@ package pw.xiaohaozi.xadapter.smart.provider
 
 import androidx.viewbinding.ViewBinding
 import kotlinx.coroutines.CoroutineScope
+import pw.xiaohaozi.xadapter.smart.XAdapterException
 import pw.xiaohaozi.xadapter.smart.params.OnBindParams
 import pw.xiaohaozi.xadapter.smart.adapter.SmartAdapter
 import pw.xiaohaozi.xadapter.smart.ext.OnProviderBindHolder
@@ -19,7 +20,7 @@ import pw.xiaohaozi.xadapter.smart.proxy.EventProxy
  * 创建时间：2024/6/9 22:08
  */
 abstract class SmartProvider<AVB : ViewBinding, AD, PVB : ViewBinding, PD>(
-    override val adapter: SmartAdapter<AVB, AD>, //
+    final override val adapter: SmartAdapter<AVB, AD>, //
     private val listener: EventImpl<SmartProvider<AVB, AD, PVB, PD>, PVB, PD> = EventImpl(),//
 ) : XProvider<PVB, PD>(adapter), EventProxy<SmartProvider<AVB, AD, PVB, PD>, PVB, PD> by listener {
     init {
@@ -29,7 +30,9 @@ abstract class SmartProvider<AVB : ViewBinding, AD, PVB : ViewBinding, PD>(
 
     override var employer: SmartProvider<AVB, AD, PVB, PD>
         get() = this
-        set(value) {}
+        set(value) {
+            throw XAdapterException("employer禁止赋值")
+        }
 
     override fun initProxy(employer: SmartProvider<AVB, AD, PVB, PD>) {
         listener.initProxy(employer)

@@ -21,7 +21,7 @@ import pw.xiaohaozi.xadapter.smart.proxy.EventProxy
  * 创建时间：2024/6/9 22:08
  */
 abstract class NodeProvider<AVB : ViewBinding, AD : NodeEntity<*, *>, VB : AVB, D : AD>(
-    override val adapter: NodeAdapter<AVB, AD>,
+    final override val adapter: NodeAdapter<AVB, AD>,
     private val listener: EventImpl<NodeProvider<AVB, AD, VB, D>, VB, D> = EventImpl(),//
 ) : XProvider<VB, D>(adapter), EventProxy<NodeProvider<AVB, AD, VB, D>, VB, D> by listener {
     init {
@@ -31,7 +31,7 @@ abstract class NodeProvider<AVB : ViewBinding, AD : NodeEntity<*, *>, VB : AVB, 
     override var employer: NodeProvider<AVB, AD, VB, D>
         get() = this
         set(value) {
-            throw XAdapterException("禁止赋值")
+            throw XAdapterException("employer禁止赋值")
         }
 
     /**
