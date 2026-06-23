@@ -1,4 +1,4 @@
-package pw.xiaohaozi.xadapter.fragment.example
+package pw.xiaohaozi.xadapter.fragment.example.imageselected
 
 import android.util.Log
 import androidx.annotation.OptIn

@@ -11,7 +11,7 @@ import pw.xiaohaozi.xadapter.fragment.node.CreateNodeFragment
 import pw.xiaohaozi.xadapter.fragment.node.EditNodeFragment
 import pw.xiaohaozi.xadapter.fragment.example.FriendFragment
 import pw.xiaohaozi.xadapter.fragment.example.GoodsFragment
-import pw.xiaohaozi.xadapter.fragment.example.ImageSelectedFragment
+import pw.xiaohaozi.xadapter.fragment.example.imageselected.ImageSelectedFragment
 import pw.xiaohaozi.xadapter.fragment.example.MultipleCategoryFragment
 import pw.xiaohaozi.xadapter.fragment.example.TagFragment
 import pw.xiaohaozi.xadapter.fragment.node.ExpandCollapseFragment
@@ -22,9 +22,6 @@ import pw.xiaohaozi.xadapter.fragment.smart.GroupFragment
 import pw.xiaohaozi.xadapter.fragment.smart.SelectFragment
 import pw.xiaohaozi.xadapter.fragment.smart.LongClickFragment
 import pw.xiaohaozi.xadapter.fragment.smart.MultipleFragment
-import pw.xiaohaozi.xadapter.fragment.node.Node2EditFragment
-import pw.xiaohaozi.xadapter.fragment.node.NodeEditFragment
-import pw.xiaohaozi.xadapter.fragment.node.NodeFragment
 import pw.xiaohaozi.xadapter.fragment.node.RemoveAtNodeFragment
 import pw.xiaohaozi.xadapter.fragment.node.RemoveListNodeFragment
 import pw.xiaohaozi.xadapter.fragment.node.RemoveMultipleNodeFragment

@@ -1,17 +1,9 @@
-package pw.xiaohaozi.xadapter.fragment.example
+package pw.xiaohaozi.xadapter.fragment.example.imageselected
 
-import android.os.Bundle
-import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
-import androidx.transition.ChangeBounds
-import androidx.transition.Fade
-import androidx.transition.TransitionInflater
-import androidx.transition.TransitionSet
-import androidx.viewpager2.adapter.FragmentStateAdapter
 import androidx.viewpager2.widget.ViewPager2
 import kotlinx.coroutines.launch
-import pw.xiaohaozi.xadapter.R
 import pw.xiaohaozi.xadapter.databinding.FragmentBigImagePreviewBinding
 import pw.xiaohaozi.xadapter.fragment.VBFragment
 

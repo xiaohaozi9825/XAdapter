@@ -1,4 +1,4 @@
-package pw.xiaohaozi.xadapter.fragment.example
+package pw.xiaohaozi.xadapter.fragment.example.imageselected
 
 import android.Manifest
 import android.animation.ObjectAnimator
@@ -7,10 +7,8 @@ import android.os.Build
 import android.util.Log
 import android.view.View
 import androidx.core.animation.addListener
-import androidx.core.view.ViewCompat
 import androidx.core.view.isVisible
 import androidx.fragment.app.activityViewModels
-import androidx.fragment.app.commit
 import androidx.lifecycle.lifecycleScope
 import com.hjq.permissions.Permission
 import kotlinx.coroutines.launch

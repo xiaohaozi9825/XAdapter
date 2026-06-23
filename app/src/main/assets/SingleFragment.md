@@ -27,7 +27,7 @@ inline fun <reified VB : ViewBinding, reified D> createAdapter(
 ### 基础用法
 ```kotlin
 //形参bind为必传，其他参数按需传入
-val adapter = createAdapter { 
+val adapter = createAdapter<ItemVerseBinding, VerseInfo> { 
     //编写数据绑定逻辑
 }
 ```
