@@ -14,7 +14,6 @@ import pw.xiaohaozi.xadapter.enableEdgeToEdge
 
 class EmptyActivity : AppCompatActivity() {
     private val binding by lazy { ActivityEmptyBinding.inflate(layoutInflater) }
-    private var markdownName: String? = null
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()

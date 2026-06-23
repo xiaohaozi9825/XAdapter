@@ -3,24 +3,17 @@ package pw.xiaohaozi.xadapter.fragment.example
 import android.Manifest
 import android.animation.ObjectAnimator
 import android.annotation.SuppressLint
-import android.graphics.Bitmap
-import android.graphics.BitmapFactory
 import android.os.Build
-import android.os.Bundle
 import android.util.Log
-import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
 import androidx.core.animation.addListener
+import androidx.core.view.ViewCompat
 import androidx.core.view.isVisible
-import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
+import androidx.fragment.app.commit
 import androidx.lifecycle.lifecycleScope
 import com.hjq.permissions.Permission
-import kotlinx.coroutines.Dispatchers.Default
-import kotlinx.coroutines.Dispatchers.IO
-import kotlinx.coroutines.Dispatchers.Main
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import pw.xiaohaozi.myvideo.utils.permission.RPermissions
 import pw.xiaohaozi.xadapter.R
 import pw.xiaohaozi.xadapter.databinding.FragmentImageSelectBinding
@@ -29,7 +22,6 @@ import pw.xiaohaozi.xadapter.databinding.ItemImageSelectedBinding
 import pw.xiaohaozi.xadapter.fragment.VBFragment
 import pw.xiaohaozi.xadapter.smart.ext.createAdapter
 import pw.xiaohaozi.xadapter.smart.ext.singleSelect
-import pw.xiaohaozi.xadapter.utils.LoadLocalMedia
 import pw.xiaohaozi.xadapter.utils.LoadMediaFile
 import pw.xiaohaozi.xadapter.utils.load
 
@@ -37,6 +29,7 @@ import pw.xiaohaozi.xadapter.utils.load
 class ImageSelectedFragment : VBFragment<FragmentImageSelectBinding>() {
     private val TAG = "ImageSelectedFragment"
     private var selectedList = mutableListOf<LoadMediaFile>()
+    private val viewModel by activityViewModels<ImageSelectedViewModel>()
 
     @SuppressLint("SetTextI18n")
     val groupAdapter = createAdapter<ItemImageSelectGroupBinding, MutableList<LoadMediaFile>> { (holder, data, position, payload) ->
@@ -50,7 +43,7 @@ class ImageSelectedFragment : VBFragment<FragmentImageSelectBinding>() {
     }.singleSelect { data, position, index, fromUser ->
         if (fromUser) {
             binding.tvGroupName.postDelayed({ binding.tvGroupName.text = data.firstOrNull().groupName(position) }, 300)
-            imageAdapter.refresh(data)
+            viewModel.curMediaList.value = data
             binding.viewCover.isVisible = false
             binding.cvGroup.hint()
             binding.ivArrow.rotation(180f, 360f)
@@ -58,7 +51,7 @@ class ImageSelectedFragment : VBFragment<FragmentImageSelectBinding>() {
     }
 
     @SuppressLint("SetTextI18n")
-    private val imageAdapter = createAdapter<ItemImageSelectedBinding, LoadMediaFile> { (holder, data, _, payload,scope) ->
+    private val imageAdapter = createAdapter<ItemImageSelectedBinding, LoadMediaFile> { (holder, data, _, payload, scope) ->
         val index = selectedList.indexOf(data)
         if (index < 0) {
             holder.binding.tvSelectedIndex.text = ""
@@ -83,7 +76,7 @@ class ImageSelectedFragment : VBFragment<FragmentImageSelectBinding>() {
 //                Log.e(TAG, "图片加载失败:${data.name}", e)
 //            }
 //        }
-    }.setOnClickListener { holder, data, position, view ->
+    }.setOnClickListener(R.id.view_click) { holder, data, position, view ->
         if (!selectedList.contains(data)) {
             selectedList.add(data)
             notifyItemChanged(position)
@@ -93,7 +86,14 @@ class ImageSelectedFragment : VBFragment<FragmentImageSelectBinding>() {
         }
         val size = selectedList.size
         binding.tvPreview.text = if (size == 0) "预览" else "预览（${size}）"
+    }.setOnClickListener { holder, data, position, view ->
+        viewModel.curPosition.value = position
+        parentFragmentManager.beginTransaction()
+            .addToBackStack(null)
+            .add(R.id.fl_fragment, BigImagePreviewFragment())
+            .commit()
     }
+
 
     private fun LoadMediaFile?.groupName(position: Int): String {
         return if (position == 0) "图片与视频"
@@ -151,11 +151,23 @@ class ImageSelectedFragment : VBFragment<FragmentImageSelectBinding>() {
 
     private fun initData() {
         lifecycleScope.launch {
-            val loadFiles = withContext(IO) { LoadLocalMedia().getLoadFiles(requireContext()) }
-            groupAdapter.refresh(loadFiles)
-            imageAdapter.refresh(loadFiles.firstOrNull() ?: mutableListOf())
-            binding.cvGroup.post { binding.cvGroup.translationY = -binding.cvGroup.height.toFloat() }
-
+            viewModel.allMediaList.collect {
+                groupAdapter.refresh(it)
+            }
+        }
+        lifecycleScope.launch {
+            viewModel.curMediaList.collect {
+                imageAdapter.refresh(it)
+                binding.cvGroup.post { binding.cvGroup.translationY = -binding.cvGroup.height.toFloat() }
+            }
+        }
+        lifecycleScope.launch {
+            viewModel.curPosition.collect {
+                binding.rvImage.scrollToPosition(it)
+            }
+        }
+        lifecycleScope.launch {
+            viewModel.initData()
         }
     }
 }

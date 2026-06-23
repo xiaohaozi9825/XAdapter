@@ -1,5 +1,6 @@
 package pw.xiaohaozi.xadapter.utils
 
+import android.net.Uri
 import android.util.TypedValue
 import android.widget.ImageView
 import androidx.annotation.DrawableRes
@@ -16,6 +17,11 @@ import java.io.File
 fun ImageView.load(file: File) {
     Glide.with(this).load(file).into(this)
 }
+
+fun ImageView.load(uri: Uri) {
+    Glide.with(this).load(uri).into(this)
+}
+
 fun ImageView.load(file: String?) {
     Glide.with(this).load(file).into(this)
 }

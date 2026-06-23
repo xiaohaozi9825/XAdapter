@@ -1,6 +1,7 @@
 package pw.xiaohaozi.xadapter.utils
 
 import android.content.Context
+import android.net.Uri
 import android.provider.MediaStore
 
 class LoadMediaGroup(
@@ -17,6 +18,7 @@ class LoadMediaFile(
     val name: String?,
     val path: String?,
     val duration: Long?,
+    val uri: Uri?,
     /**
      * 上传状态0上传中，1成功，2失败，3审核失败
      */
@@ -54,6 +56,7 @@ class LoadLocalMedia {
                     } catch (e: IllegalArgumentException) {
                         null
                     }
+
 
                     val fileName = try {
                         cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Images.ImageColumns.DISPLAY_NAME))
@@ -93,7 +96,18 @@ class LoadLocalMedia {
                         } catch (e: IllegalArgumentException) {
                             null
                         }
-
+                    val uri = try {
+                        val isImage = mimeType?.contains("image") == true
+                        val mediaUri =
+                            if (isImage) MediaStore.Images.Media.EXTERNAL_CONTENT_URI else MediaStore.Video.Media.EXTERNAL_CONTENT_URI
+                        val idIndex = cursor.getColumnIndex(if (isImage) MediaStore.Images.Media._ID else MediaStore.Video.Media._ID)
+                        // 1. 取出媒体库主键ID
+                        val mediaId = cursor.getLong(idIndex)
+                        // 2. 拼接标准媒体Content Uri（重点：这就是文件可用Uri）
+                        Uri.withAppendedPath(mediaUri, mediaId.toString())
+                    } catch (e: IllegalArgumentException) {
+                        null
+                    }
                     first.add(
                         LoadMediaFile(
                             bucketId,
@@ -103,6 +117,7 @@ class LoadLocalMedia {
                             fileName,
                             filePath,
                             duration,
+                            uri,
                         )
                     )
 //                            Logger.i("查询媒体文件", imageId + " -- " + fileName + " -- " + filePath + " --- " + bucketId);

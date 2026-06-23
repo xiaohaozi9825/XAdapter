@@ -7,7 +7,7 @@ plugins {
 
 android {
     namespace 'pw.xiaohaozi.xadapter'
-    compileSdk 33
+    compileSdk 34
 
     defaultConfig {
         applicationId "pw.xiaohaozi.xadapter"
@@ -68,6 +68,11 @@ dependencies {
     implementation 'androidx.appcompat:appcompat:1.4.1'
     implementation 'com.google.android.material:material:1.7.0'
     implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
+    // Fragment KTX 提供 activityViewModel / viewModels 委托
+    implementation "androidx.fragment:fragment-ktx:1.6.1"
+
+    // ViewModel 基础（如已引入可忽略）
+    implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:2.7.0"
 
 
     //https://github.com/scwang90/SmartRefreshLayout
@@ -105,4 +110,11 @@ dependencies {
 
     // Google 官方弹性布局管理器（完美实现流式布局）
     implementation 'com.google.android.flexbox:flexbox:3.0.0'
+
+    implementation 'com.davemorrissey.labs:subsampling-scale-image-view-androidx:3.10.0'
+
+    implementation "androidx.media3:media3-exoplayer:1.3.1"
+    implementation "androidx.media3:media3-ui:1.3.1"         // 必须包含 UI 库
+    implementation "androidx.media3:media3-session:1.3.1"    // 推荐添加
+
 }
