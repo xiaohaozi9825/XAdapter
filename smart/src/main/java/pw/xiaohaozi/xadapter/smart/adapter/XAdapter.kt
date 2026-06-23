@@ -836,12 +836,14 @@ open class XAdapter<VB : ViewBinding, D, out R : XAdapter<VB, D, R>> : Adapter<X
     /**************************************************************************/
     override fun onViewRecycled(holder: XHolder<VB>) {
         Log.i(TAG, "onViewRecycled: $holder")
-        tryNotifyProvider { onViewRecycled(holder) }
+        val viewType = holder.itemViewType
+        tryNotifyProvider(viewType) { onViewRecycled(holder) }
         holder.data = null
     }
 
     override fun onFailedToRecycleView(holder: XHolder<VB>): Boolean {
-        tryNotifyProvider { onFailedToRecycleView(holder) }
+        val viewType = holder.itemViewType
+        tryNotifyProvider(viewType) { onFailedToRecycleView(holder) }
         return super.onFailedToRecycleView(holder)
     }
 
@@ -862,7 +864,7 @@ open class XAdapter<VB : ViewBinding, D, out R : XAdapter<VB, D, R>> : Adapter<X
         }
         recyclerView.addOnAttachStateChangeListener(rvOnAttachStateChangeListener)
         onRecyclerViewChanges.tryNotify { onAttachedToRecyclerView(recyclerView) }
-        tryNotifyProvider { onAdapterAttachedToRecyclerView(recyclerView) }
+        tryNotifyAllProvider { onAdapterAttachedToRecyclerView(recyclerView) }
     }
 
     override fun onDetachedFromRecyclerView(recyclerView: RecyclerView) {
@@ -870,7 +872,7 @@ open class XAdapter<VB : ViewBinding, D, out R : XAdapter<VB, D, R>> : Adapter<X
         coroutineContext.cancel()
         recyclerView.removeOnAttachStateChangeListener(rvOnAttachStateChangeListener)
         onRecyclerViewChanges.tryNotify { onDetachedFromRecyclerView(recyclerView) }
-        tryNotifyProvider { onAdapterDetachedFromRecyclerView(recyclerView) }
+        tryNotifyAllProvider { onAdapterDetachedFromRecyclerView(recyclerView) }
         lifecycleOwner?.lifecycle?.removeObserver(defaultLifecycleObserver)
         this.recyclerView = null
     }
@@ -883,7 +885,8 @@ open class XAdapter<VB : ViewBinding, D, out R : XAdapter<VB, D, R>> : Adapter<X
             layoutParams.isFullSpan = isFixed
         }
         onViewChanges.tryNotify { onViewAttachedToWindow(holder) }
-        tryNotifyProvider { onHolderAttachedToWindow(holder) }
+        val viewType = holder.itemViewType
+        tryNotifyProvider(viewType) { onHolderAttachedToWindow(holder) }
     }
 
     override fun onViewDetachedFromWindow(holder: XHolder<VB>) {
@@ -891,11 +894,20 @@ open class XAdapter<VB : ViewBinding, D, out R : XAdapter<VB, D, R>> : Adapter<X
         Log.i(TAG, "onViewDetachedFromWindow: $holder")
         holder.cancelHolderCoroutineChildren()//取消holder中的所有子协程
         onViewChanges.tryNotify { onViewDetachedFromWindow(holder) }
-        tryNotifyProvider { onHolderDetachedFromWindow(holder) }
+        val viewType = holder.itemViewType
+        tryNotifyProvider(viewType) { onHolderDetachedFromWindow(holder) }
     }
 
 
-    private fun tryNotifyProvider(action: TypeProvider<VB, D>.() -> Unit) {
+    private fun tryNotifyProvider(viewType: Int, action: TypeProvider<VB, D>.() -> Unit) {
+        try {
+            action.invoke(providers[viewType] as TypeProvider<VB, D>)
+        } catch (e: Exception) {
+            Log.e(TAG, "tryNotifyProvider: ", e)
+        }
+    }
+
+    private fun tryNotifyAllProvider(action: TypeProvider<VB, D>.() -> Unit) {
         providers.forEach { key, provider ->
             try {
                 action.invoke(provider as TypeProvider<VB, D>)
@@ -934,14 +946,14 @@ open class XAdapter<VB : ViewBinding, D, out R : XAdapter<VB, D, R>> : Adapter<X
         override fun onViewAttachedToWindow(v: View) {
             Log.i(TAG, "onViewAttachedToWindow: ")
             onRecyclerViewAttachStateChanges.tryNotify { onViewAttachedToWindow(v as RecyclerView) }
-            tryNotifyProvider { onRecyclerViewAttachedToWindow(v as RecyclerView) }
+            tryNotifyAllProvider { onRecyclerViewAttachedToWindow(v as RecyclerView) }
         }
 
         //这里可以用来监听activity销毁
         override fun onViewDetachedFromWindow(v: View) {
             Log.i(TAG, "onViewDetachedFromWindow: ")
             onRecyclerViewAttachStateChanges.tryNotify { onViewDetachedFromWindow(v as RecyclerView) }
-            tryNotifyProvider { onViewRecyclerDetachedFromWindow(v as RecyclerView) }
+            tryNotifyAllProvider { onViewRecyclerDetachedFromWindow(v as RecyclerView) }
         }
     }
 
