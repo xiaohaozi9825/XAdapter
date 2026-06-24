@@ -17,7 +17,7 @@ class DocumentFragment : VBFragment<FragmentDocumentBinding>() {
             insets
         }
 
-        binding.webView.loadMarkDownByAsses(requireContext(), "Document.md")
+        binding.webView.loadMarkDownByAsses(requireContext(), "Document.md", null)
     }
 
 }

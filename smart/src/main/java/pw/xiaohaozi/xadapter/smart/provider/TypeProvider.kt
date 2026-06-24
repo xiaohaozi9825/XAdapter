@@ -81,6 +81,6 @@ interface TypeProvider<VB : ViewBinding, D> : XEmployer {
      * RecyclerView 离开 Window
      * Activity 被销毁时会调用，可以在此处进行一些资源释放工作
      */
-    fun onViewRecyclerDetachedFromWindow(recyclerView: RecyclerView)
+    fun onRecyclerViewDetachedFromWindow(recyclerView: RecyclerView)
 
 }

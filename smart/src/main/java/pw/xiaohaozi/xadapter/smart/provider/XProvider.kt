@@ -111,7 +111,7 @@ abstract class XProvider<VB : ViewBinding, D>(override val adapter: XAdapter<*, 
 
     }
 
-    override fun onViewRecyclerDetachedFromWindow(recyclerView: RecyclerView) {
+    override fun onRecyclerViewDetachedFromWindow(recyclerView: RecyclerView) {
 
     }
 

@@ -1,26 +1,10 @@
-package pw.xiaohaozi.xadapter.fragment.example.imageselected
+# 大图预览&视频播放Adapter
+> 视频播放逻辑较为复杂，可以使用继承的方式创建adapter和provider
+## 用法
 
-import android.util.Log
-import androidx.annotation.OptIn
-import androidx.core.view.isVisible
-import androidx.media3.common.MediaItem
-import androidx.media3.common.Player
-import androidx.media3.common.util.UnstableApi
-import androidx.media3.exoplayer.ExoPlayer
-import androidx.recyclerview.widget.RecyclerView
-import androidx.viewbinding.ViewBinding
-import androidx.viewpager2.widget.ViewPager2
-import com.davemorrissey.labs.subscaleview.ImageSource
-import kotlinx.coroutines.CoroutineScope
-import pw.xiaohaozi.xadapter.databinding.ItemImagePreviewBinding
-import pw.xiaohaozi.xadapter.databinding.ItemVideoPreviewBinding
-import pw.xiaohaozi.xadapter.smart.adapter.SmartAdapter
-import pw.xiaohaozi.xadapter.smart.holder.XHolder
-import pw.xiaohaozi.xadapter.smart.provider.SmartProvider
-import pw.xiaohaozi.xadapter.utils.LoadMediaFile
-import pw.xiaohaozi.xadapter.utils.load
-
-class BigImagePreviewAdapter(viewPager: ViewPager2) : SmartAdapter<ViewBinding, LoadMediaFile>() {
+### 创建Adapter
+```kotlin
+class BigImagePreviewAdapter : SmartAdapter<ViewBinding, LoadMediaFile>() {
     companion object {
         const val TAG = "BigImagePreviewAdapter"
         const val ITEM_TYPE_IMAGE = 1//图片
@@ -30,10 +14,9 @@ class BigImagePreviewAdapter(viewPager: ViewPager2) : SmartAdapter<ViewBinding, 
     fun LoadMediaFile.isImage() = mimeType?.contains("image") == true
     fun LoadMediaFile.isVideo() = mimeType?.contains("video") == true
 
-
     init {
         addProvider(ImageProvider(this), ITEM_TYPE_IMAGE)
-        addProvider(VideoProvider(this, viewPager), ITEM_TYPE_VIDEO)
+        addProvider(VideoProvider(this), ITEM_TYPE_VIDEO)
 
         //动态计算itemType
         customItemType { data, _ ->
@@ -42,7 +25,10 @@ class BigImagePreviewAdapter(viewPager: ViewPager2) : SmartAdapter<ViewBinding, 
     }
 
 }
+```
 
+### 创建图片预览Provider
+```kotlin
 class ImageProvider(adapter: BigImagePreviewAdapter) :
     SmartProvider<ViewBinding, LoadMediaFile, ItemImagePreviewBinding, LoadMediaFile>(adapter) {
     override fun onCreated(holder: XHolder<ItemImagePreviewBinding>) {
@@ -55,8 +41,11 @@ class ImageProvider(adapter: BigImagePreviewAdapter) :
     }
 
 }
+```
 
-class VideoProvider(adapter: BigImagePreviewAdapter, val viewPager: ViewPager2) :
+### 创建视频播放Provider
+```kotlin
+class VideoProvider(adapter: BigImagePreviewAdapter) :
     SmartProvider<ViewBinding, LoadMediaFile, ItemVideoPreviewBinding, LoadMediaFile>(adapter) {
     companion object {
         const val TAG = "VideoProvider"
@@ -64,27 +53,6 @@ class VideoProvider(adapter: BigImagePreviewAdapter, val viewPager: ViewPager2) 
 
     //为每个holder 记录一个 player
     private var players = hashMapOf<XHolder<ItemVideoPreviewBinding>, Player>()
-    val callback = object : ViewPager2.OnPageChangeCallback() {
-        var tempPosition = -1
-        override fun onPageSelected(position: Int) {
-            super.onPageSelected(position)
-            Log.i(TAG, "onPageSelected: $position")
-            if (tempPosition != -1) {
-                onHide(tempPosition)
-            }
-            onShow(position)
-            tempPosition = position
-        }
-
-//        override fun onPageScrollStateChanged(state: Int) {
-//            super.onPageScrollStateChanged(state)
-//            Log.i(TAG, "onPageScrollStateChanged: $state")
-//        }
-    }
-
-    init {
-        viewPager.registerOnPageChangeCallback(callback)
-    }
 
     override fun onCreated(holder: XHolder<ItemVideoPreviewBinding>) {
         Log.i(TAG, "onCreated ")
@@ -135,54 +103,9 @@ class VideoProvider(adapter: BigImagePreviewAdapter, val viewPager: ViewPager2) 
             ?.apply { setMediaItem(MediaItem.fromUri(uri)) }
     }
 
-    //viewHolder 附着到recyclerView上时，准备好资源
     override fun onHolderAttachedToWindow(holder: XHolder<ItemVideoPreviewBinding>) {
         super.onHolderAttachedToWindow(holder)
-        prepare(holder)
-    }
-
-    //viewHolder 脱离recyclerView上时，停止播放
-    override fun onHolderDetachedFromWindow(holder: XHolder<ItemVideoPreviewBinding>) {
-        super.onHolderDetachedFromWindow(holder)
-        //当viewPager.offscreenPageLimit >= 1 时，
-        // item不可见时并不会调用该方法，所以在onHide方法中停止会比较合理
-        //stop(holder)
-    }
-
-    override fun onRecyclerViewAttachedToWindow(recyclerView: RecyclerView) {
-        super.onRecyclerViewAttachedToWindow(recyclerView)
-        //此方法不会被回调，因此在初始化时viewPager.registerOnPageChangeCallback(callback)比较合理
-        Log.i(TAG, "onRecyclerViewAttachedToWindow: ")
-    }
-
-    override fun onRecyclerViewDetachedFromWindow(recyclerView: RecyclerView) {
-        super.onRecyclerViewDetachedFromWindow(recyclerView)
-        Log.i(TAG, "onRecyclerViewDetachedFromWindow: ")
-        viewPager.unregisterOnPageChangeCallback(callback)
-        //销毁资源
-        players.forEach { (_, player) -> player.release() }
-        players.clear()
-    }
-
-
-    private fun onShow(position: Int) {
-        //视频资源准备放在onHolderAttachedToWindow中可提前将资源准备好
-        Log.i(TAG, "onShow: $position")
-    }
-
-    private fun onHide(position: Int) {
-        Log.i(TAG, "onHide: $position")
-        val holder = players.keys.find { it.bindingAdapterPosition == position }
-        if (holder != null) stop(holder)
-    }
-
-    /**
-     * 视频准备
-     * 可以在onHolderAttachedToWindow中调用，提前准备
-     * 可以在onShow中调用，显示时准备
-     * 可以在click中调用，点击时再准备
-     */
-    private fun prepare(holder: XHolder<ItemVideoPreviewBinding>) {
+        //viewpager2 item可见时，重置视频为初始状态
         holder.binding.btnStart.isVisible = true
         holder.binding.ivPreview.isVisible = true
         players[holder]
@@ -191,7 +114,17 @@ class VideoProvider(adapter: BigImagePreviewAdapter, val viewPager: ViewPager2) 
             ?.apply { prepare() }
     }
 
-    private fun stop(holder: XHolder<ItemVideoPreviewBinding>) {
+    override fun onHolderDetachedFromWindow(holder: XHolder<ItemVideoPreviewBinding>) {
+        super.onHolderDetachedFromWindow(holder)
+        //viewpager2 item不可见时，停止播放
         players[holder]?.apply { stop() }
     }
+
+    override fun onViewRecyclerDetachedFromWindow(recyclerView: RecyclerView) {
+        super.onViewRecyclerDetachedFromWindow(recyclerView)
+        //销毁资源
+        players.forEach { (_, player) -> player.release() }
+        players.clear()
+    }
 }
+```

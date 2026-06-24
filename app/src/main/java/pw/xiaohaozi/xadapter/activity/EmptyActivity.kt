@@ -29,6 +29,7 @@ class EmptyActivity : AppCompatActivity() {
         binding.btnImage.setOnClickListener {
             val intent = Intent(this, WebActivity::class.java)
                 .putExtra("fileName", intent.getStringExtra("name"))//文档名
+                .putExtra("fragmentName", supportFragmentManager.fragments.last()::class.java.simpleName)//文档名
             startActivity(intent)
         }
         supportFragmentManager.beginTransaction().replace(
@@ -48,6 +49,7 @@ inline fun <reified F : Fragment> Activity.toEmptyActivity(title: String) {
             .putExtra("title", title)
     )
 }
+
 /**
  * @param clazz
  * @param title 页面标题

@@ -22,7 +22,7 @@ class HomeFragment : VBFragment<FragmentHomeBinding>() {
         }
         //binding.webView.loadUrl("file:///android_asset/index.html")
 
-        webView.loadMarkDownByAsses(requireContext(), "index.md")
+        webView.loadMarkDownByAsses(requireContext(), "index.md",null)
     }
 
 }

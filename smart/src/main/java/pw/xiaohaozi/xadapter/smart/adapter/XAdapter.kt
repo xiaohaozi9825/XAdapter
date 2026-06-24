@@ -31,6 +31,7 @@ import pw.xiaohaozi.xadapter.smart.provider.TypeProvider
 import pw.xiaohaozi.xadapter.smart.provider.XProvider
 import java.lang.reflect.ParameterizedType
 import kotlin.coroutines.CoroutineContext
+import androidx.core.util.size
 
 /**
  * XAdapter基类，提供Adapter基础功能
@@ -344,7 +345,6 @@ open class XAdapter<VB : ViewBinding, D, out R : XAdapter<VB, D, R>> : Adapter<X
                 }
             }
         }
-        Log.i("caonima", "itemCount = $itemCount -- position = $position")
 
         //头布局
         if (hasHeader && position < headerCount) return headers[position].second
@@ -471,7 +471,7 @@ open class XAdapter<VB : ViewBinding, D, out R : XAdapter<VB, D, R>> : Adapter<X
         }
         if (find != null) throw XAdapterException("provider中数据类继承自MultiItemEntity，addProvider()方法中形参itemType不能为空")
 
-        return Int.MIN_VALUE + providers.size()
+        return Int.MIN_VALUE + providers.size
     }
 
     /**************************************************************************/
@@ -953,7 +953,7 @@ open class XAdapter<VB : ViewBinding, D, out R : XAdapter<VB, D, R>> : Adapter<X
         override fun onViewDetachedFromWindow(v: View) {
             Log.i(TAG, "onViewDetachedFromWindow: ")
             onRecyclerViewAttachStateChanges.tryNotify { onViewDetachedFromWindow(v as RecyclerView) }
-            tryNotifyAllProvider { onViewRecyclerDetachedFromWindow(v as RecyclerView) }
+            tryNotifyAllProvider { onRecyclerViewDetachedFromWindow(v as RecyclerView) }
         }
     }
 

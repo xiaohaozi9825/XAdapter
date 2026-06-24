@@ -25,7 +25,7 @@ class WebActivity : AppCompatActivity() {
         binding.llGoBack.setOnClickListener { onBackPressed() }
 
         //binding.webView.loadUrl("file:///android_asset/${intent.getStringExtra("fileName")}.html")
-        binding.webView.loadMarkDownByAsses(this, "${intent.getStringExtra("fileName")}.md")
+        binding.webView.loadMarkDownByAsses(this, "${intent.getStringExtra("fileName")}.md","${intent.getStringExtra("fragmentName")}.md")
     }
 
 }

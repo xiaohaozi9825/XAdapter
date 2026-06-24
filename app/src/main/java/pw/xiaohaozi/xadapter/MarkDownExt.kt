@@ -15,7 +15,7 @@ fun WebView.loadMarkDown(markdown: String) {
 }
 
 @SuppressLint("SetJavaScriptEnabled")
-fun WebView.loadMarkDownByAsses(context: Context, fileName: String) {
+fun WebView.loadMarkDownByAsses(context: Context, fileName: String, fragmentName: String?) {
     try {
         setBackgroundColor(Color.TRANSPARENT)
         backgroundTintList = ColorStateList.valueOf(Color.TRANSPARENT)
@@ -30,8 +30,19 @@ fun WebView.loadMarkDownByAsses(context: Context, fileName: String) {
         val markdown = context.assets.open(fileName).readBytes().toString(Charsets.UTF_8)
         loadMarkDown(markdown)
     } catch (e: FileNotFoundException) {
-        val md = "![敬请期待](ic_stay_tuned.png)"
-        loadMarkDown(md)
+        if (fragmentName != null) {
+            try {
+                val markdown = context.assets.open(fragmentName).readBytes().toString(Charsets.UTF_8)
+                loadMarkDown(markdown)
+            }catch (e: Exception){
+                val md = "![敬请期待](ic_stay_tuned.png)"
+                loadMarkDown(md)
+            }
+        }else{
+            val md = "![敬请期待](ic_stay_tuned.png)"
+            loadMarkDown(md)
+        }
+
     } catch (e: Exception) {
         val md = "##### 加载失败\n```kotlin\n$e\n```".trimIndent()
 //        val md = "## Hello Markdown\n**加粗文本**\n- 列表1\n- 列表2\n[链接](https://www.baidu.com)\n```\n private lateinit var etMarkdown: EditText\n```"
