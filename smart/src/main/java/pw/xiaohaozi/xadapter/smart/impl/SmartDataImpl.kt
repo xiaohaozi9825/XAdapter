@@ -22,7 +22,6 @@ import java.util.*
  *
  * 描述：通过 [XEmployer] 解析宿主 [XAdapter] 后操作内部数据列表。
  * 作者：小耗子
- * github：https://github.com/xiaohaozi9825
  * 创建时间：2022/10/6 8:47
  */
 class SmartDataImpl<Employer : XProxy<Employer>, VB : ViewBinding, D> : SmartDataProxy<Employer, VB, D> {

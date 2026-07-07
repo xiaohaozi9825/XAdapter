@@ -5,7 +5,6 @@ package pw.xiaohaozi.xadapter.smart.proxy
  * 描述：所有的代理类接口都需要继承该接口
  *
  * 作者：小耗子
- * github：https://github.com/xiaohaozi9825
  * 创建时间：2024/6/9 8:37
  */
 interface XProxy<Employer : XProxy<Employer>> {

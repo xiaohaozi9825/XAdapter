@@ -6,7 +6,6 @@ import android.util.SparseArray
  *
  * 描述：
  * 作者：小耗子
- * github：https://github.com/xiaohaozi9825
  * 创建时间：2024/11/20 14:29
  */
 fun <T> SparseArray<T>.findKey(action: (key: Int, value: T) -> Boolean): Int? {

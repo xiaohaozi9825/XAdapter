@@ -21,6 +21,7 @@ import pw.xiaohaozi.xadapter.fragment.VBFragment
 import pw.xiaohaozi.xadapter.smart.ext.createAdapter
 import pw.xiaohaozi.xadapter.smart.ext.singleSelect
 import pw.xiaohaozi.xadapter.utils.LoadMediaFile
+import pw.xiaohaozi.xadapter.utils.isVideo
 import pw.xiaohaozi.xadapter.utils.load
 
 
@@ -60,6 +61,7 @@ class ImageSelectedFragment : VBFragment<FragmentImageSelectBinding>() {
         }
         if (payload.contains("select")) return@createAdapter
         holder.binding.ivImage.load(data.path)
+        holder.binding.btnPlay.isVisible = data.isVideo()
         //进一步验证协成，注意有些gif或视频类型的文件，这里是加载不了的，所以有空白是正常的。
 //        scope.launch(IO) {
 //            try {

@@ -28,7 +28,6 @@ import java.lang.reflect.ParameterizedType
  *
  * 描述：通过 [XEmployer] 取宿主 [XAdapter]；头/脚/空/缺省页等不参与 Adapter 级自动注册。
  * 作者：小耗子
- * github：https://github.com/xiaohaozi9825
  * 创建时间：2022/10/5 22:47
  */
 class EventImpl<Employer : XProxy<Employer>, VB : ViewBinding, D> : EventProxy<Employer, VB, D> {

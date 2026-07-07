@@ -20,7 +20,6 @@ import pw.xiaohaozi.xadapter.smart.proxy.XEmployer
  * Adapter集
  * 描述：包含了XAdapter基础功能，数据操作功能，选择功能，事件监听功能
  * 作者：小耗子
- * github：https://github.com/xiaohaozi9825
  * 创建时间：2024/6/9 9:10
  */
 open class SmartAdapter<VB : ViewBinding, D>(

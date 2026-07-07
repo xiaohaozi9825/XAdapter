@@ -214,11 +214,4 @@ val adapter = createAdapter()
 
 若各类型数据有统一父类型（如 `sealed class Row`），可使用 `createTypeAdapter<ViewBinding, Row>()`，再为各子类写 `withType`。
 
-## 相关地址
-
-demo体验：[https://www.pgyer.com/7kPKon2W](https://www.pgyer.com/7kPKon2W)
-
-github：[https://github.com/xiaohaozi9825/XAdapter](https://github.com/xiaohaozi9825/XAdapter)
-
-gitee：[https://gitee.com/xiaohaozi9825/xadapter](https://gitee.com/xiaohaozi9825/xadapter)
 

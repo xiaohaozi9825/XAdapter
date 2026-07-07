@@ -24,7 +24,8 @@ class LoadMediaFile(
      */
     var uploadStatus: Int? = null
 )
-
+fun LoadMediaFile.isImage() = mimeType?.contains("image") == true
+fun LoadMediaFile.isVideo() = mimeType?.contains("video") == true
 class LoadLocalMedia {
     val TAG = "LoadLocalMedia"
     fun getLoadFiles(context: Context): MutableList<MutableList<LoadMediaFile>> {

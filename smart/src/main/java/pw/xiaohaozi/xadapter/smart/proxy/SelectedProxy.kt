@@ -17,7 +17,6 @@ typealias SelectionSame<D> = (a:D,b:D)-> Boolean
  * item选择事件
  * 描述：
  * 作者：小耗子
- * github：https://github.com/xiaohaozi9825
  * 创建时间：2022/9/28 23:19
  */
 interface SelectedProxy<Employer : XProxy<Employer>, VB : ViewBinding, D> :

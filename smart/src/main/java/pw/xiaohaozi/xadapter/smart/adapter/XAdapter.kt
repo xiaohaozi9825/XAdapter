@@ -42,7 +42,6 @@ import androidx.core.util.size
  *
  * 描述：负责adapter生命周期分发，ViewHolder创建，类型提供者管理等工作
  * 作者：小耗子
- * github：https://github.com/xiaohaozi9825
  * 创建时间：2024/6/8 14:59
  */
 open class XAdapter<VB : ViewBinding, D, out R : XAdapter<VB, D, R>> : Adapter<XHolder<VB>>(), CoroutineScope {

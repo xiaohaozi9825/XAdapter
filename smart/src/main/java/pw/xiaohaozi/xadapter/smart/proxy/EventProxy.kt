@@ -17,7 +17,6 @@ typealias OnItemTextChange<Employer, VB, D> = Employer.(holder: XHolder<VB>, dat
  * 事件监听接口
  * 描述：负责View事件监听，入点击事件，长按事件，选中事件，开关事件，EditView文本变化监听，进度条变化监听等
  * 作者：小耗子
- * github：https://github.com/xiaohaozi9825
  * 创建时间：2022/9/28 23:19
  */
 interface EventProxy<Employer : XProxy<Employer>, VB : ViewBinding, D> : XProxy<Employer> {

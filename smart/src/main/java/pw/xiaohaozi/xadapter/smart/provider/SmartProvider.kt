@@ -16,7 +16,6 @@ import pw.xiaohaozi.xadapter.smart.proxy.EventProxy
  *
  * 描述：与 [SmartAdapter] 配合使用；子布局可通过 [withType] 嵌套注册。
  * 作者：小耗子
- * github：https://github.com/xiaohaozi9825
  * 创建时间：2024/6/9 22:08
  */
 abstract class SmartProvider<AVB : ViewBinding, AD, PVB : ViewBinding, PD>(

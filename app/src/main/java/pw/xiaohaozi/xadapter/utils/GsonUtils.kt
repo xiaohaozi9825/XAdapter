@@ -7,7 +7,6 @@ import com.google.gson.reflect.TypeToken
  *
  * 描述：
  * 作者：小耗子
- * github：https://github.com/xiaohaozi9825
  * 创建时间：2022/10/23 19:15
  */
 object GsonUtil {

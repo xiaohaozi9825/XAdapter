@@ -20,7 +20,6 @@ import kotlin.coroutines.EmptyCoroutineContext
  * 类型提供者
  * 描述：
  * 作者：小耗子
- * github：https://github.com/xiaohaozi9825
  * 创建时间：2024/6/8 14:29
  */
 abstract class XProvider<VB : ViewBinding, D>(override val adapter: XAdapter<*, *, *>) : TypeProvider<VB, D> {

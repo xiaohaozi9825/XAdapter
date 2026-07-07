@@ -18,7 +18,9 @@ import pw.xiaohaozi.xadapter.smart.adapter.SmartAdapter
 import pw.xiaohaozi.xadapter.smart.holder.XHolder
 import pw.xiaohaozi.xadapter.smart.provider.SmartProvider
 import pw.xiaohaozi.xadapter.utils.LoadMediaFile
+import pw.xiaohaozi.xadapter.utils.isVideo
 import pw.xiaohaozi.xadapter.utils.load
+import kotlin.math.absoluteValue
 
 class BigImagePreviewAdapter(viewPager: ViewPager2) : SmartAdapter<ViewBinding, LoadMediaFile>() {
     companion object {
@@ -27,8 +29,6 @@ class BigImagePreviewAdapter(viewPager: ViewPager2) : SmartAdapter<ViewBinding, 
         const val ITEM_TYPE_VIDEO = 2//视频
     }
 
-    fun LoadMediaFile.isImage() = mimeType?.contains("image") == true
-    fun LoadMediaFile.isVideo() = mimeType?.contains("video") == true
 
 
     init {
@@ -66,20 +66,36 @@ class VideoProvider(adapter: BigImagePreviewAdapter, val viewPager: ViewPager2) 
     private var players = hashMapOf<XHolder<ItemVideoPreviewBinding>, Player>()
     val callback = object : ViewPager2.OnPageChangeCallback() {
         var tempPosition = -1
-        override fun onPageSelected(position: Int) {
-            super.onPageSelected(position)
-            Log.i(TAG, "onPageSelected: $position")
-            if (tempPosition != -1) {
-                onHide(tempPosition)
+        override fun onPageScrolled(position: Int, positionOffset: Float, positionOffsetPixels: Int) {
+            Log.i(
+                TAG,
+                "onPageScrolled: position = $position  positionOffset = $positionOffset positionOffsetPixels = $positionOffsetPixels"
+            )
+            //等待动画结束，判断是否切换了item，如果切换了item，如果切换了item，则调用onHide和onShow方法
+            //positionOffset.absoluteValue < 0.0001 判断动画是否结束
+            //tempPosition != position 判断是否切换了item
+            if (tempPosition != position && positionOffset.absoluteValue < 0.0001) {
+                if (tempPosition != -1) {
+                    onHide(tempPosition)
+                }
+                onShow(position)
+                tempPosition = position
             }
-            onShow(position)
-            tempPosition = position
         }
 
-//        override fun onPageScrollStateChanged(state: Int) {
-//            super.onPageScrollStateChanged(state)
-//            Log.i(TAG, "onPageScrollStateChanged: $state")
-//        }
+        override fun onPageSelected(position: Int) {
+            Log.i(TAG, "onPageSelected: $position")
+//            该方法在滑动动画开始时就会调用，有可能还没有执行onBind方法
+//            if (tempPosition != -1) {
+//                onHide(tempPosition)
+//            }
+//            onShow(position)
+//            tempPosition = position
+        }
+
+        override fun onPageScrollStateChanged(state: Int) {
+            Log.i(TAG, "onPageScrollStateChanged: $state")
+        }
     }
 
     init {
@@ -100,7 +116,6 @@ class VideoProvider(adapter: BigImagePreviewAdapter, val viewPager: ViewPager2) 
                             holder.binding.ivPreview.isVisible = true
                             playWhenReady = false
                             seekTo(0)
-                            prepare()
                         }
                     }
                 })
@@ -124,6 +139,7 @@ class VideoProvider(adapter: BigImagePreviewAdapter, val viewPager: ViewPager2) 
 
     @OptIn(UnstableApi::class)
     override fun onBind(scope: CoroutineScope, holder: XHolder<ItemVideoPreviewBinding>, data: LoadMediaFile, position: Int) {
+        Log.i(TAG, "onBind: $position")
         val uri = data.uri ?: return
         //设置预览图片
         holder.binding.ivPreview.load(uri)
@@ -138,7 +154,9 @@ class VideoProvider(adapter: BigImagePreviewAdapter, val viewPager: ViewPager2) 
     //viewHolder 附着到recyclerView上时，准备好资源
     override fun onHolderAttachedToWindow(holder: XHolder<ItemVideoPreviewBinding>) {
         super.onHolderAttachedToWindow(holder)
-        prepare(holder)
+        //当viewPager.offscreenPageLimit >= 1 时，
+        // item预加载时就会执行该方法，但不一定会显示，所以在onShow方法中准备会比较合理
+        //prepare(holder)
     }
 
     //viewHolder 脱离recyclerView上时，停止播放
@@ -166,8 +184,9 @@ class VideoProvider(adapter: BigImagePreviewAdapter, val viewPager: ViewPager2) 
 
 
     private fun onShow(position: Int) {
-        //视频资源准备放在onHolderAttachedToWindow中可提前将资源准备好
         Log.i(TAG, "onShow: $position")
+        val holder = players.keys.find { it.bindingAdapterPosition == position }
+        if (holder != null) prepare(holder)
     }
 
     private fun onHide(position: Int) {
@@ -192,6 +211,8 @@ class VideoProvider(adapter: BigImagePreviewAdapter, val viewPager: ViewPager2) 
     }
 
     private fun stop(holder: XHolder<ItemVideoPreviewBinding>) {
+        holder.binding.btnStart.isVisible = true
+        holder.binding.ivPreview.isVisible = true
         players[holder]?.apply { stop() }
     }
 }

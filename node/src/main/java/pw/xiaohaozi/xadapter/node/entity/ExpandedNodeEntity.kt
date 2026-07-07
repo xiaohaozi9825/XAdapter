@@ -5,7 +5,6 @@ package pw.xiaohaozi.xadapter.node.entity
  *
  * 描述：实现该接口的节点在 [pw.xiaohaozi.xadapter.node.NodeAdapter] 中支持展开、收起等操作。
  * 作者：小耗子
- * github：https://github.com/xiaohaozi9825
  * 创建时间：2024/12/31 16:15
  */
 interface ExpandedNodeEntity {

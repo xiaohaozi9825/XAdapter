@@ -18,7 +18,6 @@ import androidx.recyclerview.widget.RecyclerView;
 /**
  * 描述：侧滑菜单
  * 作者：小耗子
- * github：https://github.com/xiaohaozi9825
  * 创建时间：2020/8/22 0022 12:02
  * <p>
  * <p>

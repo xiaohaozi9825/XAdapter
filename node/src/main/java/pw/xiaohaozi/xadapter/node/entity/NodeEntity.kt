@@ -5,7 +5,6 @@ package pw.xiaohaozi.xadapter.node.entity
  *
  * 描述：[Parent]、[Child] 分别约束父节点与列表中子节点类型；层级可通过 [xNodeGrade] 或重写 [getNodeEntityGrade] 维护。
  * 作者：小耗子
- * github：https://github.com/xiaohaozi9825
  * 创建时间：2024/12/25 11:22
  */
 interface NodeEntity<Parent, Child> {

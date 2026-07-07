@@ -6,7 +6,6 @@ import java.util.LinkedList
  *
  * 描述：之前用的LinkedHashSetList，在移除 data class 时，如果数据发生改变，会导致无法删除
  * 作者：小耗子
- * github：https://github.com/xiaohaozi9825
  * 创建时间：2023/12/18 14:39
  */
 class SelectedList<E> : LinkedList<E>() {

@@ -31,7 +31,6 @@ import kotlin.math.min
  *
  * 描述：依赖 [ObservableList] 回调在增删时校正选中项；支持最大可选数、全选等策略。
  * 作者：小耗子
- * github：https://github.com/xiaohaozi9825
  * 创建时间：2022/10/5 22:47
  */
 open class AdapterSelectedImpl<Employer : XProxy<Employer>, VB : ViewBinding, D> :

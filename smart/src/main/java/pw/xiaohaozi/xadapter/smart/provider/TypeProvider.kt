@@ -11,7 +11,6 @@ import pw.xiaohaozi.xadapter.smart.proxy.XEmployer
  *
  * 描述：
  * 作者：小耗子
- * github：https://github.com/xiaohaozi9825
  * 创建时间：2024/6/8 14:30
  */
 interface TypeProvider<VB : ViewBinding, D> : XEmployer {

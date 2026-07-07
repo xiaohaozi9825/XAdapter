@@ -12,7 +12,6 @@ import java.util.LinkedList
  * 描述：负责所有数据增删改操作
  *
  * 作者：小耗子
- * github：https://github.com/xiaohaozi9825
  * 创建时间：2022/10/6 8:45
  */
 interface SmartDataProxy<Employer : XProxy<Employer>, VB : ViewBinding, D> :
