@@ -4,13 +4,13 @@ plugins {
     id 'maven-publish'
 }
 group='com.github.xiaohaozi9825'
-version ='2.1.0'
+version ='2.1.1'
 publishing {
     publications {
         release(MavenPublication) {
             groupId 'com.github.xiaohaozi9825'
             artifactId 'node'
-            version '2.1.0'
+            version '2.1.1'
 
             afterEvaluate {
                 // 发布 AAR 包（Android 库）

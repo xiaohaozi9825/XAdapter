@@ -13,8 +13,8 @@ android {
         applicationId "pw.xiaohaozi.xadapter"
         minSdk 21
         targetSdk 33
-        versionCode 2_01_00
-        versionName "2.1.0"
+        versionCode 2_01_01
+        versionName "2.1.1"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
