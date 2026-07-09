@@ -2,7 +2,9 @@ package pw.xiaohaozi.xadapter.smart.provider
 
 import androidx.viewbinding.ViewBinding
 import kotlinx.coroutines.CoroutineScope
+import pw.xiaohaozi.xadapter.smart.utils.applyExplicitTypes
 import pw.xiaohaozi.xadapter.smart.XAdapterException
+import pw.xiaohaozi.xadapter.smart.entity.XMultiItemEntity
 import pw.xiaohaozi.xadapter.smart.params.OnBindParams
 import pw.xiaohaozi.xadapter.smart.adapter.SmartAdapter
 import pw.xiaohaozi.xadapter.smart.ext.OnProviderBindHolder
@@ -65,7 +67,14 @@ abstract class SmartProvider<AVB : ViewBinding, AD, PVB : ViewBinding, PD>(
         crossinline created: OnProviderCreatedHolder<AVB, AD, pvb, pd> = {},
         crossinline bind: OnProviderBindHolder<AVB, AD, pvb, pd>,
     ): SmartProvider<AVB, AD, pvb, pd> {
+        if (itemType == null && XMultiItemEntity::class.java.isAssignableFrom(pd::class.java)) {
+            throw XAdapterException("provider 的数据类型实现了 XMultiItemEntity，withType() 的 itemType 不能为空")
+        }
         val provider = object : SmartProvider<AVB, AD, pvb, pd>(adapter) {
+
+            init {
+                applyExplicitTypes(pvb::class.java, pd::class.java)
+            }
 
             override fun onCreated(holder: XHolder<pvb>) {
                 created.invoke(this, holder)

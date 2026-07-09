@@ -67,6 +67,10 @@ abstract class NodeProvider<AVB : ViewBinding, AD : NodeEntity<*, *>, VB : AVB, 
     ): NodeProvider<AVB, AD, vb, d> {
         val provider = object : NodeProvider<AVB, AD, vb, d>(adapter) {
 
+            init {
+                setExplicitTypes(vb::class.java, d::class.java)
+            }
+
             override fun onCreated(holder: XHolder<vb>) {
                 create.invoke(this, holder)
             }

@@ -20,6 +20,7 @@ import pw.xiaohaozi.xadapter.smart.dragswipe.ItemSwipe
 import pw.xiaohaozi.xadapter.smart.dragswipe.SwipeDelete
 import pw.xiaohaozi.xadapter.smart.holder.XHolder
 import pw.xiaohaozi.xadapter.smart.provider.SmartProvider
+import pw.xiaohaozi.xadapter.smart.utils.applyExplicitTypes
 import pw.xiaohaozi.xadapter.smart.widgets.SwipeItemLayout
 
 
@@ -60,6 +61,10 @@ inline fun <reified VB : ViewBinding, reified D> createAdapter(
         }
     }
     val provider = object : SmartProvider<VB, D, VB, D>(adapter) {
+
+        init {
+            applyExplicitTypes(VB::class.java, D::class.java)
+        }
 
         override fun onCreated(holder: XHolder<VB>) {
             created.invoke(adapter, holder)

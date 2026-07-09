@@ -38,7 +38,7 @@ typealias OnItemId<VB, D> = (NodeAdapter<VB, D>.(position: Int) -> Long)
  * @param bind
  * @return NodeAdapter<VB, D>
  */
-inline fun <VB : ViewBinding, D : NodeEntity<*, *>> nodeAdapter(
+inline fun <reified VB : ViewBinding, reified D : NodeEntity<*, *>> nodeAdapter(
     itemType: Int = 0,
     crossinline onItemId: OnItemId<VB, D> = { NO_ID },
     crossinline init: (NodeProvider<VB, D, VB, D>.() -> Unit) = {},
@@ -51,6 +51,10 @@ inline fun <VB : ViewBinding, D : NodeEntity<*, *>> nodeAdapter(
         }
     }
     val provider = object : NodeProvider<VB, D, VB, D>(adapter) {
+
+        init {
+            setExplicitTypes(VB::class.java, D::class.java)
+        }
 
         override fun onCreated(holder: XHolder<VB>) {
             create.invoke(adapter, holder)

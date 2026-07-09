@@ -11,8 +11,9 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import pw.xiaohaozi.xadapter.smart.adapter.XAdapter
 import pw.xiaohaozi.xadapter.smart.holder.XHolder
+import pw.xiaohaozi.xadapter.smart.utils.resolveProviderDataClass
+import pw.xiaohaozi.xadapter.smart.utils.resolveProviderViewBindingClass
 import java.lang.reflect.Method
-import java.lang.reflect.ParameterizedType
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.EmptyCoroutineContext
 
@@ -24,6 +25,33 @@ import kotlin.coroutines.EmptyCoroutineContext
  */
 abstract class XProvider<VB : ViewBinding, D>(override val adapter: XAdapter<*, *, *>) : TypeProvider<VB, D> {
     private val TAG = "XProvider"
+
+    /** inline 创建或子类可赋值；混淆后优先于泛型反射。 */
+    @JvmField
+    internal var explicitViewBindingClass: Class<*>? = null
+
+    /** inline 创建或子类可赋值；混淆后优先于泛型反射。 */
+    @JvmField
+    internal var explicitDataClass: Class<*>? = null
+
+    init {
+        ensureExplicitTypesResolved()
+    }
+
+    internal fun ensureExplicitTypesResolved() {
+        if (explicitViewBindingClass == null) {
+            explicitViewBindingClass = resolveProviderViewBindingClass(this)
+        }
+        if (explicitDataClass == null) {
+            explicitDataClass = resolveProviderDataClass(this)
+        }
+    }
+
+    /** inline 匿名 Provider 显式写入 VB/D 类型，供跨模块（如 node）在 R8 下使用。 */
+    fun setExplicitTypes(viewBindingClass: Class<*>, dataClass: Class<*>) {
+        explicitViewBindingClass = viewBindingClass
+        explicitDataClass = dataClass
+    }
 
     /**
      * 在 [adapter] 作用域内启动协程（与 RecyclerView / Adapter 生命周期一致），
@@ -114,17 +142,11 @@ abstract class XProvider<VB : ViewBinding, D>(override val adapter: XAdapter<*, 
 
     }
 
-    //反射创建ViewBinding实例
-    //A : Adapter<*>, VH : Holder<VB>, VB : ViewBinding, D
     private fun smartCreateViewBinding(parent: ViewGroup): VB {
-        val genericSuperclass =
-            this.javaClass.genericSuperclass as? ParameterizedType ?: throw RuntimeException("必须明确指定VB泛型类型")
-        val find = genericSuperclass.actualTypeArguments.findLast {
-            (it as? Class<*>)?.run { ViewBinding::class.java.isAssignableFrom(this) } ?: false
-        }
-        return smartCreateViewBinding(
-            parent, find as? Class<*> ?: throw NullPointerException("没有找到 ViewBinding 的子类 VB")
-        )
+        ensureExplicitTypesResolved()
+        val clazz = explicitViewBindingClass
+            ?: throw RuntimeException("必须明确指定 VB 泛型类型")
+        return smartCreateViewBinding(parent, clazz)
     }
 
     //反射创建ViewBinding实例

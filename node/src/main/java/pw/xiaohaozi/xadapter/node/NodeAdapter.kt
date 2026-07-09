@@ -492,6 +492,10 @@ open class NodeAdapter<VB : ViewBinding, D : NodeEntity<*, *>>(
     ): NodeProvider<VB, D, vb, d> {
         val provider = object : NodeProvider<VB, D, vb, d>(this) {
 
+            init {
+                setExplicitTypes(vb::class.java, d::class.java)
+            }
+
             override fun onCreated(holder: XHolder<vb>) {
                 create.invoke(this, holder)
             }

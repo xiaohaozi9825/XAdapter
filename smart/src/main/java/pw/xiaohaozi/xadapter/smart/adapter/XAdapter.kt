@@ -29,6 +29,10 @@ import pw.xiaohaozi.xadapter.smart.entity.XMultiItemEntity
 import pw.xiaohaozi.xadapter.smart.holder.XHolder
 import pw.xiaohaozi.xadapter.smart.provider.TypeProvider
 import pw.xiaohaozi.xadapter.smart.provider.XProvider
+import pw.xiaohaozi.xadapter.smart.utils.applyExplicitTypes
+import pw.xiaohaozi.xadapter.smart.utils.isMultiItemDataProvider
+import pw.xiaohaozi.xadapter.smart.utils.resolveProviderDataClass
+import pw.xiaohaozi.xadapter.smart.utils.resolveProviderViewBindingClass
 import java.lang.reflect.ParameterizedType
 import kotlin.coroutines.CoroutineContext
 import androidx.core.util.size
@@ -62,6 +66,9 @@ open class XAdapter<VB : ViewBinding, D, out R : XAdapter<VB, D, R>> : Adapter<X
 
     //viewHolder 提供者
     val providers: SparseArray<TypeProvider<*, *>> by lazy { SparseArray() }
+
+    /** 数据类型 → itemType，用于按 Class 自动匹配 Provider（同类型多 Provider 时不覆盖）。 */
+    private val dataClassToItemType = HashMap<Class<*>, Int>()
 
     //activity生命周期回调
     private val defaultLifecycleObserver = object : DefaultLifecycleObserver {
@@ -390,12 +397,10 @@ open class XAdapter<VB : ViewBinding, D, out R : XAdapter<VB, D, R>> : Adapter<X
 
         } else {
             val clazz = data!!::class.java
+            dataClassToItemType[clazz]?.let { return it }
             providers.forEach { key, value ->
-                val genericSuperclass = value.javaClass.genericSuperclass as? ParameterizedType
-                    ?: throw XAdapterException("必须明确指定 D 泛型类型")
-                if (genericSuperclass.actualTypeArguments.any { it == clazz }) {
-                    return key
-                }
+                val dataClass = resolveProviderDataClass(value) ?: return@forEach
+                if (dataClass == clazz) return key
             }
         }
         return 0
@@ -459,18 +464,14 @@ open class XAdapter<VB : ViewBinding, D, out R : XAdapter<VB, D, R>> : Adapter<X
         return headerCount + footerCount + dataCount
     }
 
-    //自动生成itemType
-    private fun automaticallyItemType(provider: TypeProvider<*, *>): Int {
-        val genericSuperclass = provider.javaClass.genericSuperclass as? ParameterizedType
-            ?: throw XAdapterException("必须明确指定VB泛型类型")
-        val find = genericSuperclass.actualTypeArguments.find {
-            (it as? Class<*>)
-                ?.run { XMultiItemEntity::class.java.isAssignableFrom(this) }
-                ?: false
-        }
-        if (find != null) throw XAdapterException("provider中数据类继承自MultiItemEntity，addProvider()方法中形参itemType不能为空")
+    private fun nextAutoItemType(): Int = Int.MIN_VALUE + providers.size
 
-        return Int.MIN_VALUE + providers.size
+    private fun registerProviderDataClass(provider: TypeProvider<*, *>, itemType: Int) {
+        resolveProviderDataClass(provider)?.let { clazz ->
+            if (!dataClassToItemType.containsKey(clazz)) {
+                dataClassToItemType[clazz] = itemType
+            }
+        }
     }
 
     /**************************************************************************/
@@ -484,8 +485,15 @@ open class XAdapter<VB : ViewBinding, D, out R : XAdapter<VB, D, R>> : Adapter<X
      */
     fun addProvider(provider: TypeProvider<*, *>, itemType: Int? = null): R {
         if (itemType != null && itemType < 0) throw XAdapterException("itemType 必须为非负整数，不能为: $itemType")
-        val type = itemType ?: automaticallyItemType(provider)
+        if (itemType == null && isMultiItemDataProvider(provider)) {
+            throw XAdapterException("provider 的数据类型实现了 XMultiItemEntity，addProvider() 的 itemType 不能为空")
+        }
+        if (provider is XProvider<*, *>) {
+            provider.ensureExplicitTypesResolved()
+        }
+        val type = itemType ?: nextAutoItemType()
         providers[type] = provider
+        registerProviderDataClass(provider, type)
         @Suppress("UNCHECKED_CAST")
         return this as R
     }
@@ -539,7 +547,8 @@ open class XAdapter<VB : ViewBinding, D, out R : XAdapter<VB, D, R>> : Adapter<X
      * 添加头布局
      */
     fun addHeaderProvider(provider: XProvider<*, *>, header: HEADER) {
-        val type = automaticallyItemType(provider)
+        provider.ensureExplicitTypesResolved()
+        val type = nextAutoItemType()
         providers[type] = provider
         headers.add(0, Triple(provider, type, header))
         if (hasHeader) notifyItemInserted(0)
@@ -550,8 +559,9 @@ open class XAdapter<VB : ViewBinding, D, out R : XAdapter<VB, D, R>> : Adapter<X
      */
     inline fun <reified T : ViewBinding> removeHeaderProvider() {
         headers.find {
-            val genericSuperclass = it.first.javaClass.genericSuperclass as? ParameterizedType
-            genericSuperclass?.actualTypeArguments?.contains(T::class.java) == true
+            resolveProviderViewBindingClass(it.first) == T::class.java
+                || (it.first.javaClass.genericSuperclass as? ParameterizedType)
+                    ?.actualTypeArguments?.contains(T::class.java) == true
         }?.let {
             val position = headers.indexOf(it)
             providers.remove(it.second)
@@ -564,7 +574,8 @@ open class XAdapter<VB : ViewBinding, D, out R : XAdapter<VB, D, R>> : Adapter<X
      * 添加脚布局
      */
     fun addFooterProvider(provider: XProvider<*, *>, footer: FOOTER) {
-        val type = automaticallyItemType(provider)
+        provider.ensureExplicitTypesResolved()
+        val type = nextAutoItemType()
         providers[type] = provider
         footers.add(Triple(provider, type, footer))
         if (hasFooter) notifyItemInserted(itemCount - 1)
@@ -575,8 +586,9 @@ open class XAdapter<VB : ViewBinding, D, out R : XAdapter<VB, D, R>> : Adapter<X
      */
     inline fun <reified T : ViewBinding> removeFooterProvider() {
         footers.find {
-            val genericSuperclass = it.first.javaClass.genericSuperclass as? ParameterizedType
-            genericSuperclass?.actualTypeArguments?.contains(T::class.java) == true
+            resolveProviderViewBindingClass(it.first) == T::class.java
+                || (it.first.javaClass.genericSuperclass as? ParameterizedType)
+                    ?.actualTypeArguments?.contains(T::class.java) == true
         }?.let {
             val position = itemCount - getFooterProviderCount() + footers.indexOf(it)
             providers.remove(it.second)
@@ -590,7 +602,8 @@ open class XAdapter<VB : ViewBinding, D, out R : XAdapter<VB, D, R>> : Adapter<X
      * 初始化时设置，当数据为空时自动展示
      */
     fun setEmptyProvider(provider: XProvider<*, *>, footer: EMPTY, showOnFirstLoad: Boolean) {
-        val type = automaticallyItemType(provider)
+        provider.ensureExplicitTypesResolved()
+        val type = nextAutoItemType()
         hasEmpty = showOnFirstLoad
         emptyTriple = Triple(provider, type, footer)
         providers[type] = provider
@@ -613,8 +626,9 @@ open class XAdapter<VB : ViewBinding, D, out R : XAdapter<VB, D, R>> : Adapter<X
      */
     inline fun <reified T : ViewBinding> showDefaultPage() {
         val defaultPageTriple = defaultPages.findLast {
-            val genericSuperclass = it.first.javaClass.genericSuperclass as? ParameterizedType
-            genericSuperclass?.actualTypeArguments?.contains(T::class.java) == true
+            resolveProviderViewBindingClass(it.first) == T::class.java
+                || (it.first.javaClass.genericSuperclass as? ParameterizedType)
+                    ?.actualTypeArguments?.contains(T::class.java) == true
         }
         //找到了对应的缺省页，且与上次展示的不一样时，才刷新
         if (defaultPageTriple != null && defaultPageTriple != this.defaultPageTriple) {
@@ -680,6 +694,10 @@ open class XAdapter<VB : ViewBinding, D, out R : XAdapter<VB, D, R>> : Adapter<X
     ): R {
         val provider = object : XProvider<vb, HEADER>(this) {
 
+            init {
+                applyExplicitTypes(vb::class.java, HEADER::class.java)
+            }
+
             override fun onCreated(holder: XHolder<vb>) {
                 create?.invoke(this, holder)
             }
@@ -724,6 +742,10 @@ open class XAdapter<VB : ViewBinding, D, out R : XAdapter<VB, D, R>> : Adapter<X
         noinline bind: (XProvider<vb, FOOTER>.(holder: XHolder<vb>, data: FOOTER) -> Unit)? = null,
     ): R {
         val provider = object : XProvider<vb, FOOTER>(this) {
+
+            init {
+                applyExplicitTypes(vb::class.java, FOOTER::class.java)
+            }
 
             override fun onCreated(holder: XHolder<vb>) {
                 create?.invoke(this, holder)
@@ -771,6 +793,10 @@ open class XAdapter<VB : ViewBinding, D, out R : XAdapter<VB, D, R>> : Adapter<X
     ): R {
         val provider = object : XProvider<vb, EMPTY>(this) {
 
+            init {
+                applyExplicitTypes(vb::class.java, EMPTY::class.java)
+            }
+
             override fun isFixedViewType(): Boolean {
                 return true
             }
@@ -810,6 +836,10 @@ open class XAdapter<VB : ViewBinding, D, out R : XAdapter<VB, D, R>> : Adapter<X
         noinline bind: (XProvider<vb, DEFAULT_PAGE>.(holder: XHolder<vb>, data: DEFAULT_PAGE) -> Unit)? = null,
     ): R {
         val provider = object : XProvider<vb, DEFAULT_PAGE>(this) {
+
+            init {
+                applyExplicitTypes(vb::class.java, DEFAULT_PAGE::class.java)
+            }
 
             override fun isFixedViewType(): Boolean {
                 return true
